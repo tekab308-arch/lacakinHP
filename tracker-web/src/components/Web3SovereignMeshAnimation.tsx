@@ -1,548 +1,653 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Smartphone,
-  Radio,
-  Blocks,
-  Monitor,
-  Lock,
-  Zap,
-  ExternalLink,
-  Terminal,
-  Activity,
-} from 'lucide-react';
 
-interface StageData {
+interface BlockTxSlice {
   id: string;
-  number: string;
-  title: string;
-  subtitle: string;
-  role: string;
-  icon: React.ElementType;
-  primaryColor: string; // Tailwind color token
-  accentHex: string;
-  glowHex: string;
-  shortTag: string;
-  specs: { label: string; value: string }[];
-  terminalLog: string[];
-  description: string;
+  name: string;
+  bytes: number;
+  color: string;
+  detail: string;
+  hexPreview: string;
 }
 
-const PIPELINE_STAGES: StageData[] = [
+interface CryptoBlock {
+  height: number;
+  type: 'LATEST_HEARTBEAT' | 'HISTORY_EVENT' | 'IPFS_DAG_PIN';
+  kind: number;
+  timestamp: string;
+  parentHash: string;
+  blockHash: string;
+  schnorrSig: string;
+  ipfsCid: string;
+  relayAcks: string[];
+  payloadSize: string;
+  txSlices: BlockTxSlice[];
+  rawNostrEnvelope: {
+    id: string;
+    pubkey: string;
+    kind: number;
+    created_at: number;
+    tags: string[][];
+    content: string;
+    sig: string;
+  };
+}
+
+const INITIAL_BLOCKS: CryptoBlock[] = [
   {
-    id: 'edge',
-    number: '01',
-    title: 'Edge Hardware (HP Target)',
-    subtitle: 'Chip GPS Satelit & Kriptografi Lokal',
-    role: 'Penguncian Satelit & Penandatanganan Data',
-    icon: Smartphone,
-    primaryColor: 'sky',
-    accentHex: '#38bdf8',
-    glowHex: 'rgba(56, 189, 248, 0.4)',
-    shortTag: 'CHIP GPS • BIP-340',
-    specs: [
-      { label: 'Sensor', value: 'GNSS Satelit Fisik (Offline)' },
-      { label: 'Enkripsi Payload', value: 'AES-256-GCM (12-byte IV)' },
-      { label: 'Tanda Tangan', value: 'BIP-340 Schnorr (secp256k1)' },
-      { label: 'Key Derivation', value: 'PBKDF2-HMAC-SHA256 (100k iters)' },
+    height: 1082,
+    type: 'HISTORY_EVENT',
+    kind: 3078,
+    timestamp: '2026-11-25 21:55:12 UTC',
+    parentHash: '0000a39f1c7d884e1b2f90a887b4e99c1d0f5e7a892b11e2f3890c4d871a2b3c',
+    blockHash: '0000c8f12a9e4b771f280a9c8b71d49e6f3a180d55e4e8a1b2c3d4e5f6071829',
+    schnorrSig: '6896bd60eeae296db48a229ff71dfe071bde413e6d43f917dc8dcf8c78de33418f4a7c8b9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f60',
+    ipfsCid: 'bafybeiedexeztfbfe2n6p7jidhkls7tsw3flkvd6wjtvs4mxv56rlakbk4',
+    relayAcks: ['wss://relay.damus.io', 'wss://nos.lol'],
+    payloadSize: '248 B',
+    txSlices: [
+      { id: 'gps', name: 'GPS_LAT_LNG_CIPHER', bytes: 72, color: '#38bdf8', detail: 'AES-256-GCM iv=a7x9c1.. tag=9b42.. (Latitude & Longitude Terenkripsi)', hexPreview: 'a7x9c14d88e20f1b29a8c43e' },
+      { id: 'sig', name: 'BIP340_SCHNORR_SIG', bytes: 64, color: '#34d399', detail: 'Kurva Secp256k1 auxRand=0^32 (Tanda Tangan Kriptografi HP)', hexPreview: '6896bd60eeae296db48a229f' },
+      { id: 'meta', name: 'BATTERY_ACCURACY', bytes: 38, color: '#818cf8', detail: 'Status Daya: 88% • Akurasi Satelit: 3.8m • Provider: GPS GNSS', hexPreview: '5842415438382c414343332e' },
+      { id: 'tag', name: 'NOSTR_NIP01_TAGS', bytes: 74, color: '#f59e0b', detail: 'NIP-01 Protocol Header [["t","lacakhp"], ["h","1082"]]', hexPreview: '5b5b2274222c226c6163616b' },
     ],
-    terminalLog: [
-      '> [GPS_LOCK] Satelit GNSS terkunci: 11 satelit • Akurasi 3.8m',
-      '> [CRYPTO_CORE] Generate IV acak 96-bit via CSPRNG...',
-      '> [AES-256-GCM] Mengenkripsi payload koordinat ke ciphertext v1...',
-      '> [BIP-340] Menandatangani ID hash dengan kurva secp256k1: OK',
-    ],
-    description:
-      'HP mengunci titik koordinat langsung dari satelit GPS di angkasa secara offline tanpa server. Data seketika dibungkus enkripsi militer AES-256-GCM dan ditandatangani Schnorr BIP-340 sebelum dipancarkan.',
+    rawNostrEnvelope: {
+      id: '0000c8f12a9e4b771f280a9c8b71d49e6f3a180d55e4e8a1b2c3d4e5f6071829',
+      pubkey: 'dbf7f7a0c351830594c75e532bae3cc3626e2dc2a39dad1819825a775f6b3f5f',
+      kind: 3078,
+      created_at: 1795617312,
+      tags: [['t', 'lacakhp'], ['h', '1082']],
+      content: 'v1:a7x9c14d88e20f:Mjk4N2FmOGMzMGEwODky...',
+      sig: '6896bd60eeae296db48a229ff71dfe071bde413e6d43f917dc8dcf8c78de33418f4a7c8b9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f60',
+    },
   },
   {
-    id: 'nostr',
-    number: '02',
-    title: 'Nostr Multi-Relay Mesh',
-    subtitle: 'Jaringan Soket Terdesentralisasi Sedunia',
-    role: 'Distribusi Paket P2P Tanpa Database Pusat',
-    icon: Radio,
-    primaryColor: 'emerald',
-    accentHex: '#34d399',
-    glowHex: 'rgba(52, 211, 153, 0.4)',
-    shortTag: 'P2P MESH • 3 RELAYS',
-    specs: [
-      { label: 'Protokol Transmisi', value: 'WebSocket NIP-01 / NIP-33' },
-      { label: 'Relay Primer', value: 'wss://damus.io • nos.lol' },
-      { label: 'Relay Cadangan', value: 'wss://relay.primal.net • offchain.pub' },
-      { label: 'Format Pesan', value: 'Nostr Event Kind 30078 / 3078' },
+    height: 1083,
+    type: 'HISTORY_EVENT',
+    kind: 3078,
+    timestamp: '2026-11-25 22:05:40 UTC',
+    parentHash: '0000c8f12a9e4b771f280a9c8b71d49e6f3a180d55e4e8a1b2c3d4e5f6071829',
+    blockHash: '00007d4b9a11e2f3890c4d871a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f901a',
+    schnorrSig: 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d8877665544332211aabbccddeeff00112233445566778899aabbccddeeff0011',
+    ipfsCid: 'bafybeiedexeztfbfe2n6p7jidhkls7tsw3flkvd6wjtvs4mxv56rlakbk4',
+    relayAcks: ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.primal.net'],
+    payloadSize: '256 B',
+    txSlices: [
+      { id: 'gps', name: 'GPS_LAT_LNG_CIPHER', bytes: 76, color: '#38bdf8', detail: 'AES-256-GCM delta=24m displacement (Pergerakan Terdeteksi)', hexPreview: 'b28f9910c2738a19230198de' },
+      { id: 'sig', name: 'BIP340_SCHNORR_SIG', bytes: 64, color: '#34d399', detail: 'Verifikasi Kurva Elips secp256k1: LULUS (Authentic HP Hardware)', hexPreview: 'a1b2c3d4e5f60718293a4b5c' },
+      { id: 'meta', name: 'MOTION_SENSOR_DATA', bytes: 42, color: '#818cf8', detail: 'Akselerometer: Significant Motion Validated • Speed: 1.2 m/s', hexPreview: '4d4f54494f4e5f56414c4944' },
+      { id: 'tag', name: 'NOSTR_NIP01_TAGS', bytes: 74, color: '#f59e0b', detail: 'NIP-01 Protocol Header [["t","lacakhp"], ["seq","83"]]', hexPreview: '5b5b2274222c226c6163616b' },
     ],
-    terminalLog: [
-      '> [SOCKET_INIT] Membuka koneksi WSS paralel ke 3 relay publik...',
-      '> [BROADCAST] Mengirim ["EVENT", {kind:30078, pubkey:dbf7...}]',
-      '> [RELAY_ACK] wss://relay.damus.io -> ["OK", event_id, true]',
-      '> [RELAY_ACK] wss://nos.lol -> ["OK", event_id, true] (Quorum tercapai)',
-    ],
-    description:
-      'Paket lokasi terenkripsi disebar serentak ke berbagai server relay sukarelawan di AS, Eropa, dan Asia. Tidak ada database terpusat yang bisa disita, diretas, atau dimatikan oleh otoritas mana pun.',
+    rawNostrEnvelope: {
+      id: '00007d4b9a11e2f3890c4d871a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f901a',
+      pubkey: 'dbf7f7a0c351830594c75e532bae3cc3626e2dc2a39dad1819825a775f6b3f5f',
+      kind: 3078,
+      created_at: 1795617940,
+      tags: [['t', 'lacakhp'], ['seq', '83'], ['h', '1083']],
+      content: 'v1:c810b42f710a:T3B0aW1pemVkR1BTTW90...',
+      sig: 'a1b2c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d8877665544332211aabbccddeeff00112233445566778899aabbccddeeff0011',
+    },
   },
   {
-    id: 'ipfs',
-    number: '03',
-    title: 'Brankas Abadi IPFS',
-    subtitle: 'InterPlanetary File System (Web3)',
-    role: 'Penyimpanan Kode Web Permanen Anti-Hack',
-    icon: Blocks,
-    primaryColor: 'indigo',
-    accentHex: '#818cf8',
-    glowHex: 'rgba(129, 140, 248, 0.4)',
-    shortTag: 'CID IPFS • ANTI-SITA',
-    specs: [
-      { label: 'Content ID (CID)', value: 'bafybeiedexeztfbfe2n6p7jidh...' },
-      { label: 'Jaringan Hosting', value: 'P2P IPFS Network (4EVERLAND)' },
-      { label: 'Integritas Kode', value: 'Immutable Cryptographic Hash' },
-      { label: 'Ketahanan Domain', value: 'Kebal Phishing & Manipulasi Kode' },
+    height: 1084,
+    type: 'LATEST_HEARTBEAT',
+    kind: 30078,
+    timestamp: '2026-11-25 22:15:18 UTC',
+    parentHash: '00007d4b9a11e2f3890c4d871a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f901a',
+    blockHash: '00001f89bc44d7102e3a5f9c0b1a2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c',
+    schnorrSig: '9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    ipfsCid: 'bafybeiedexeztfbfe2n6p7jidhkls7tsw3flkvd6wjtvs4mxv56rlakbk4',
+    relayAcks: ['wss://relay.damus.io', 'wss://nos.lol', 'wss://offchain.pub'],
+    payloadSize: '284 B',
+    txSlices: [
+      { id: 'gps', name: 'LATEST_E2EE_POINT', bytes: 84, color: '#38bdf8', detail: 'Replaceable Kind 30078 d=lacakhp-latest (Titik GPS Realtime Terkini)', hexPreview: '1f89bc44d7102e3a5f9c0b1a' },
+      { id: 'sig', name: 'BIP340_SCHNORR_SIG', bytes: 64, color: '#34d399', detail: 'BIP-340 X-Only 32-byte Schnorr Signature Valid', hexPreview: '9f8e7d6c5b4a3f2e1d0c9b8a' },
+      { id: 'ipfs', name: 'IPFS_MERKLE_CID', bytes: 62, color: '#818cf8', detail: 'P2P Web Mirror Root CID: bafybeiedexe... (4EVERLAND Node Pin)', hexPreview: '626166796265696564657865' },
+      { id: 'tag', name: 'PARAM_TAGS_D', bytes: 74, color: '#f59e0b', detail: 'Nostr Parameterized Replaceable Tag [["d", "lacakhp-latest"]]', hexPreview: '5b5b2264222c226c6163616b' },
     ],
-    terminalLog: [
-      '> [IPFS_GATEWAY] Resolving root CID bafybeiedexeztfbfe...',
-      '> [MERKLE_DAG] Verifikasi kepingan SHA-256 aset HTML & JS: Cocok 100%',
-      '> [IMMUTABILITY] Kode berstatus murni (tidak bisa dimodifikasi malware)',
-      '> [PEER_ROUTING] Menyajikan antarmuka pelacak via node P2P terdekat',
-    ],
-    description:
-      'Seluruh kode tampilan web LacakHP disimpan di ribuan node P2P IPFS dunia menggunakan kode hash matematis (CID). Kode bersifat permanen — tidak ada hacker yang bisa menyusupi malware ke dalam sistem.',
-  },
-  {
-    id: 'viewer',
-    number: '04',
-    title: 'Layar Pemantau Keluarga',
-    subtitle: 'Browser / Tablet / Laptop Terverifikasi',
-    role: 'Dekripsi Nol-Pengetahuan (Zero-Knowledge)',
-    icon: Monitor,
-    primaryColor: 'amber',
-    accentHex: '#fbbf24',
-    glowHex: 'rgba(251, 191, 36, 0.4)',
-    shortTag: 'RAM DECRYPT • PRIVATE',
-    specs: [
-      { label: 'Eksekusi Dekripsi', value: '100% Client-Side di RAM Browser' },
-      { label: 'Kunci Rahasia', value: 'Kata Sandi Keluarga (Tidak Dikirim)' },
-      { label: 'WebCrypto Engine', value: 'SubtleCrypto AES-GCM 256-bit' },
-      { label: 'Anti-Shoulder-Surfing', value: 'Verifikasi Kredensial Layar HP' },
-    ],
-    terminalLog: [
-      '> [CLIENT_SUB] Menerima ciphertext terenkripsi dari relay Nostr...',
-      '> [VERIFY_SIG] Validasi tanda tangan BIP-340 Schnorr pengirim: SAH',
-      '> [KEY_DERIVE] Membuka kunci via PBKDF2 dari kata sandi pemilik...',
-      '> [SUCCESS] Dekripsi sukses di RAM: Lat -6.2088 • Lng 106.8456 (Peta Terbuka)',
-    ],
-    description:
-      'Browser keluarga menarik ciphertext acak dari relay dan mendekripsinya secara instan hanya di dalam memori RAM komputer/HP Anda. Server mana pun di internet hanya melihat deretan angka acak tanpa arti.',
+    rawNostrEnvelope: {
+      id: '00001f89bc44d7102e3a5f9c0b1a2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c',
+      pubkey: 'dbf7f7a0c351830594c75e532bae3cc3626e2dc2a39dad1819825a775f6b3f5f',
+      kind: 30078,
+      created_at: 1795618518,
+      tags: [['d', 'lacakhp-latest'], ['h', '1084']],
+      content: 'v1:e2eePayloadNonceB64:SealedCiphertextBytesB64==',
+      sig: '9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    },
   },
 ];
 
 export const Web3SovereignMeshAnimation: React.FC = () => {
-  const [activeStageIndex, setActiveStageIndex] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [blocks, setBlocks] = useState<CryptoBlock[]>(INITIAL_BLOCKS);
+  const [selectedBlock, setSelectedBlock] = useState<CryptoBlock>(INITIAL_BLOCKS[2]);
+  const [selectedSlice, setSelectedSlice] = useState<BlockTxSlice | null>(INITIAL_BLOCKS[2].txSlices[0]);
+  const [isLiveMining, setIsLiveMining] = useState<boolean>(true);
+  const [pendingTxProgress, setPendingTxProgress] = useState<number>(45);
+  const [activeInspectorTab, setActiveInspectorTab] = useState<'treemap' | 'nostr' | 'verify'>('treemap');
 
-  // Smooth automatic pipeline progression
+  // Trigger mining/sealing a block
+  const sealNewBlock = () => {
+    setBlocks((prev) => {
+      const last = prev[prev.length - 1];
+      const newHeight = last.height + 1;
+      const newParent = last.blockHash;
+      const randHex = Math.random().toString(16).slice(2, 10);
+      const fullRandHex = Array.from({ length: 7 }, () => Math.random().toString(16).slice(2, 10)).join('');
+      const newBlockHash = `0000${randHex}${fullRandHex.slice(0, 52)}`;
+      const newSig = Array.from({ length: 16 }, () => Math.random().toString(16).slice(2, 10)).join('').slice(0, 128);
+
+      const isLiveKind = newHeight % 2 === 0;
+      const newBlock: CryptoBlock = {
+        height: newHeight,
+        type: isLiveKind ? 'LATEST_HEARTBEAT' : 'HISTORY_EVENT',
+        kind: isLiveKind ? 30078 : 3078,
+        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC',
+        parentHash: newParent,
+        blockHash: newBlockHash,
+        schnorrSig: newSig,
+        ipfsCid: 'bafybeiedexeztfbfe2n6p7jidhkls7tsw3flkvd6wjtvs4mxv56rlakbk4',
+        relayAcks: ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.primal.net'],
+        payloadSize: `${240 + Math.floor(Math.random() * 45)} B`,
+        txSlices: [
+          {
+            id: 'gps',
+            name: isLiveKind ? 'LATEST_E2EE_POINT' : 'GPS_LAT_LNG_CIPHER',
+            bytes: 78 + Math.floor(Math.random() * 8),
+            color: '#38bdf8',
+            detail: `AES-256-GCM paket #${newHeight} (${isLiveKind ? 'Kind:30078 Titik Terkini' : 'Kind:3078 Riwayat Jejak'})`,
+            hexPreview: newBlockHash.slice(4, 28),
+          },
+          {
+            id: 'sig',
+            name: 'BIP340_SCHNORR_SIG',
+            bytes: 64,
+            color: '#34d399',
+            detail: `BIP-340 secp256k1 validasi kriptografis perangkat mandiri`,
+            hexPreview: newSig.slice(0, 24),
+          },
+          {
+            id: 'ipfs',
+            name: 'IPFS_MERKLE_CID',
+            bytes: 58,
+            color: '#818cf8',
+            detail: `P2P Merkle DAG Pin di IPFS Swarm (CID: bafybeiedexe...)`,
+            hexPreview: '626166796265696564657865',
+          },
+          {
+            id: 'tag',
+            name: isLiveKind ? 'PARAM_TAGS_D' : 'NOSTR_NIP01_TAGS',
+            bytes: 72,
+            color: '#f59e0b',
+            detail: `Relay Consensus Quorum (3/3 relays acknowledged)`,
+            hexPreview: '5b5b2274222c226c6163616b',
+          },
+        ],
+        rawNostrEnvelope: {
+          id: newBlockHash,
+          pubkey: 'dbf7f7a0c351830594c75e532bae3cc3626e2dc2a39dad1819825a775f6b3f5f',
+          kind: isLiveKind ? 30078 : 3078,
+          created_at: Math.floor(Date.now() / 1000),
+          tags: isLiveKind ? [['d', 'lacakhp-latest'], ['h', String(newHeight)]] : [['t', 'lacakhp'], ['h', String(newHeight)]],
+          content: `v1:iv${randHex}==:ctEncryptedGpsCoordCoordinates==`,
+          sig: newSig,
+        },
+      };
+
+      setSelectedBlock(newBlock);
+      setSelectedSlice(newBlock.txSlices[0]);
+      return [...prev.slice(1), newBlock];
+    });
+    setPendingTxProgress(0);
+  };
+
+  // Simulated live blockchain progression
   useEffect(() => {
-    if (!isPlaying) return;
-    const timer = setInterval(() => {
-      setActiveStageIndex((prev) => (prev + 1) % PIPELINE_STAGES.length);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, [isPlaying]);
+    if (!isLiveMining) return;
+    const progressInterval = setInterval(() => {
+      setPendingTxProgress((p) => {
+        if (p >= 100) {
+          sealNewBlock();
+          return 0;
+        }
+        return p + 20;
+      });
+    }, 1200);
 
-  const activeStage = PIPELINE_STAGES[activeStageIndex];
+    return () => clearInterval(progressInterval);
+  }, [isLiveMining]);
 
   return (
-    <section className="relative rounded-2xl bg-slate-950 border border-slate-800/90 overflow-hidden shadow-2xl">
-      {/* Subtle Blueprint Ambient Glows */}
-      <div
-        className="absolute -top-32 left-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none transition-colors duration-1000 opacity-20"
-        style={{ backgroundColor: activeStage.accentHex }}
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
-
-      {/* Top Header & Architecture Control Bar */}
-      <div className="relative z-10 px-5 py-4 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-slate-950/70 backdrop-blur-md">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center border transition-colors duration-500"
-            style={{
-              backgroundColor: `${activeStage.accentHex}15`,
-              borderColor: `${activeStage.accentHex}40`,
-              color: activeStage.accentHex,
-            }}
-          >
-            <Zap className="w-4 h-4 animate-pulse" />
+    <section className="rounded-2xl bg-[#080b12] border border-slate-800 font-mono text-slate-200 overflow-hidden shadow-2xl relative">
+      {/* Top Telemetry Header Bar (Mempool & Blockchain Explorer Style) */}
+      <div className="px-4 sm:px-6 py-3.5 bg-[#0f1422] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
+            </span>
+            <span className="font-bold text-slate-100 tracking-wider">
+              MEMPOOL &amp; CRYPTOGRAPHIC BLOCKSTREAM
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-slate-100 tracking-tight">
-                Topologi Jaringan Berdaulat (Sovereign Web3 Pipeline)
-              </h3>
-              <span className="hidden sm:inline-flex px-2 py-0.5 rounded text-[0.625rem] font-mono uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
-                ● Live Topology
-              </span>
-            </div>
-            <p className="text-[0.6875rem] sm:text-xs text-slate-400">
-              Alur data terenkripsi ujung-ke-ujung dari satelit luar angkasa ke relay global &amp; IPFS
-            </p>
-          </div>
+          <span className="hidden md:inline text-slate-600">|</span>
+          <span className="hidden md:inline text-slate-400 text-[0.6875rem]">
+            NOSTR NIP-01 • BIP-340 SCHNORR • IPFS DAG
+          </span>
         </div>
 
-        {/* Playback Controls & Stage Counter */}
-        <div className="flex items-center gap-2">
-          <div className="text-[0.6875rem] font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800">
-            TAHAP <span className="text-slate-100 font-bold">{activeStage.number}</span> / 04
-          </div>
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => setIsPlaying((p) => !p)}
-            className="px-3 py-1 rounded-md bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-mono text-slate-300 transition cursor-pointer flex items-center gap-1.5"
-            aria-label={isPlaying ? 'Jeda Simulasi Alur' : 'Putar Simulasi Alur'}
+            onClick={sealNewBlock}
+            className="px-2.5 py-1 rounded bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/40 text-[0.6875rem] font-semibold text-sky-300 transition cursor-pointer"
+            title="Kunci data GPS terkini menjadi blok rantai baru"
           >
-            <Activity className="w-3 h-3 text-sky-400" />
-            <span>{isPlaying ? 'Jeda Alur' : 'Putar Alur'}</span>
+            + KUNCI BLOK BARU
           </button>
+          <button
+            type="button"
+            onClick={() => setIsLiveMining((v) => !v)}
+            className="px-2.5 py-1 rounded bg-[#182033] hover:bg-[#202b44] border border-slate-700 text-[0.6875rem] text-slate-300 transition cursor-pointer"
+          >
+            {isLiveMining ? 'PAUSE STREAM' : 'RESUME STREAM'}
+          </button>
+          <div className="text-emerald-400 text-[0.6875rem] bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded font-bold">
+            HEIGHT: #{blocks[blocks.length - 1].height}
+          </div>
         </div>
       </div>
 
-      {/* Bespoke Interactive SVG Circuit Topology Canvas */}
-      <div className="relative z-10 px-4 pt-4 sm:px-6">
-        <div className="w-full relative rounded-xl bg-slate-900/60 border border-slate-800/80 p-3 sm:p-5 overflow-hidden">
-          {/* Responsive SVG Schematic */}
-          <svg
-            viewBox="0 0 800 160"
-            className="w-full h-auto max-h-[170px] select-none"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <defs>
-              {/* Dynamic Gradients */}
-              <linearGradient id="traceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.8" />
-                <stop offset="35%" stopColor="#34d399" stopOpacity="0.8" />
-                <stop offset="70%" stopColor="#818cf8" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#fbbf24" stopOpacity="0.8" />
-              </linearGradient>
+      {/* Network Metrics Sub-strip */}
+      <div className="px-4 sm:px-6 py-2 bg-[#0a0d16] border-b border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[0.6875rem] text-slate-400">
+        <div>
+          <span className="text-slate-500">KONSENSUS:</span>{' '}
+          <span className="text-emerald-400 font-semibold">ZERO-SERVER P2P</span>
+        </div>
+        <div>
+          <span className="text-slate-500">NOSTR RELAYS:</span>{' '}
+          <span className="text-sky-300 font-semibold">3/3 ACTIVE QUORUM</span>
+        </div>
+        <div>
+          <span className="text-slate-500">SIG KURVA:</span>{' '}
+          <span className="text-slate-200 font-semibold">secp256k1 (BIP-340)</span>
+        </div>
+        <div className="text-right sm:text-left">
+          <span className="text-slate-500">IPFS MERKLE:</span>{' '}
+          <span className="text-indigo-400 font-semibold">CID-v1 PINNED</span>
+        </div>
+      </div>
 
-              {/* Glowing Laser Filter */}
-              <filter id="laserGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {/* Circuit Interconnect Buses (Angled Traces) */}
-            <path
-              d="M 100 80 L 260 80 L 300 80 L 460 80 L 500 80 L 660 80 L 700 80"
-              stroke="#334155"
-              strokeWidth="2"
-              fill="none"
-              strokeDasharray="4 4"
-            />
-            <path
-              d="M 100 80 L 260 80 L 300 80 L 460 80 L 500 80 L 660 80 L 700 80"
-              stroke="url(#traceGrad)"
-              strokeWidth="2.5"
-              fill="none"
-              opacity="0.85"
-            />
-
-            {/* Flowing Laser Packet Pulses along Conduit */}
-            <motion.circle
-              r="4.5"
-              fill="#38bdf8"
-              filter="url(#laserGlow)"
-              animate={{
-                cx: [100, 300, 500, 700],
-                opacity: [0.2, 1, 1, 0.2],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 3.6,
-                ease: 'easeInOut',
-              }}
-              cy="80"
-            />
-            <motion.circle
-              r="3.5"
-              fill="#34d399"
-              filter="url(#laserGlow)"
-              animate={{
-                cx: [100, 300, 500, 700],
-                opacity: [0.1, 0.9, 0.9, 0.1],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 3.6,
-                delay: 1.8,
-                ease: 'easeInOut',
-              }}
-              cy="80"
-            />
-
-            {/* 4 Interactive Schematic Nodes */}
-            {[
-              { idx: 0, x: 100, label: '01. EDGE HP', sub: 'GPS + BIP-340' },
-              { idx: 1, x: 300, label: '02. NOSTR', sub: 'P2P Relays' },
-              { idx: 2, x: 500, label: '03. IPFS', sub: 'CID Immutability' },
-              { idx: 3, x: 700, label: '04. PEMANTAU', sub: 'RAM Decrypt' },
-            ].map(({ idx, x, label, sub }) => {
-              const isSelected = activeStageIndex === idx;
-              const nodeData = PIPELINE_STAGES[idx];
-
+      {/* Main Horizontal Blockchain Conveyor */}
+      <div className="p-4 sm:p-6 overflow-x-auto select-none">
+        <div className="flex items-stretch gap-2.5 min-w-[760px] pb-2">
+          {/* Confirmed Chained Blocks */}
+          <AnimatePresence mode="popLayout">
+            {blocks.map((b, i) => {
+              const isSelected = selectedBlock.height === b.height;
               return (
-                <g
-                  key={idx}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setActiveStageIndex(idx);
-                    setIsPlaying(false);
-                  }}
-                >
-                  {/* Outer Pulsing Halo when active */}
-                  {isSelected && (
-                    <circle
-                      cx={x}
-                      cy="80"
-                      r="36"
-                      fill={nodeData.accentHex}
-                      opacity="0.15"
-                      className="animate-pulse"
-                    />
+                <React.Fragment key={b.height}>
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, x: 40, scale: 0.95 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: -40, scale: 0.9 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    onClick={() => {
+                      setSelectedBlock(b);
+                      setSelectedSlice(b.txSlices[0]);
+                    }}
+                    className={`flex-1 min-w-[190px] rounded-xl p-3.5 transition-all cursor-pointer border relative flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-[#151c2d] border-sky-400/90 shadow-[0_0_24px_rgba(56,189,248,0.22)]'
+                        : 'bg-[#0f1422] border-slate-800 hover:border-slate-700 hover:bg-[#131a2b]'
+                    }`}
+                  >
+                    {/* Block Header */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-2.5">
+                        <div>
+                          <div className="font-bold text-slate-100 flex items-center gap-1.5">
+                            <span className="text-sky-400">#{b.height}</span>
+                            <span className="text-[0.625rem] text-slate-400 font-normal">
+                              {b.kind === 30078 ? 'KIND:30078 (LIVE)' : 'KIND:3078 (HIST)'}
+                            </span>
+                          </div>
+                          <div className="text-[0.5625rem] text-slate-500 truncate max-w-[130px] pt-0.5">
+                            {b.timestamp}
+                          </div>
+                        </div>
+                        <span className="px-1.5 py-0.5 rounded text-[0.625rem] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold">
+                          SEALED
+                        </span>
+                      </div>
+
+                      {/* Mempool.space Style Proportional Tx Treemap Rectangles */}
+                      <div className="w-full h-20 bg-[#06080e] rounded-lg border border-slate-800/80 p-1 mb-2.5 grid grid-cols-2 gap-1 overflow-hidden">
+                        {b.txSlices.map((slice) => {
+                          const isSliceActive = selectedSlice?.id === slice.id && isSelected;
+                          return (
+                            <div
+                              key={slice.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedBlock(b);
+                                setSelectedSlice(slice);
+                              }}
+                              className={`rounded p-1 flex flex-col justify-between transition-all border cursor-pointer ${
+                                isSliceActive
+                                  ? 'border-white brightness-125 ring-1 ring-white/80'
+                                  : 'border-transparent hover:border-white/40 opacity-90'
+                              }`}
+                              style={{ backgroundColor: `${slice.color}20` }}
+                              title={`${slice.name} (${slice.bytes} bytes)`}
+                            >
+                              <div
+                                className="text-[0.625rem] font-bold truncate leading-none"
+                                style={{ color: slice.color }}
+                              >
+                                {slice.name.split('_')[0]}
+                              </div>
+                              <div className="text-[0.5625rem] text-slate-400 leading-none">
+                                {slice.bytes}B
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Block Hash Footers */}
+                    <div className="space-y-1 text-[0.625rem] text-slate-400 pt-1 border-t border-slate-800/60">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">HASH:</span>
+                        <span className="text-slate-300 font-mono">
+                          {b.blockHash.slice(0, 10)}...
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">BIP-340:</span>
+                        <span className="text-emerald-400 font-semibold">PASS ✓</span>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Cryptographic Hash Pointer Link Connector */}
+                  {i < blocks.length - 1 && (
+                    <div className="flex flex-col items-center justify-center text-slate-600 px-0.5 self-center">
+                      <span className="text-[0.5625rem] text-sky-400 font-mono tracking-tighter">
+                        SHA256
+                      </span>
+                      <div className="w-6 h-0.5 bg-gradient-to-r from-sky-400 to-emerald-400 relative my-1">
+                        <motion.div
+                          animate={{ x: [0, 20, 0] }}
+                          transition={{ repeat: Infinity, duration: 1.6, ease: 'linear' }}
+                          className="absolute -top-1 w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_6px_#34d399]"
+                        />
+                      </div>
+                      <span className="text-[0.5625rem] text-slate-500">POINTER</span>
+                    </div>
                   )}
-
-                  {/* Primary Node Outer Ring */}
-                  <circle
-                    cx={x}
-                    cy="80"
-                    r={isSelected ? 26 : 22}
-                    fill="#090d16"
-                    stroke={isSelected ? nodeData.accentHex : '#475569'}
-                    strokeWidth={isSelected ? '3' : '1.5'}
-                    className="transition-all duration-300"
-                  />
-
-                  {/* Inner Core Light */}
-                  <circle
-                    cx={x}
-                    cy="80"
-                    r={isSelected ? 9 : 6}
-                    fill={isSelected ? nodeData.accentHex : '#64748b'}
-                    className="transition-all duration-300"
-                  />
-
-                  {/* Node Label Text */}
-                  <text
-                    x={x}
-                    y="126"
-                    textAnchor="middle"
-                    fill={isSelected ? '#f8fafc' : '#94a3b8'}
-                    fontSize="11"
-                    fontFamily="monospace"
-                    fontWeight={isSelected ? 'bold' : 'normal'}
-                  >
-                    {label}
-                  </text>
-                  <text
-                    x={x}
-                    y="142"
-                    textAnchor="middle"
-                    fill={isSelected ? nodeData.accentHex : '#64748b'}
-                    fontSize="9.5"
-                    fontFamily="monospace"
-                  >
-                    {sub}
-                  </text>
-                </g>
+                </React.Fragment>
               );
             })}
-          </svg>
+          </AnimatePresence>
+
+          {/* Pending Mempool Block (Assembling real-time data bytes) */}
+          <div className="flex flex-col items-center justify-center text-slate-600 px-0.5 self-center">
+            <span className="text-[0.5625rem] text-amber-400 font-mono">MEMPOOL</span>
+            <div className="w-6 h-0.5 bg-dashed border-t border-amber-500/60 my-1" />
+            <span className="text-[0.5625rem] text-amber-500 font-bold animate-pulse">MINING</span>
+          </div>
+
+          <div className="w-[200px] min-w-[200px] rounded-xl p-3.5 border border-dashed border-amber-500/50 bg-[#12151f] flex flex-col justify-between shrink-0">
+            <div>
+              <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-2">
+                <span className="font-bold text-amber-400">
+                  #{blocks[blocks.length - 1].height + 1}
+                </span>
+                <span className="text-[0.625rem] text-amber-300 font-mono font-bold animate-pulse">
+                  ASSEMBLING...
+                </span>
+              </div>
+              <div className="text-[0.6875rem] text-slate-400 space-y-1">
+                <div className="truncate text-slate-300">› Lock Satelit GNSS: Terkunci</div>
+                <div className="truncate text-slate-400">› CSPRNG: Generate IV 96-bit</div>
+                <div className="truncate text-slate-400">› AES-256-GCM: Segel Payload</div>
+                <div className="truncate text-amber-300/90">› Schnorr BIP-340: Sign secp256k1</div>
+              </div>
+            </div>
+
+            {/* Block Assembly Progress Bar */}
+            <div className="space-y-1 pt-3">
+              <div className="flex justify-between text-[0.625rem] text-slate-400">
+                <span>Buffer Enkripsi</span>
+                <span className="text-amber-400 font-bold">{pendingTxProgress}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-amber-500 via-sky-400 to-emerald-400"
+                  style={{ width: `${pendingTxProgress}%` }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Stage Selector Pills (Touch & Mobile Friendly) */}
-      <div className="relative z-10 px-4 sm:px-6 pt-3">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {PIPELINE_STAGES.map((stage, idx) => {
-            const isSelected = activeStageIndex === idx;
-            const Icon = stage.icon;
-            return (
+      {/* Selected Block Cryptographic Verification Drawer (Terminal / Mempool Inspector) */}
+      <div className="p-4 sm:p-6 pt-0">
+        <div className="rounded-xl bg-[#06080e] border border-slate-800 p-4 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">INSPEKSI BLOK:</span>
+              <span className="text-sm font-bold text-sky-400">
+                BLOCK #{selectedBlock.height} ({selectedBlock.type})
+              </span>
+              <span className="text-[0.6875rem] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                UKURAN: {selectedBlock.payloadSize}
+              </span>
+            </div>
+
+            {/* Inspector Tab Buttons */}
+            <div className="flex items-center gap-1.5 text-xs">
               <button
-                key={stage.id}
                 type="button"
-                onClick={() => {
-                  setActiveStageIndex(idx);
-                  setIsPlaying(false);
-                }}
-                className={`p-2.5 rounded-xl border text-left transition-all relative overflow-hidden cursor-pointer ${
-                  isSelected
-                    ? 'bg-slate-900/90 border-slate-700 shadow-lg'
-                    : 'bg-slate-950/60 border-slate-800/80 hover:bg-slate-900/40 hover:border-slate-700'
+                onClick={() => setActiveInspectorTab('treemap')}
+                className={`px-2.5 py-1 rounded transition text-[0.6875rem] font-semibold cursor-pointer ${
+                  activeInspectorTab === 'treemap'
+                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
+                    : 'bg-[#101422] text-slate-400 hover:text-slate-200 border border-slate-800'
                 }`}
-                style={{
-                  borderColor: isSelected ? stage.accentHex : undefined,
-                }}
               >
-                {isSelected && (
-                  <motion.div
-                    layoutId="pillBar"
-                    className="absolute top-0 left-0 right-0 h-0.5"
-                    style={{ backgroundColor: stage.accentHex }}
-                  />
-                )}
-                <div className="flex items-center justify-between gap-1 mb-1">
-                  <span className="text-[0.625rem] font-mono font-bold text-slate-400">
-                    STAGE {stage.number}
-                  </span>
-                  <Icon
-                    className="w-3.5 h-3.5"
-                    style={{ color: isSelected ? stage.accentHex : '#64748b' }}
-                  />
-                </div>
-                <div className="text-xs font-bold text-slate-100 truncate">
-                  {stage.title}
-                </div>
-                <div className="text-[0.6875rem] font-mono truncate text-slate-400 mt-0.5">
-                  {stage.shortTag}
-                </div>
+                PAYLOAD SLICES
               </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Deep-Dive Stage Inspector & Live Terminal Stream */}
-      <div className="relative z-10 p-4 sm:p-6 pt-3">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeStage.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-4"
-          >
-            {/* Left: Architecture Specifications (7 cols) */}
-            <div className="lg:col-span-7 rounded-xl bg-slate-900/80 border border-slate-800/90 p-4 sm:p-5 space-y-3.5">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center border"
-                    style={{
-                      backgroundColor: `${activeStage.accentHex}15`,
-                      borderColor: `${activeStage.accentHex}40`,
-                      color: activeStage.accentHex,
-                    }}
-                  >
-                    <activeStage.icon className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base font-bold text-slate-100 leading-none">
-                      {activeStage.title}
-                    </h4>
-                    <span className="text-xs text-slate-400 font-mono">
-                      {activeStage.subtitle}
-                    </span>
-                  </div>
-                </div>
-
-                <span
-                  className="px-2.5 py-0.5 rounded-full text-[0.6875rem] font-mono border"
-                  style={{
-                    backgroundColor: `${activeStage.accentHex}15`,
-                    borderColor: `${activeStage.accentHex}30`,
-                    color: activeStage.accentHex,
-                  }}
-                >
-                  {activeStage.role}
-                </span>
-              </div>
-
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                {activeStage.description}
-              </p>
-
-              {/* Technical Specifications Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs font-mono">
-                {activeStage.specs.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/90 space-y-0.5"
-                  >
-                    <span className="text-[0.6875rem] text-slate-400 block">
-                      {item.label}
-                    </span>
-                    <span className="text-slate-100 font-semibold text-xs truncate block">
-                      {item.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {activeStage.id === 'ipfs' && (
-                <div className="pt-2 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">
-                    Mirror IPFS Publik Aktif:
-                  </span>
-                  <a
-                    href="https://lacakinhp-79so.ipfs.4everland.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 font-semibold transition"
-                  >
-                    <span>Buka Portal IPFS Live</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setActiveInspectorTab('nostr')}
+                className={`px-2.5 py-1 rounded transition text-[0.6875rem] font-semibold cursor-pointer ${
+                  activeInspectorTab === 'nostr'
+                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
+                    : 'bg-[#101422] text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                RAW NOSTR EVENT
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveInspectorTab('verify')}
+                className={`px-2.5 py-1 rounded transition text-[0.6875rem] font-semibold cursor-pointer ${
+                  activeInspectorTab === 'verify'
+                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
+                    : 'bg-[#101422] text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                BUKTI KRIPTOGRAFI
+              </button>
             </div>
+          </div>
 
-            {/* Right: Real-Time Telemetry Terminal (5 cols) */}
-            <div className="lg:col-span-5 rounded-xl bg-slate-950 border border-slate-800 p-4 font-mono text-xs flex flex-col justify-between shadow-inner space-y-3">
-              <div>
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2.5">
-                  <div className="flex items-center gap-1.5 text-slate-400 text-[0.6875rem]">
-                    <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>SOVEREIGN_TELEMETRY.log</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-slate-700" />
-                    <span className="w-2 h-2 rounded-full bg-slate-700" />
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  </div>
+          {/* Cryptographic Link Continuity Strip */}
+          <div className="p-2.5 rounded-lg bg-[#0c101b] border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[0.6875rem]">
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-slate-500">PARENT HASH:</span>
+              <span className="text-slate-300 font-mono truncate max-w-[280px]">
+                {selectedBlock.parentHash}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500">RANTAI:</span>
+              <span className="text-emerald-400 font-bold">
+                ✓ CONTINUOUS LEDGER MATCH
+              </span>
+            </div>
+          </div>
+
+          {/* Tab Content Display */}
+          {activeInspectorTab === 'treemap' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              {/* Left: Treemap Slices Inspector */}
+              <div className="lg:col-span-5 space-y-2">
+                <div className="text-[0.6875rem] text-slate-400 font-bold uppercase tracking-wider">
+                  Struktur Data Kriptografis (Payload Slices)
+                </div>
+                <div className="space-y-1.5">
+                  {selectedBlock.txSlices.map((slice) => {
+                    const isActive = selectedSlice?.id === slice.id;
+                    return (
+                      <div
+                        key={slice.id}
+                        onClick={() => setSelectedSlice(slice)}
+                        className={`p-2.5 rounded-lg border text-xs cursor-pointer transition flex items-center justify-between ${
+                          isActive
+                            ? 'bg-[#151c2d] border-sky-400'
+                            : 'bg-[#0c101b] border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-sm shrink-0"
+                            style={{ backgroundColor: slice.color }}
+                          />
+                          <span className="font-bold text-slate-200">
+                            {slice.name}
+                          </span>
+                        </div>
+                        <span className="text-slate-400 font-mono">
+                          {slice.bytes} Bytes
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="space-y-2 text-[0.75rem] leading-relaxed">
-                  {activeStage.terminalLog.map((line, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, x: -4 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.08, duration: 0.18 }}
-                      className={
-                        idx === activeStage.terminalLog.length - 1
-                          ? 'text-emerald-300 font-bold'
-                          : 'text-slate-300'
-                      }
+                {selectedSlice && (
+                  <div className="p-3 rounded-lg bg-[#0c101b] border border-slate-800 text-xs space-y-1.5">
+                    <div className="text-[0.625rem] text-slate-400 uppercase font-bold flex items-center justify-between">
+                      <span>Detail Slice: {selectedSlice.name}</span>
+                      <span className="text-sky-400 font-mono">{selectedSlice.bytes}B</span>
+                    </div>
+                    <div className="text-slate-200 text-[0.6875rem]">
+                      {selectedSlice.detail}
+                    </div>
+                    <div className="text-[0.625rem] text-slate-500 font-mono truncate">
+                      HEX PREVIEW: 0x{selectedSlice.hexPreview}...
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Technical Specs & Merkle Node Proofs */}
+              <div className="lg:col-span-7 space-y-3">
+                <div className="text-[0.6875rem] text-slate-400 font-bold uppercase tracking-wider">
+                  Verifikasi Kedaulatan Data &amp; Multi-Relay Quorum
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="p-3 rounded-lg bg-[#0c101b] border border-slate-800 space-y-1">
+                    <span className="text-[0.625rem] text-slate-500 block">MULTI-RELAY ACKNOWLEDGEMENT:</span>
+                    <div className="space-y-1 text-[0.6875rem]">
+                      {selectedBlock.relayAcks.map((relay, idx) => (
+                        <div key={idx} className="text-emerald-400 flex items-center gap-1.5 font-mono">
+                          <span>✓</span>
+                          <span className="text-slate-300">{relay}</span>
+                          <span className="text-emerald-400 text-[0.5625rem]">[OK]</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-[#0c101b] border border-slate-800 space-y-1">
+                    <span className="text-[0.625rem] text-slate-500 block">DESENTRALISASI HOSTING IPFS:</span>
+                    <div className="text-indigo-400 font-mono text-[0.6875rem] break-all">
+                      CID: {selectedBlock.ipfsCid}
+                    </div>
+                    <a
+                      href="https://lacakinhp-79so.ipfs.4everland.app"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-1 text-[0.625rem] text-indigo-300 hover:text-indigo-200 font-bold underline"
                     >
-                      {line}
-                    </motion.div>
-                  ))}
+                      Buka Web Mirror di IPFS Swarm →
+                    </a>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-[#0c101b] border border-slate-800 space-y-1 font-mono text-[0.6875rem]">
+                  <div className="text-slate-500 text-[0.625rem]">BIP-340 SCHNORR SIGNATURE HASH:</div>
+                  <div className="text-slate-300 break-all">{selectedBlock.schnorrSig}</div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Cryptographic Assurance Stamp */}
-              <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[0.6875rem] text-slate-400">
-                <span className="inline-flex items-center gap-1 text-slate-400">
-                  <Lock className="w-3 h-3 text-emerald-400" />
-                  <span>Jaminan Kedaulatan Data</span>
+          {activeInspectorTab === 'nostr' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[0.6875rem] text-slate-400 font-bold uppercase tracking-wider">
+                  Raw Nostr Event JSON Envelope (NIP-01 / NIP-33 / BIP-340)
                 </span>
-                <span className="text-emerald-400 font-bold">100% P2P SECURED</span>
+                <span className="text-[0.625rem] text-emerald-400 font-bold">
+                  ✓ SIGNATURE SECP256K1 VERIFIED
+                </span>
+              </div>
+              <div className="bg-[#030408] border border-slate-800 rounded-lg p-3 text-[0.6875rem] font-mono text-slate-300 overflow-x-auto max-h-[220px]">
+                <pre>{JSON.stringify(selectedBlock.rawNostrEnvelope, null, 2)}</pre>
               </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
+          )}
+
+          {activeInspectorTab === 'verify' && (
+            <div className="space-y-3 font-mono text-xs">
+              <div className="text-[0.6875rem] text-slate-400 font-bold uppercase tracking-wider">
+                Audit Kriptografis Independen (Zero-Knowledge Audit)
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="p-3 rounded-lg bg-[#0c101b] border border-emerald-900/60 space-y-1">
+                  <div className="text-emerald-400 text-xs font-bold">1. Keabsahan Tanda Tangan</div>
+                  <div className="text-[0.6875rem] text-slate-300">
+                    BIP-340 Schnorr 64-byte signature valid di atas kurva secp256k1 milik HP target.
+                  </div>
+                  <span className="text-[0.625rem] text-emerald-400 font-bold">STATUS: VALID</span>
+                </div>
+                <div className="p-3 rounded-lg bg-[#0c101b] border border-sky-900/60 space-y-1">
+                  <div className="text-sky-400 text-xs font-bold">2. Enkripsi End-to-End</div>
+                  <div className="text-[0.6875rem] text-slate-300">
+                    Kunci AES-256 diturunkan via PBKDF2 (100.000 iterasi) hanya di memori browser pelacak.
+                  </div>
+                  <span className="text-[0.625rem] text-sky-400 font-bold">STATUS: ZERO-LEAK</span>
+                </div>
+                <div className="p-3 rounded-lg bg-[#0c101b] border border-indigo-900/60 space-y-1">
+                  <div className="text-indigo-400 text-xs font-bold">3. Ketahanan Sensor IPFS</div>
+                  <div className="text-[0.6875rem] text-slate-300">
+                    Aplikasi web tersemat di jutaan node IPFS terdesentralisasi global tanpa ketergantungan DNS.
+                  </div>
+                  <span className="text-[0.625rem] text-indigo-400 font-bold">STATUS: IMMUTABLE</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
