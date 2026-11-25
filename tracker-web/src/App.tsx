@@ -32,6 +32,7 @@ import {
 const OFFICIAL_WEB_HOSTS = new Set([
   'lacakinhp110.my.id',
   'www.lacakinhp110.my.id',
+  'lacakinhp.pages.dev',
   'lacakhp.pages.dev',
   'tracker-web-xi.vercel.app',
   'localhost',
@@ -42,7 +43,7 @@ function isOfficialWebHost(hostname: string): boolean {
   const h = hostname.toLowerCase();
   if (OFFICIAL_WEB_HOSTS.has(h)) return true;
   if (h.endsWith('-senarendy37-tekab308s-projects.vercel.app')) return true;
-  if (h.endsWith('.pages.dev') && h.includes('lacakhp')) return true;
+  if (h.endsWith('.pages.dev') && (h.includes('lacakhp') || h.includes('lacakinhp'))) return true;
   return false;
 }
 
