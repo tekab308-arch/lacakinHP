@@ -23,6 +23,10 @@ export interface DecryptedLocationPoint {
   bat: number;
   ts: number;
   mdl?: string;
+  eventId?: string;
+  pubkey?: string;
+  sig?: string;
+  relay?: string;
 }
 
 async function sha256Bytes(input: string | Uint8Array): Promise<Uint8Array> {

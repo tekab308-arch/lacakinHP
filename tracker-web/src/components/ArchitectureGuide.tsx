@@ -22,6 +22,10 @@ import {
   Upload,
   Loader2,
   AlertTriangle,
+  Copy,
+  Check,
+  Terminal,
+  ShieldCheck,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 import { LegalConsentModal } from './LegalConsentModal';
@@ -65,6 +69,38 @@ export const ArchitectureGuide: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const releaseInfo = useReleaseInfo();
+  const [copiedAdb, setCopiedAdb] = useState(false);
+  const [copiedJson, setCopiedJson] = useState(false);
+  const [activeOwnerTab, setActiveOwnerTab] = useState<'shizuku' | 'adb' | 'qr'>('shizuku');
+
+  const adbCommand = 'adb shell dpm set-device-owner com.lacakhp.app/.TrackerAdminReceiver';
+  const provisioningJson = JSON.stringify(
+    {
+      'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME':
+        'com.lacakhp.app/.TrackerAdminReceiver',
+      'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION':
+        'https://lacakinhp110.my.id/lacakhp-resmi.apk',
+      'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM':
+        '4xENaXW0SSUvRW45J3yWSy8rK_j7p4OhU6gHyA==',
+    },
+    null,
+    2
+  );
+
+  const handleCopyAdb = () => {
+    navigator.clipboard.writeText(adbCommand).then(() => {
+      setCopiedAdb(true);
+      setTimeout(() => setCopiedAdb(false), 2500);
+    });
+  };
+
+  const handleCopyJson = () => {
+    navigator.clipboard.writeText(provisioningJson).then(() => {
+      setCopiedJson(true);
+      setTimeout(() => setCopiedJson(false), 2500);
+    });
+  };
+
   const [apkCheckState, setApkCheckState] = useState<{
     status: 'idle' | 'hashing' | 'match' | 'mismatch' | 'error';
     fileName?: string;
@@ -918,6 +954,293 @@ export const ArchitectureGuide: React.FC = () => {
           <b>Izin yang TIDAK PERNAH diminta LacakHP:</b> Aplikasi tidak meminta
           akses ke <b>Daftar Kontak, Galeri/Foto, Kamera, Mikrofon, File Pribadi,</b>{' '}
           maupun login akun Google Anda.
+        </div>
+      </SpotlightCard>
+
+      {/* Benteng Proteksi 2 Tingkat: Device Owner (MDM Anti-Hapus Permanen) */}
+      <SpotlightCard
+        as="section"
+        tone="radar"
+        radius={600}
+        restingBgClassName="bg-slate-950/75"
+        restingBorderClassName="border-amber-500/35"
+        contentClassName="p-4 sm:p-6 space-y-5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Benteng Anti-Hapus Android Enterprise (Murni Device Owner)</span>
+            </div>
+            <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+              Aktivasi Proteksi 2 Tingkat: Dari Pemilik Awam hingga Benteng Maksimal
+            </h2>
+            <p className="text-xs text-slate-300">
+              100% Mematuhi Kebijakan Google Play Protect (Murni izin resmi <code>BIND_DEVICE_ADMIN</code> tanpa modifikasi berbahaya).
+            </p>
+          </div>
+
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-900 text-amber-300 border border-amber-500/30">
+            Paket: com.lacakhp.app
+          </span>
+        </div>
+
+        {/* 2 Levels Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-sky-400 text-xs">Level 1: Device Administrator (Awam)</span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                1-Klik di Aplikasi
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Cukup ketuk tombol <i>"Aktifkan Administrator Perangkat"</i> di dalam aplikasi LacakHP. Menjaga aplikasi dari pencopotan biasa dan mencatat peringatan jika ada yang salah menebak PIN layar 3 kali.
+            </p>
+            <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
+              Cocok untuk: Penggunaan harian keluarga tanpa butuh koneksi kabel atau alat tambahan.
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/30 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-amber-300 text-xs">Level 2: Benteng Device Owner (Maksimal)</span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                Anti-Hapus Absolut
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Menetapkan LacakHP sebagai pemilik sah sistem (Enterprise MDM). Tombol hapus instalan <b>dinonaktifkan di OS</b>, Factory Reset diblokir, Safe Boot diblokir, dan izin GPS/SMS dikunci permanen.
+            </p>
+            <div className="text-[10px] text-amber-200/90 pt-1 border-t border-amber-500/20">
+              Pelepasan sah wajib lolos PIN Layar <b>DAN</b> mengetik ulang Kunci Rahasia LacakHP.
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive Activation Tabs */}
+        <div className="space-y-3 pt-1">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold text-white flex items-center gap-1.5">
+              <Terminal className="w-4 h-4 text-sky-400" />
+              <span>Panduan Aktivasi Level 2 (Pilih Cara Paling Mudah Bagi Anda):</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveOwnerTab('shizuku')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition touch-manipulation ${
+                activeOwnerTab === 'shizuku'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+              }`}
+            >
+              📱 1. Shizuku + aShell (Tanpa PC)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveOwnerTab('adb')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition touch-manipulation ${
+                activeOwnerTab === 'adb'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+              }`}
+            >
+              💻 2. Terminal ADB (Laptop / Kabel USB)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveOwnerTab('qr')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition touch-manipulation ${
+                activeOwnerTab === 'qr'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+              }`}
+            >
+              📷 3. QR Provisioning (HP Baru / Reset)
+            </button>
+          </div>
+
+          {/* Tab Content 1: Shizuku + aShell */}
+          {activeOwnerTab === 'shizuku' && (
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs leading-relaxed">
+              <div className="font-bold text-amber-300">
+                Cara Paling Praktis Tanpa Butuh Laptop (Cukup dari HP yang Bersangkutan)
+              </div>
+              <ol className="list-decimal list-inside space-y-2 text-slate-300">
+                <li>
+                  Pasang aplikasi <b>Shizuku</b> &amp; <b>aShell</b> dari Play Store / GitHub. Aktifkan Shizuku melalui <i>Wireless Debugging</i> (memerlukan sambungan Wi-Fi sebentar).
+                </li>
+                <li>
+                  Buka menu <b>Pengaturan HP &gt; Akun</b>, lalu <b>Hapus / Lepas Sementara Akun Google, Samsung, atau Xiaomi</b> (Ini adalah syarat mutlak keamanan bawaan sistem operasi Android agar perintah penetapan pemilik perangkat diizinkan).
+                </li>
+                <li>
+                  Buka aplikasi <b>aShell</b>, izinkan akses Shizuku, salin perintah di bawah ini dan tekan tombol Enter:
+                </li>
+              </ol>
+
+              {/* Copyable ADB Command Box */}
+              <div className="relative group bg-slate-900 border border-slate-700/80 rounded-xl p-3 font-mono text-[11px] text-sky-300 break-all flex items-center justify-between gap-2">
+                <code>{adbCommand}</code>
+                <button
+                  type="button"
+                  onClick={handleCopyAdb}
+                  title="Salin Perintah ADB"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-sans font-bold text-xs shrink-0 transition"
+                >
+                  {copiedAdb ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Tersalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Salin</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="text-slate-300">
+                <li>
+                  Setelah muncul teks <code>Success: Device owner set to package com.lacakhp.app</code>, silakan <b>login kembali ke Akun Google &amp; Samsung Anda</b>. Seluruh data dan aplikasi tetap aman, dan benteng LacakHP kini aktif permanen!
+                </li>
+              </div>
+            </div>
+          )}
+
+          {/* Tab Content 2: Terminal ADB */}
+          {activeOwnerTab === 'adb' && (
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs leading-relaxed">
+              <div className="font-bold text-sky-300">
+                Aktivasi Standar via Terminal / Command Prompt Laptop
+              </div>
+              <ol className="list-decimal list-inside space-y-2 text-slate-300">
+                <li>
+                  Aktifkan <b>USB Debugging</b> di menu <i>Opsi Pengembang (Developer Options)</i> HP Anda, lalu hubungkan HP ke laptop dengan kabel data.
+                </li>
+                <li>
+                  Lepas sementara akun Google di menu <i>Pengaturan &gt; Akun</i> pada HP Anda.
+                </li>
+                <li>
+                  Buka Terminal (Mac/Linux) atau PowerShell / CMD (Windows) di laptop Anda, lalu jalankan perintah berikut:
+                </li>
+              </ol>
+
+              {/* Copyable ADB Command Box */}
+              <div className="relative group bg-slate-900 border border-slate-700/80 rounded-xl p-3 font-mono text-[11px] text-sky-300 break-all flex items-center justify-between gap-2">
+                <code>{adbCommand}</code>
+                <button
+                  type="button"
+                  onClick={handleCopyAdb}
+                  title="Salin Perintah ADB"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-sans font-bold text-xs shrink-0 transition"
+                >
+                  {copiedAdb ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Tersalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Salin</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="text-slate-300">
+                <li>
+                  Begitu sukses, login kembali ke akun Google Anda. Port USB Debugging pada HP akan <b>otomatis dinonaktifkan</b> oleh LacakHP untuk mencegah laptop asing atau konter servis membobol HP Anda.
+                </li>
+              </div>
+            </div>
+          )}
+
+          {/* Tab Content 3: QR Provisioning */}
+          {activeOwnerTab === 'qr' && (
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs leading-relaxed">
+              <div className="font-bold text-emerald-300">
+                Metode Resmi Google Enterprise untuk HP Baru atau HP yang Baru Di-Reset Pabrik
+              </div>
+              <p className="text-slate-300">
+                Pada layar selamat datang pertama kali setelah HP di-factory reset (layar <i>"Halo / Selamat Datang"</i>), <b>ketuk layar kosong sebanyak 6 kali berturut-turut</b>. Kamera pemindai QR Enterprise bawaan Android akan terbuka secara otomatis.
+              </p>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Profil JSON Provisioning Resmi (Standar Google DevicePolicyManager):</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyJson}
+                    className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold"
+                  >
+                    {copiedJson ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedJson ? 'JSON Tersalin' : 'Salin JSON'}</span>
+                  </button>
+                </div>
+                <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-[10px] text-slate-300 overflow-x-auto leading-relaxed">
+                  {provisioningJson}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Smart Lockdown Policies Details */}
+        <div className="p-4 rounded-xl bg-slate-950/90 border border-slate-800/90 space-y-2.5">
+          <div className="font-bold text-white text-xs flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <span>6 Perlindungan Mode Cerdas (Smart MDM Policies) Saat Device Owner Aktif:</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-[11px]">
+            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+              <span className="font-bold text-amber-300 block">1. Anti-Hapus Permanen</span>
+              <span className="text-slate-400 block">
+                Tombol copot pemasangan aplikasi dinonaktifkan di level OS (<code>setUninstallBlocked</code>).
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+              <span className="font-bold text-amber-300 block">2. Blokir Factory Reset</span>
+              <span className="text-slate-400 block">
+                Pencuri tidak bisa menghapus HP melalui menu Setelan (<code>DISALLOW_FACTORY_RESET</code>).
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+              <span className="font-bold text-amber-300 block">3. Blokir Safe Mode</span>
+              <span className="text-slate-400 block">
+                Mencegah pencuri me-restart HP ke Mode Aman untuk mematikan layanan LacakHP (<code>DISALLOW_SAFE_BOOT</code>).
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+              <span className="font-bold text-amber-300 block">4. Kunci Izin GPS &amp; SMS</span>
+              <span className="text-slate-400 block">
+                Izin Lokasi, SMS, &amp; Telepon dikunci permanen sehingga tidak dapat dimatikan sepihak oleh pencuri.
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+              <span className="font-bold text-amber-300 block">5. Kunci Port USB Debugging</span>
+              <span className="text-slate-400 block">
+                Port USB ditutup otomatis (<code>DISALLOW_DEBUGGING_FEATURES</code>) agar laptop konter servis ditolak OS.
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+              <span className="font-bold text-amber-300 block">6. Verifikasi Ganda Pemilik</span>
+              <span className="text-slate-400 block">
+                Pelepasan benteng wajib lolos PIN layar <b>DAN</b> mengetik ulang Kunci Rahasia LacakHP (anti-intip PIN di tempat umum).
+              </span>
+            </div>
+          </div>
         </div>
       </SpotlightCard>
 

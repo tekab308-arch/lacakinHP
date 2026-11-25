@@ -318,6 +318,9 @@ export async function fetchAndDecryptFromRelays(
         if (payload) {
           if (!rawSampleEvent) rawSampleEvent = ev;
           hasV2 = true;
+          payload.eventId = ev.id;
+          payload.pubkey = ev.pubkey;
+          payload.sig = ev.sig;
           v2Points.push(payload);
         }
       } catch {
@@ -329,6 +332,9 @@ export async function fetchAndDecryptFromRelays(
         if (payload) {
           if (!rawSampleEvent) rawSampleEvent = ev;
           hasV1 = true;
+          payload.eventId = ev.id;
+          payload.pubkey = ev.pubkey;
+          payload.sig = ev.sig;
           v1Points.push(payload);
         }
       } catch {
@@ -440,6 +446,10 @@ export function subscribeToRelays(
               ev.content
             );
             if (pt && !closed) {
+              pt.eventId = ev.id;
+              pt.pubkey = ev.pubkey;
+              pt.sig = ev.sig;
+              pt.relay = relayUrl;
               onPoint(pt, ev, isV2 ? 'v2' : 'v1');
             }
           })

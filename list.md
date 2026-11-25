@@ -18,8 +18,7 @@
   - Mencegah pembajakan DNS / pengalihan domain ke situs phishing.
 - [ ] **Aktifkan Branch Protection di GitHub (`main`)**
   - Wajibkan GitHub Actions CI lulus sebelum perubahan masuk ke branch `main`.
-- [ ] **Commit & Push seluruh kode terbaru ke GitHub**
-  - Sinkronkan seluruh perbaikan keamanan Web & Android lokal agar transparan dan teruji otomatis oleh GitHub Actions CI.
+- [x] **Commit & Push seluruh kode terbaru ke GitHub** *(Selesai — branch main tekab308-arch/lacakinHP)*
 - [ ] **Cek skor header live di `securityheaders.com`**
   - Verifikasi skor A/A+ di `https://securityheaders.com/?q=https://lacakinhp110.my.id`.
 
@@ -30,8 +29,10 @@
 - [x] **Mode Ephemeral Penuh untuk Magic Link (`#id=...&key=...`)** *(Selesai — 100% RAM, tanpa menyentuh `localStorage`)*
 - [x] **Alat Cek Keaslian File APK Lokal di Browser (*Client-Side SHA-256 Verifier*)** *(Selesai — di tab Cara Kerja & Keamanan)*
 - [x] **Perbaikan Layer Peta Mode Gelap/Terang (`strict-origin-when-cross-origin` + Auto-Fallback CARTO)** *(Selesai & LIVE)*
-- [ ] **Fitur Web: Modal "Lembar Bukti Polisi (LP/STPL) & Blokir IMEI" (Cetak A4 Resmi + Bukti BIP-340 Schnorr)**
-  - Sesuai desain terkunci pada `OPTIMASI_FULL_ROOT_MDM.md` Fase A (aman dikerjakan & di-deploy ke web tanpa mengubah file APK live).
+- [x] **Fitur Web: Modal "Lembar Bukti Polisi (LP/STPL) & Blokir IMEI" (Cetak A4 Resmi + Bukti BIP-340 Schnorr)**
+  - Selesai — Form RAM-only, segel BIP-340 Schnorr & SHA-256 event ID, tabel kronologi, dan format cetak A4 resmi untuk SPKT Polri & CEIR.
+- [x] **Panduan Aktivasi Benteng Device Owner (MDM Anti-Hapus)**
+  - Selesai — Panduan 3 langkah Shizuku+aShell tanpa PC, perintah ADB salin 1-klik, format JSON QR Provisioning, dan 6 Mode Cerdas di tab Cara Kerja & Keamanan.
 - [x] **Dukungan Mode Offline / PWA App-Shell (`Network-First`) & Web Manifest**
   - Service Worker (`sw.js`) aktif, mengecualikan file APK 12MB & version.json, dan siap offline fallback.
 - [x] **Konfigurasi Mirror Cloudflare Pages (`public/_headers`) & Whitelist `lacakhp.pages.dev`**

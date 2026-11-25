@@ -120,4 +120,24 @@ textarea {
   .print-text-muted {
     color: #475569 !important;
   }
+
+  /* Formal Police Evidence A4 Document Print Override */
+  body.police-print-active * {
+    visibility: hidden !important;
+  }
+  body.police-print-active #police-evidence-print-document,
+  body.police-print-active #police-evidence-print-document * {
+    visibility: visible !important;
+  }
+  body.police-print-active #police-evidence-print-document {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
 }
