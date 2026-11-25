@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Pulsing radar beacon marker on Leaflet OpenStreetMap */
+.radar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.radar-beacon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  background: #38bdf8;
+  border: 2.5px solid #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.95);
+  z-index: 2;
+}
+
+.radar-wave,
+.radar-wave-2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: rgba(56, 189, 248, 0.35);
+  animation: radar-pulse 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  z-index: 1;
+}
+
+.radar-wave-2 {
+  background: rgba(56, 189, 248, 0.2);
+  animation-delay: 0.75s;
+}
+
+@keyframes radar-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.95;
+  }
+  85% {
+    transform: scale(2.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.7);
+    opacity: 0;
+  }
+}
+
+/* Optional crisp dark-mode map filter using same CORS-safe OSM tiles */
+.osm-dark-tiles .leaflet-tile-pane {
+  filter: invert(92%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar-wave,
+  .radar-wave-2 {
+    animation: none !important;
+  }
+}
+
+/* Official Print Report layout */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  .print-card {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+  .print-text-dark {
+    color: #0f172a !important;
+  }
+  .print-text-muted {
+    color: #475569 !important;
+  }
+}

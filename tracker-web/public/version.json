@@ -1,0 +1,8 @@
+{
+  "versionCode": 8,
+  "versionName": "2.6",
+  "apkUrl": "https://lacakinhp110.my.id/lacakhp-resmi.apk",
+  "certSha256": "E3:10:0D:61:55:7B:49:1F:65:E4:B2:42:CC:43:29:25:27:3B:7C:96:F5:55:27:CA:27:A9:EB:48:C3:A8:07:48",
+  "apkSha256": "de81c0fe3bc3d6cbe50a467bb4143fe4a0a41d9207ba56f12281f105cea1d970",
+  "notes": "Peningkatan benteng Anti-SIM Swap: goAsync modem settling, Direct SMS Fallback jika service ditolak Android 12-15, dan fallback GPS timeout."
+}

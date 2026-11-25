@@ -1,0 +1,43 @@
+LISENSI AMAL NON-KOMERSIAL & PERLINDUNGAN MEREK LACAKHP
+(LacakHP Non-Commercial Charity, Trademark & Anti-Abuse License)
+
+Hak Cipta (c) 2026 Pengembang Resmi LacakHP.
+
+Kode sumber proyek LacakHP dibuka untuk publik semata-mata demi transparansi
+kriptografi Zero-Knowledge, audit keamanan independen, edukasi, dan mendukung
+tugas kepolisian dalam membantu masyarakat menemukan perangkat yang hilang
+atau dicuri.
+
+Dengan mengakses, membaca, menyalin, atau memodifikasi kode sumber ini, Anda
+wajib mematuhi seluruh ketentuan berikut:
+
+1. LARANGAN KOMERSIALISASI & PUNGUTAN BIAYA (100% NIRLABA)
+   Perangkat lunak ini, baik secara utuh maupun sebagian, DILARANG KERAS
+   diperjualbelikan, disewakan, dijadikan layanan berbayar, dipasangi paywall,
+   atau digunakan untuk meminta biaya tebusan, transfer uang, maupun donasi
+   paksa dalam bentuk apa pun untuk membuka titik koordinat lokasi.
+
+2. PERLINDUNGAN NAMA, MEREK & IDENTITAS RESMI ("LacakHP")
+   Nama "LacakHP", logo, identitas visual, serta Sidik Jari Sertifikat Rilis
+   Resmi (SHA-256) adalah milik eksklusif Pengembang Resmi LacakHP.
+   Setiap duplikat (clone/fork) atau versi modifikasi pihak ketiga:
+   - DILARANG menggunakan nama "LacakHP" atau menyamar sebagai aplikasi/situs
+     resmi LacakHP.
+   - WAJIB mengganti nama aplikasi, package ID, dan domain serta mencantumkan
+     secara jelas bahwa versi tersebut bukan rilis resmi LacakHP.
+   Pelanggaran terhadap ketentuan ini akan ditindak melalui laporan Phishing /
+   Trademark Abuse dan DMCA Takedown ke penyedia hosting, registrar domain,
+   GitHub, Cloudflare, dan Google Safe Browsing.
+
+3. LARANGAN PENYALAHGUNAAN & PENYADAPAN ILEGAL (KEPATUHAN HUKUM & UU ITE)
+   Perangkat lunak ini hanya boleh dipasang pada perangkat milik sendiri atau
+   anggota keluarga dengan sepengetahuan dan persetujuan penuh pemilik sah.
+   DILARANG KERAS menggunakan atau memodifikasi perangkat lunak ini sebagai
+   alat mata-mata ilegal (stalkerware/spyware) untuk memantau lokasi orang lain
+   tanpa izin (melanggar Undang-Undang ITE Pasal 31 & KUHP).
+
+4. PENOLAKAN JAMINAN (DISCLAIMER)
+   Perangkat lunak ini disediakan "SEBAGAIMANA ADANYA" (AS-IS) sebagai upaya
+   bantuan kemanusiaan/amal tanpa jaminan apa pun. Pengembang resmi tidak
+   bertanggung jawab atas penyalahgunaan oleh pihak ketiga yang memodifikasi
+   kode sumber di luar rilis resmi yang ditandatangani secara kriptografis.
