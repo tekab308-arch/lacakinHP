@@ -35,6 +35,7 @@ const OFFICIAL_WEB_HOSTS = new Set([
   'lacakinhp.pages.dev',
   'lacakhp.pages.dev',
   'tracker-web-xi.vercel.app',
+  'lacakinhp-79so.ipfs.4everland.app',
   'localhost',
   '127.0.0.1',
 ]);
@@ -44,6 +45,7 @@ function isOfficialWebHost(hostname: string): boolean {
   if (OFFICIAL_WEB_HOSTS.has(h)) return true;
   if (h.endsWith('-senarendy37-tekab308s-projects.vercel.app')) return true;
   if (h.endsWith('.pages.dev') && (h.includes('lacakhp') || h.includes('lacakinhp'))) return true;
+  if (h.endsWith('.4everland.app') || h.endsWith('.on-fleek.app') || h.endsWith('.ipfs.dweb.link') || h.endsWith('.ipfs.io') || h.endsWith('.flk-ipfs.xyz')) return true;
   return false;
 }
 

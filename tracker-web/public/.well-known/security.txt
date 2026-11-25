@@ -3,5 +3,5 @@ Contact: https://lacakinhp110.my.id/
 Policy: https://lacakinhp110.my.id/
 Preferred-Languages: id, en
 Canonical: https://lacakinhp110.my.id/.well-known/security.txt
-Mirrors: https://lacakinhp.pages.dev/, https://tracker-web-xi.vercel.app/
+Mirrors: https://lacakinhp.pages.dev/, https://tracker-web-xi.vercel.app/, https://lacakinhp-79so.ipfs.4everland.app/
 Expires: 2027-12-31T23:59:59.000Z

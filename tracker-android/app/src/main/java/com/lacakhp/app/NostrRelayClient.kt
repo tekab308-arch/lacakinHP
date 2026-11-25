@@ -40,8 +40,11 @@ object NostrRelayClient {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = cm.activeNetwork ?: return false
         val caps = cm.getNetworkCapabilities(network) ?: return false
-        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        // Do NOT require NET_CAPABILITY_VALIDATED: Huawei/HarmonyOS devices without Google Play Services
+        // (and some ISP/Wi-Fi setups) fail Google's connectivity probe and never flag the network as
+        // validated even though the internet works, which silently blocked every relay upload.
+        // If the network is truly down, the WebSocket attempt fails and points stay safely queued.
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     /**

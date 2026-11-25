@@ -455,13 +455,14 @@ class TrackerService : Service() {
 
     private fun handleManualSync() {
         val battery = getBatteryPercentage()
-        updateNotification("Mengambil GPS & enkripsi ke relay...")
+        updateNotification("Mengambil koordinat & enkripsi ke relay...")
         gpsLocator.requestAccurateLocation(batteryPct = battery, timeoutMs = 20_000L) { result ->
             val pt = result.point
             if (pt != null) {
                 savePointAndSync(pt)
             } else {
                 flushOfflineQueueAsync()
+                broadcastState()
             }
             updateNotification(defaultModeNotificationText())
         }

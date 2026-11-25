@@ -835,8 +835,14 @@ class MainActivity : AppCompatActivity() {
             val acc = if (last.accuracy >= 0f) "${last.accuracy.toInt()}m" else "-"
             tvLastMeta.text = "Akurasi: $acc (${last.provider}) • $timeStr"
         } else {
-            tvLastCoords.text = "Belum ada titik GPS"
-            tvLastMeta.text = "Tekan 'Ambil GPS & Sync' di tempat terbuka"
+            val locator = GpsLocator(this)
+            if (!locator.hasHardwareGps()) {
+                tvLastCoords.text = "Belum ada titik (Mode Wi-Fi)"
+                tvLastMeta.text = "Tablet Wi-Fi tanpa chip GPS fisik. Aktifkan Lokasi Wi-Fi & buka Petal Maps."
+            } else {
+                tvLastCoords.text = "Belum ada titik GPS"
+                tvLastMeta.text = "Tekan 'Ambil GPS & Sync' di tempat terbuka"
+            }
         }
 
         val unsynced = dbHelper.countUnsynced()

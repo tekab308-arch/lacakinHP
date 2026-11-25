@@ -28,6 +28,10 @@ class GpsLocator(private val context: Context) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var periodicListener: LocationListener? = null
 
+    fun hasHardwareGps(): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    }
+
     fun hasLocationPermission(): Boolean {
         val fine = ContextCompat.checkSelfPermission(
             context,
@@ -42,7 +46,8 @@ class GpsLocator(private val context: Context) {
 
     fun isGpsEnabled(): Boolean {
         return try {
-            locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
         } catch (_: Exception) {
             false
         }
@@ -67,24 +72,32 @@ class GpsLocator(private val context: Context) {
         }
         periodicListener = listener
 
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        val enabledProviders = try {
+            locationManager.getProviders(true)
+        } catch (_: Exception) {
+            emptyList<String>()
+        }
+        for (p in enabledProviders) {
+            try {
+                locationManager.requestLocationUpdates(
+                    p,
+                    minTimeMs,
+                    minDistanceM,
+                    listener,
+                    Looper.getMainLooper()
+                )
+            } catch (_: Exception) {}
+        }
+        // Also listen on PASSIVE_PROVIDER so fixes from Petal Maps, Huawei HMS, or other apps are automatically captured
+        try {
             locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
+                LocationManager.PASSIVE_PROVIDER,
                 minTimeMs,
                 minDistanceM,
                 listener,
                 Looper.getMainLooper()
             )
-        }
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                minTimeMs,
-                minDistanceM,
-                listener,
-                Looper.getMainLooper()
-            )
-        }
+        } catch (_: Exception) {}
     }
 
     fun isPeriodicRunning(): Boolean = periodicListener != null
@@ -164,7 +177,8 @@ class GpsLocator(private val context: Context) {
                         bestLocation = location
                     }
                     val isGps = location.provider == LocationManager.GPS_PROVIDER
-                    if (isGps && location.accuracy <= targetAccuracyMeters) {
+                    val acceptableAccuracy = if (isGps) targetAccuracyMeters else maxOf(targetAccuracyMeters * 2.5f, 75f)
+                    if (location.accuracy <= acceptableAccuracy) {
                         finishWith(location, isCached = false)
                     }
                 }
@@ -175,26 +189,33 @@ class GpsLocator(private val context: Context) {
             listenerRef = listener
 
             var requestedAny = false
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            val enabledProviders = try {
+                locationManager.getProviders(true)
+            } catch (_: Exception) {
+                emptyList<String>()
+            }
+            for (p in enabledProviders) {
+                try {
+                    locationManager.requestLocationUpdates(
+                        p,
+                        1000L,
+                        0f,
+                        listener,
+                        Looper.getMainLooper()
+                    )
+                    requestedAny = true
+                } catch (_: Exception) {}
+            }
+            try {
                 locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
+                    LocationManager.PASSIVE_PROVIDER,
                     1000L,
                     0f,
                     listener,
                     Looper.getMainLooper()
                 )
                 requestedAny = true
-            }
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    1000L,
-                    0f,
-                    listener,
-                    Looper.getMainLooper()
-                )
-                requestedAny = true
-            }
+            } catch (_: Exception) {}
 
             if (!requestedAny) {
                 finishWith(getBestLastKnownLocation(), isCached = true)
@@ -213,11 +234,23 @@ class GpsLocator(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun getBestLastKnownLocation(): Location? {
         if (!hasLocationPermission()) return null
-        val providers = listOf(
-            LocationManager.GPS_PROVIDER,
-            LocationManager.NETWORK_PROVIDER,
-            LocationManager.PASSIVE_PROVIDER
-        )
+        val providers = try {
+            val list = mutableListOf(
+                LocationManager.GPS_PROVIDER,
+                LocationManager.NETWORK_PROVIDER,
+                LocationManager.PASSIVE_PROVIDER
+            )
+            for (p in locationManager.allProviders) {
+                if (!list.contains(p)) list.add(p)
+            }
+            list
+        } catch (_: Exception) {
+            listOf(
+                LocationManager.GPS_PROVIDER,
+                LocationManager.NETWORK_PROVIDER,
+                LocationManager.PASSIVE_PROVIDER
+            )
+        }
         var best: Location? = null
         for (provider in providers) {
             val loc = try {
@@ -226,7 +259,7 @@ class GpsLocator(private val context: Context) {
                 null
             } ?: continue
             if (!isValidLocation(loc)) continue
-            if (provider == LocationManager.PASSIVE_PROVIDER && loc.accuracy > 150f) continue
+            if (provider == LocationManager.PASSIVE_PROVIDER && loc.accuracy > 250f) continue
             if (best == null || isBetterLocation(loc, best)) {
                 best = loc
             }
