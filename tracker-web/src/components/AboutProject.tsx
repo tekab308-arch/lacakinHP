@@ -11,6 +11,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
+import { Web3SovereignMeshAnimation } from './Web3SovereignMeshAnimation';
 import {
   useReleaseInfo,
   shortHexHash,
@@ -146,6 +147,9 @@ export const AboutProject: React.FC<AboutProjectProps> = ({
           </footer>
         </blockquote>
       </SpotlightCard>
+
+      {/* Web3 Sovereign Architecture Mesh Animation */}
+      <Web3SovereignMeshAnimation />
 
       {/* 3 Pillars of Commitment */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
