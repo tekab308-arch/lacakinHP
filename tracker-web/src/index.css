@@ -4,6 +4,12 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  font-size: 100%;
+}
+
+/* Citizen Comfortable Reading Mode (A+ toggle: scales all rem typography smoothly) */
+html.font-comfortable {
+  font-size: 112.5%;
 }
 
 html,
@@ -11,7 +17,25 @@ body {
   overflow-x: hidden;
   width: 100%;
   max-width: 100%;
+  line-height: 1.6;
+  letter-spacing: 0.006em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-tap-highlight-color: transparent;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Clean native <details> progressive disclosure without JS bloat */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details[open] > summary .details-chevron {
+  transform: rotate(180deg);
 }
 
 button,
@@ -101,6 +125,10 @@ textarea {
 
 /* Official Print Report layout */
 @media print {
+  html,
+  html.font-comfortable {
+    font-size: 100% !important;
+  }
   .no-print {
     display: none !important;
   }

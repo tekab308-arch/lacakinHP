@@ -7,6 +7,7 @@ import {
   ExternalLink,
   ShieldAlert,
   Info,
+  ChevronDown,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 
@@ -16,7 +17,7 @@ interface ChecklistItem {
   desc: string;
   tip?: {
     label: string;
-    detail: string;
+    detailLines: string[];
   };
   linkLabel?: string;
   linkHref?: string;
@@ -45,8 +46,11 @@ const EMERGENCY_STEPS: ChecklistItem[] = [
     desc: 'Hati-hati menentukan urutan langkah ini agar pelacakan tidak terputus sebelum waktunya:',
     tip: {
       label: 'Aturan Emas untuk Pengguna LacakHP',
-      detail:
-        'Jika LacakHP SUDAH terpasang & HP masih merespons, TUNDA blokir SIM 15–30 menit pertama supaya 4G dan SMS darurat (LACAK / LACAK BUNYI) tetap bisa menjangkau HP. Segera blokir SIM hanya jika: (a) belum pasang LacakHP, (b) HP dimatikan/SIM tidak merespons, atau (c) saldo m-banking/e-wallet kritis harus segera diamankan dari SMS OTP. (Catatan: jika SIM diblokir, WiFi Auto-Flush & deteksi SIM baru di LacakHP tetap bekerja jika HP terkoneksi WiFi atau dimasuki SIM baru).',
+      detailLines: [
+        '• Jika LacakHP SUDAH terpasang & HP masih merespons: TUNDA blokir SIM 15–30 menit pertama supaya 4G dan SMS darurat (LACAK / LACAK BUNYI) tetap bisa menjangkau HP.',
+        '• Segera blokir SIM hanya jika: (a) belum pasang LacakHP, (b) HP dimatikan/SIM tidak merespons, atau (c) saldo m-banking/e-wallet kritis harus segera diamankan dari SMS OTP.',
+        '• Catatan: jika SIM diblokir, WiFi Auto-Flush & deteksi SIM baru di LacakHP tetap bekerja bila HP terkoneksi WiFi atau dimasuki SIM baru.',
+      ],
     },
     urgent: true,
   },
@@ -58,11 +62,13 @@ const EMERGENCY_STEPS: ChecklistItem[] = [
   {
     id: 'police-report',
     title: '5. Buat Laporan Resmi ke Kepolisian (LP atau STPL)',
-    desc: 'Datangi SPKT Polsek atau Polres terdekat dengan membawa KTP, bukti kepemilikan (dus/faktur/nomor IMEI), serta hasil cetak PDF riwayat koordinat dari tab Pelacak Live sebagai data pendukung. Sesuaikan jenis laporan dengan kejadian:',
+    desc: 'Datangi SPKT Polsek atau Polres terdekat dengan membawa KTP, bukti kepemilikan (dus/faktur/nomor IMEI), serta hasil cetak PDF Bukti Polisi A4 dari tab Pelacak Live. Sesuaikan jenis laporan:',
     tip: {
       label: 'Perbedaan LP & STPL untuk Pemberkasan',
-      detail:
-        '• Laporan Polisi (LP): dibuat apabila kehilangan merupakan dugaan tindak pidana kejahatan (pencurian, perampasan, atau penjambretan) sebagai dasar penyelidikan kepolisian.\n• Surat Keterangan / Tanda Penerimaan Laporan (STPL) Kehilangan: dibuat apabila HP murni hilang/tercecer untuk keperluan pemberkasan administrasi (ganti kartu SIM, blokir IMEI, atau klaim asuransi).',
+      detailLines: [
+        '• Laporan Polisi (LP): dibuat apabila kehilangan merupakan dugaan tindak pidana kejahatan (pencurian, perampasan, atau penjambretan) sebagai dasar penyelidikan kepolisian.',
+        '• Surat Keterangan / Tanda Penerimaan Laporan (STPL) Kehilangan: dibuat apabila HP murni hilang/tercecer untuk keperluan administrasi (ganti kartu SIM, blokir IMEI, atau klaim asuransi).',
+      ],
     },
   },
 ];
@@ -107,27 +113,26 @@ export const FirstAidChecklist: React.FC = () => {
         tone="amber"
         radius={540}
         restingBgClassName="bg-amber-500/10"
-        restingBorderClassName="border-amber-500/30"
+        restingBorderClassName="border-amber-500/35"
         hoverBgClassName="bg-slate-900/95"
-        contentClassName="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        contentClassName="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
-        <div className="flex items-start gap-3.5">
-          <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
+        <div className="flex items-start gap-3.5 max-w-[62ch]">
+          <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300 shrink-0 mt-0.5">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-bold text-white">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-50 leading-snug">
               SOP Pertolongan Pertama Saat HP Hilang / Dicuri
             </h1>
-            <p className="text-xs text-slate-200 mt-1 leading-relaxed">
-              Arahkan kursor atau ketuk salah satu langkah di bawah untuk fokus
-              membaca, lalu centang tindakan yang sudah selesai dilakukan.
+            <p className="text-sm text-slate-200 mt-1.5 leading-relaxed">
+              Ketuk langkah yang sudah selesai Anda lakukan untuk mencentang progres di bawah ini.
             </p>
           </div>
         </div>
-        <div className="shrink-0 bg-slate-950/85 border border-slate-800 rounded-xl px-4 py-2.5 text-center">
-          <div className="text-[11px] text-slate-400">Progres Tindakan</div>
-          <div className="text-lg font-bold text-amber-300">
+        <div className="shrink-0 bg-slate-950/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-center tabular-nums">
+          <div className="text-xs text-slate-300">Progres Tindakan</div>
+          <div className="text-xl font-bold text-amber-300">
             {completedCount} / {EMERGENCY_STEPS.length}
           </div>
         </div>
@@ -135,7 +140,7 @@ export const FirstAidChecklist: React.FC = () => {
 
       {/* Interactive Checklist with Warm Amber/Emerald Triage Spotlight */}
       <div
-        className="space-y-3"
+        className="space-y-3.5"
         onMouseLeave={() => setFocusedId(null)}
       >
         {EMERGENCY_STEPS.map((item) => {
@@ -153,8 +158,8 @@ export const FirstAidChecklist: React.FC = () => {
                 isDone
                   ? 'bg-emerald-950/40'
                   : item.urgent
-                  ? 'bg-slate-950/80'
-                  : 'bg-slate-950/75'
+                  ? 'bg-slate-950/85'
+                  : 'bg-slate-950/80'
               }
               restingBorderClassName={
                 isDone
@@ -204,7 +209,7 @@ export const FirstAidChecklist: React.FC = () => {
               }}
               transition={{ type: 'spring', stiffness: 360, damping: 28 }}
               className="cursor-pointer"
-              contentClassName="p-4 sm:p-5"
+              contentClassName="p-4 sm:p-6"
             >
               <div className="flex items-start gap-3.5">
                 <div className="mt-0.5 shrink-0">
@@ -213,60 +218,67 @@ export const FirstAidChecklist: React.FC = () => {
                   ) : (
                     <Square
                       className={`w-5 h-5 transition-colors ${
-                        isFocused ? 'text-amber-400' : 'text-slate-500'
+                        isFocused ? 'text-amber-400' : 'text-slate-400'
                       }`}
                     />
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex-1 min-w-0 space-y-2.5 max-w-[66ch]">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2
-                      className={`text-sm sm:text-[15px] font-bold transition-colors ${
+                      className={`text-base font-bold leading-snug transition-colors ${
                         isDone
                           ? 'line-through text-slate-400'
                           : isFocused
                           ? 'text-amber-200'
-                          : 'text-white'
+                          : 'text-slate-100'
                       }`}
                     >
                       {item.title}
                     </h2>
                     {item.urgent && !isDone && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-200 border border-rose-500/35">
                         Prioritas 15 Menit Pertama
                       </span>
                     )}
                   </div>
 
                   <p
-                    className={`text-xs sm:text-[13px] leading-relaxed transition-colors ${
-                      isFocused ? 'text-slate-100' : 'text-slate-300'
+                    className={`text-sm sm:text-[0.9375rem] leading-relaxed transition-colors ${
+                      isFocused ? 'text-slate-50' : 'text-slate-200'
                     }`}
                   >
                     {item.desc}
                   </p>
 
                   {item.tip && (
-                    <div
-                      className={`rounded-xl border p-3 text-xs leading-relaxed transition-colors ${
+                    <details
+                      open
+                      onClick={(e) => e.stopPropagation()}
+                      className={`rounded-xl border transition-colors overflow-hidden ${
                         isFocused
                           ? 'bg-amber-950/35 border-amber-500/40 text-amber-50'
-                          : 'bg-slate-900/90 border-slate-800 text-slate-300'
+                          : 'bg-slate-900/90 border-slate-700/80 text-slate-200'
                       }`}
                     >
-                      <div
-                        className={`flex items-center gap-1.5 font-bold mb-1 ${
+                      <summary
+                        className={`px-3.5 py-2.5 cursor-pointer flex items-center justify-between gap-2 text-[0.8125rem] sm:text-sm font-bold select-none ${
                           isFocused ? 'text-amber-300' : 'text-sky-300'
                         }`}
                       >
-                        <Info className="w-3.5 h-3.5 shrink-0" />
-                        <span>{item.tip.label}</span>
-                      </div>
-                      <p className="text-[11px] sm:text-xs leading-relaxed whitespace-pre-line">
-                        {item.tip.detail}
-                      </p>
-                    </div>
+                        <span className="flex items-center gap-1.5 min-w-0">
+                          <Info className="w-4 h-4 shrink-0" />
+                          <span>{item.tip.label}</span>
+                        </span>
+                        <ChevronDown className="details-chevron w-4 h-4 shrink-0 transition-transform duration-200 opacity-75" />
+                      </summary>
+                      <ul className="px-3.5 pb-3.5 pt-1 border-t border-slate-800/70 space-y-2 text-[0.8125rem] sm:text-sm leading-relaxed">
+                        {item.tip.detailLines.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </details>
                   )}
 
                   {item.linkHref && (
@@ -276,10 +288,10 @@ export const FirstAidChecklist: React.FC = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-400 hover:text-sky-300 underline underline-offset-4"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-400 hover:text-sky-300 underline underline-offset-4"
                       >
                         <span>{item.linkLabel}</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
                   )}
@@ -294,39 +306,39 @@ export const FirstAidChecklist: React.FC = () => {
       <SpotlightCard
         tone="amber"
         radius={540}
-        restingBgClassName="bg-slate-950/80"
+        restingBgClassName="bg-slate-950/85"
         restingBorderClassName="border-slate-800"
         hoverBgClassName="bg-slate-900/95"
-        contentClassName="p-4 sm:p-5 space-y-4"
+        contentClassName="p-4 sm:p-6 space-y-4"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5 min-w-0 max-w-[60ch]">
             <div className="flex items-center gap-2">
-              <PhoneCall className="w-4 h-4 text-amber-400 shrink-0" />
-              <h2 className="text-sm font-bold text-white">
+              <PhoneCall className="w-5 h-5 text-amber-400 shrink-0" />
+              <h2 className="text-base font-bold text-slate-100">
                 {EMERGENCY_CONTACT.title}
               </h2>
             </div>
-            <div className="text-[11px] font-medium text-amber-300/90">
+            <div className="text-xs sm:text-[0.8125rem] font-semibold text-amber-300">
               {EMERGENCY_CONTACT.note}
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed pt-0.5">
+            <p className="text-sm text-slate-200 leading-relaxed pt-0.5">
               {EMERGENCY_CONTACT.detail}
             </p>
           </div>
           <a
             href={`tel:${EMERGENCY_CONTACT.phone}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-sm font-mono font-bold text-amber-300 transition shrink-0 min-h-[46px] touch-manipulation"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/45 text-sm font-mono font-bold text-amber-200 transition shrink-0 min-h-[48px] touch-manipulation tabular-nums"
           >
             <PhoneCall className="w-4 h-4 shrink-0" />
             <span>Hubungi {EMERGENCY_CONTACT.phone}</span>
           </a>
         </div>
 
-        <div className="flex items-start gap-2.5 pt-2 text-[11px] text-slate-300 border-t border-slate-800/80">
+        <div className="flex items-start gap-2.5 pt-3 text-xs sm:text-[0.8125rem] text-slate-200 border-t border-slate-800/80 leading-relaxed max-w-[68ch]">
           <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <p>
-            <b>Waspada Penipuan &amp; Situs Tiruan:</b> LacakHP adalah projek
+            <b className="text-amber-300">Waspada Penipuan &amp; Situs Tiruan:</b> LacakHP adalah projek
             amal open-source 100% gratis demi mendukung tugas kepolisian. Kami{' '}
             <b>tidak pernah</b> meminta biaya, transfer uang, PIN, atau kode OTP
             untuk membuka lokasi — jangan pernah menyerahkan data tersebut

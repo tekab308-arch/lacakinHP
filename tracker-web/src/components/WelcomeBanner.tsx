@@ -106,33 +106,33 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
         as="section"
         tone="radar"
         radius={640}
-        restingBgClassName={collapsed ? 'bg-slate-900/90' : 'bg-slate-950/60'}
-        hoverBgClassName={collapsed ? 'bg-slate-800/90' : 'bg-slate-950/80'}
+        restingBgClassName={collapsed ? 'bg-slate-900/90' : 'bg-slate-950/65'}
+        hoverBgClassName={collapsed ? 'bg-slate-800/90' : 'bg-slate-950/85'}
         restingBorderClassName="border-slate-800/85"
         className="w-full transition-colors duration-200"
         contentClassName="p-0"
       >
-        {/* Persistent Accordion Header Bar — zero layout jump, zero delay, unmistakable Buka / Tutup */}
+        {/* Persistent Accordion Header Bar */}
         <button
           type="button"
           onClick={() => setCollapsed((v) => !v)}
           aria-expanded={!collapsed}
-          className="w-full flex items-center justify-between gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-3 text-left transition min-h-[48px] touch-manipulation hover:bg-slate-800/35"
+          className="w-full flex items-center justify-between gap-2.5 sm:gap-3 px-3.5 sm:px-5 py-3.5 text-left transition min-h-[50px] touch-manipulation hover:bg-slate-800/35"
         >
-          <span className="inline-flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <span className="inline-flex items-center gap-2.5 min-w-0">
             <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-            <span className="text-xs sm:text-[13px] font-semibold text-slate-200 leading-snug line-clamp-2 sm:line-clamp-1">
+            <span className="text-[0.8125rem] sm:text-sm font-semibold text-slate-100 leading-snug line-clamp-2 sm:line-clamp-1">
               Unduh APK Android Resmi LacakHP &amp; Panduan Instalasi 4 Langkah
             </span>
           </span>
 
           {collapsed ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/10 border border-sky-500/30 text-[11px] font-semibold text-sky-300 shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-sky-500/15 border border-sky-500/35 text-xs font-semibold text-sky-200 shrink-0">
               <span>Buka</span>
               <ChevronDown className="w-3.5 h-3.5 shrink-0" />
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/15 border border-rose-500/35 text-[11px] font-semibold text-rose-200 shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-500/15 border border-rose-500/35 text-xs font-semibold text-rose-200 shrink-0">
               <span>Tutup</span>
               <X className="w-3.5 h-3.5 shrink-0" />
             </span>
@@ -150,18 +150,18 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
               className="overflow-hidden"
             >
               <div className="p-4 sm:p-6 pt-4 border-t border-slate-800/80">
-                <div className="space-y-2.5 max-w-3xl min-w-0">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/85 border border-slate-800 text-[11px] font-mono text-slate-300">
+                <div className="space-y-3 max-w-[64ch] min-w-0">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/90 border border-slate-800 text-xs font-mono text-slate-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     <span>open-source • nirlaba • zero-knowledge</span>
                   </div>
 
-                  <h1 className="text-base sm:text-xl font-bold tracking-tight text-white leading-snug">
+                  <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-50 leading-snug">
                     Aplikasi tambahan untuk menjaga &amp; melacak handphone yang
                     hilang — gratis, privat, dan tanpa server pusat.
                   </h1>
 
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  <p className="text-sm sm:text-[0.9375rem] text-slate-200 leading-relaxed">
                     Dibangun secara sukarela sebagai projek amal open-source demi
                     mendukung tugas kepolisian &amp; membantu masyarakat melacak
                     perangkat hilang secara privat. Kami{' '}
@@ -173,13 +173,13 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                   </p>
 
                   {/* Clean Action Row */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1.5">
                     <button
                       type="button"
                       onClick={() => setIsLegalModalOpen(true)}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-lg shadow-emerald-500/20 transition min-h-[44px] cursor-pointer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[0.8125rem] sm:text-sm font-bold shadow-lg shadow-emerald-500/20 transition min-h-[46px] cursor-pointer"
                     >
-                      <Download className="w-3.5 h-3.5 shrink-0" />
+                      <Download className="w-4 h-4 shrink-0" />
                       <span>Unduh APK Resmi (Internet + SMS)</span>
                     </button>
 
@@ -191,13 +191,13 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                           prev === 'install' ? null : 'install'
                         )
                       }
-                      className={`flex-1 min-w-[130px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition min-h-[42px] ${
+                      className={`flex-1 min-w-[140px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-[0.8125rem] font-semibold transition min-h-[44px] ${
                         activeDrawer === 'install'
-                          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
-                          : 'bg-slate-950/90 hover:bg-slate-800 border-slate-700/80 text-slate-200'
+                          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-200'
+                          : 'bg-slate-950/90 hover:bg-slate-800 border-slate-700/80 text-slate-100'
                       }`}
                     >
-                      <BookOpenCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <BookOpenCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                       <span>Cara Pasang APK</span>
                     </motion.button>
 
@@ -205,9 +205,9 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                       whileTap={{ scale: 0.97 }}
                       type="button"
                       onClick={onStartDemo}
-                      className="flex-1 min-w-[130px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950/90 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-sky-300 transition min-h-[42px]"
+                      className="flex-1 min-w-[140px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950/90 hover:bg-slate-800 border border-slate-700/80 text-[0.8125rem] font-semibold text-sky-300 transition min-h-[44px]"
                     >
-                      <Play className="w-3.5 h-3.5 shrink-0" />
+                      <Play className="w-4 h-4 shrink-0" />
                       <span>Coba Demo Peta</span>
                     </motion.button>
 
@@ -219,19 +219,19 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                           prev === 'contribute' ? null : 'contribute'
                         )
                       }
-                      className="flex-1 min-w-[110px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-950/70 hover:bg-slate-800 border border-slate-800 text-xs font-medium text-slate-300 transition min-h-[42px]"
+                      className="flex-1 min-w-[120px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950/70 hover:bg-slate-800 border border-slate-800 text-[0.8125rem] font-medium text-slate-200 transition min-h-[44px]"
                     >
-                      <GitPullRequest className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <GitPullRequest className="w-4 h-4 text-indigo-400 shrink-0" />
                       <span>Kontribusi</span>
                     </motion.button>
 
                     <button
                       type="button"
                       onClick={onOpenArchitecture}
-                      className="flex-1 min-w-[120px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white transition min-h-[40px]"
+                      className="flex-1 min-w-[130px] sm:flex-initial sm:min-w-0 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-[0.8125rem] font-medium text-slate-300 hover:text-white transition min-h-[42px]"
                     >
                       <span>Lihat Arsitektur</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
+                      <ArrowUpRight className="w-4 h-4 shrink-0" />
                     </button>
                   </div>
                 </div>
@@ -247,56 +247,21 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="pt-4 mt-4 border-t border-slate-800/80 space-y-3">
+                      <div className="pt-5 mt-5 border-t border-slate-800/80 space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-xs font-bold text-emerald-300">
+                          <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                             <span>
                               Panduan Instalasi APK untuk Masyarakat (4 Langkah Mudah)
                             </span>
                           </div>
-                          <span className="font-mono text-[10px] text-slate-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 break-all">
+                          <span className="font-mono text-xs text-slate-300 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 break-all tabular-nums">
                             Versi Lengkap v{releaseInfo.versionName} (~12 MB) • Signature SHA-256: {shortCertFingerprint(releaseInfo.certSha256)}
                           </span>
                         </div>
 
-                        {/* Educational Box: Why Android / Play Protect shows a warning */}
-                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-[11px] sm:text-xs text-amber-100/95 leading-relaxed space-y-1">
-                          <div className="font-bold text-amber-300 flex items-center gap-1.5">
-                            <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>
-                              Perlu Diketahui Masyarakat: Mengapa Muncul Peringatan
-                              &ldquo;File Berbahaya / Aplikasi Tidak Dikenal&rdquo;?
-                            </span>
-                          </div>
-                          <p className="text-slate-200/95">
-                            Peringatan tersebut adalah respons standar Android untuk
-                            semua aplikasi yang diunduh langsung dari luar Google
-                            Play Store, terlebih karena LacakHP meminta{' '}
-                            <b>izin akses penuh yang memang diharuskan demi keamanan</b>{' '}
-                            — seperti <b>SMS Darurat Otomatis</b> (agar HP tetap
-                            bisa dilacak &amp; dikunci saat kuota/internet mati),{' '}
-                            <b>Lokasi Latar Belakang Sepanjang Waktu</b>, serta{' '}
-                            <b>Administrator Perangkat (Anti-Uninstall)</b> agar
-                            aplikasi tidak bisa dihapus pencuri. Seluruh kode
-                            LacakHP bersifat terbuka (<i>open-source</i>),
-                            dienkripsi Zero-Knowledge, dan telah diverifikasi dengan
-                            tanda tangan kriptografi SHA-256 resmi.
-                          </p>
-                        </div>
-
-                        {/* Legal & Anti-Spying Warning Notice */}
-                        <div className="bg-rose-950/30 border border-rose-500/35 rounded-xl p-3 text-[11px] sm:text-xs text-rose-100/90 leading-relaxed space-y-1">
-                          <div className="font-bold text-rose-300 flex items-center gap-1.5">
-                            <Scale className="w-4 h-4 text-rose-400 shrink-0" />
-                            <span>Peringatan Hukum &amp; Etika Penggunaan (UU ITE &amp; UU PDP):</span>
-                          </div>
-                          <p className="text-slate-300">
-                            Aplikasi LacakHP diperuntukkan <b>khusus perlindungan HP milik sendiri atau keluarga yang sah</b>. Dilarang keras dipasang secara sembunyi-sembunyi untuk memata-matai atau melacak orang lain tanpa izin (melanggar <b>Pasal 30 &amp; 31 UU ITE</b> ancaman pidana penjara hingga 10 tahun / denda Rp 800 Juta, serta <b>Pasal 65 UU PDP No. 27/2022</b> ancaman denda Rp 5 Miliar).
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                        {/* Layer 1: 4 Easy Steps First (Large, Clear, Scannable) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                           {INSTALL_STEPS.map((step, i) => (
                             <motion.div
                               key={step.title}
@@ -307,40 +272,92 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                                 duration: 0.22,
                                 ease: [0.22, 1, 0.36, 1],
                               }}
-                              className="bg-slate-950/85 border border-slate-800/90 rounded-xl p-3 space-y-1.5"
+                              className="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3.5 space-y-2"
                             >
-                              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                                {step.icon}
+                              <div className="flex items-start gap-2 text-sm font-bold text-slate-100 leading-snug">
+                                <span className="mt-0.5 shrink-0">{step.icon}</span>
                                 <span>{step.title}</span>
                               </div>
-                              <p className="text-[11px] text-slate-300 leading-relaxed">
+                              <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
                                 {step.desc}
                               </p>
                             </motion.div>
                           ))}
                         </div>
 
-                        <div className="bg-slate-950/90 border border-slate-800 rounded-xl px-3.5 py-3 text-[11px] text-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 leading-relaxed">
-                          <span>
-                            <b className="text-sky-300">
-                              Tips Agar Pelacak Tidak Mati Sendiri (Samsung / Xiaomi / Oppo / Vivo):
-                            </b>{' '}
-                            Tekan &amp; tahan ikon <b>LacakHP</b> di layar HP &#8594;
-                            pilih <b>Info Aplikasi</b> &#8594; masuk ke{' '}
-                            <b>Baterai</b> &#8594; pilih <b>Tidak dibatasi</b>{' '}
-                            (untuk Xiaomi, nyalakan juga <i>Mulai otomatis</i>).
-                            Setelah itu, tekan tombol daftar aplikasi terbuka
-                            (ikon <b>&#9776; / &#9634;</b> di bawah layar), lalu
-                            ketuk ikon <b>Gembok (Kunci)</b> pada jendela LacakHP
-                            agar tidak ikut mati saat membersihkan memori HP.
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setIsLegalModalOpen(true)}
-                            className="text-emerald-400 hover:underline font-semibold shrink-0 self-end sm:self-center cursor-pointer"
-                          >
-                            Unduh Ulang File APK &#8594;
-                          </button>
+                        {/* Layer 2: Progressive Disclosure Accordions (100% Content Preserved, Zero Visual Overload) */}
+                        <div className="space-y-2.5">
+                          {/* Battery Lock Tip */}
+                          <details className="bg-slate-950/90 border border-slate-800 rounded-xl overflow-hidden" open>
+                            <summary className="px-4 py-3 cursor-pointer flex items-center justify-between gap-3 text-[0.8125rem] sm:text-sm font-semibold text-sky-300 hover:bg-slate-900/60 transition select-none">
+                              <span>
+                                💡 Tips Penting Agar Pelacak Tidak Mati Sendiri (Samsung / Xiaomi / Oppo / Vivo)
+                              </span>
+                              <ChevronDown className="details-chevron w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" />
+                            </summary>
+                            <div className="px-4 pb-3.5 pt-1 border-t border-slate-800/70 text-[0.8125rem] sm:text-sm text-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 leading-relaxed">
+                              <span className="max-w-[68ch]">
+                                Tekan &amp; tahan ikon <b>LacakHP</b> di layar HP &#8594;
+                                pilih <b>Info Aplikasi</b> &#8594; masuk ke{' '}
+                                <b>Baterai</b> &#8594; pilih <b>Tidak dibatasi</b>{' '}
+                                (untuk Xiaomi, nyalakan juga <i>Mulai otomatis</i>).
+                                Setelah itu, tekan tombol daftar aplikasi terbuka
+                                (ikon <b>&#9776; / &#9634;</b> di bawah layar), lalu
+                                ketuk ikon <b>Gembok (Kunci)</b> pada jendela LacakHP
+                                agar tidak ikut mati saat membersihkan memori HP.
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setIsLegalModalOpen(true)}
+                                className="text-emerald-400 hover:underline font-semibold shrink-0 self-end sm:self-center cursor-pointer text-[0.8125rem]"
+                              >
+                                Unduh Ulang File APK &#8594;
+                              </button>
+                            </div>
+                          </details>
+
+                          {/* Why Android / Play Protect shows a warning */}
+                          <details className="bg-amber-500/10 border border-amber-500/30 rounded-xl overflow-hidden">
+                            <summary className="px-4 py-3 cursor-pointer flex items-center justify-between gap-3 text-[0.8125rem] sm:text-sm font-bold text-amber-300 hover:bg-amber-500/15 transition select-none">
+                              <span className="flex items-center gap-2 min-w-0">
+                                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                                <span>
+                                  Mengapa Muncul Peringatan &ldquo;File Berbahaya / Aplikasi Tidak Dikenal&rdquo;? (Ketuk untuk baca)
+                                </span>
+                              </span>
+                              <ChevronDown className="details-chevron w-4 h-4 text-amber-300 shrink-0 transition-transform duration-200" />
+                            </summary>
+                            <div className="px-4 pb-3.5 pt-1.5 border-t border-amber-500/20 text-[0.8125rem] sm:text-sm text-slate-100 leading-relaxed max-w-[68ch]">
+                              Peringatan tersebut adalah respons standar Android untuk
+                              semua aplikasi yang diunduh langsung dari luar Google
+                              Play Store, terlebih karena LacakHP meminta{' '}
+                              <b>izin akses penuh yang memang diharuskan demi keamanan</b>{' '}
+                              — seperti <b>SMS Darurat Otomatis</b> (agar HP tetap
+                              bisa dilacak &amp; dikunci saat kuota/internet mati),{' '}
+                              <b>Lokasi Latar Belakang Sepanjang Waktu</b>, serta{' '}
+                              <b>Administrator Perangkat (Anti-Uninstall)</b> agar
+                              aplikasi tidak bisa dihapus pencuri. Seluruh kode
+                              LacakHP bersifat terbuka (<i>open-source</i>),
+                              dienkripsi Zero-Knowledge, dan telah diverifikasi dengan
+                              tanda tangan kriptografi SHA-256 resmi.
+                            </div>
+                          </details>
+
+                          {/* Legal & Anti-Spying Warning Notice */}
+                          <details className="bg-rose-950/30 border border-rose-500/35 rounded-xl overflow-hidden">
+                            <summary className="px-4 py-3 cursor-pointer flex items-center justify-between gap-3 text-[0.8125rem] sm:text-sm font-bold text-rose-300 hover:bg-rose-950/50 transition select-none">
+                              <span className="flex items-center gap-2 min-w-0">
+                                <Scale className="w-4 h-4 text-rose-400 shrink-0" />
+                                <span>
+                                  Peringatan Hukum &amp; Etika Penggunaan — UU ITE &amp; UU PDP (Ketuk untuk rincian)
+                                </span>
+                              </span>
+                              <ChevronDown className="details-chevron w-4 h-4 text-rose-300 shrink-0 transition-transform duration-200" />
+                            </summary>
+                            <div className="px-4 pb-3.5 pt-1.5 border-t border-rose-500/25 text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed max-w-[68ch]">
+                              Aplikasi LacakHP diperuntukkan <b>khusus perlindungan HP milik sendiri atau keluarga yang sah</b>. Dilarang keras dipasang secara sembunyi-sembunyi untuk memata-matai atau melacak orang lain tanpa izin (melanggar <b>Pasal 30 &amp; 31 UU ITE</b> ancaman pidana penjara hingga 10 tahun / denda Rp 800 Juta, serta <b>Pasal 65 UU PDP No. 27/2022</b> ancaman denda Rp 5 Miliar).
+                            </div>
+                          </details>
                         </div>
                       </div>
                     </motion.div>
@@ -355,7 +372,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="pt-4 mt-4 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                      <div className="pt-4 mt-4 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {CONTRIBUTE_ROLES.map((role, i) => (
                           <motion.div
                             key={role.title}
@@ -366,13 +383,13 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                               duration: 0.22,
                               ease: [0.22, 1, 0.36, 1],
                             }}
-                            className="bg-slate-950/80 border border-slate-800/90 rounded-xl p-3 space-y-1.5"
+                            className="bg-slate-950/85 border border-slate-800/90 rounded-xl p-3.5 space-y-2"
                           >
-                            <div className="flex items-center gap-2 text-xs font-bold text-white">
+                            <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
                               {role.icon}
                               <span>{role.title}</span>
                             </div>
-                            <p className="text-[11px] text-slate-400 leading-relaxed">
+                            <p className="text-[0.8125rem] text-slate-300 leading-relaxed">
                               {role.desc}
                             </p>
                           </motion.div>

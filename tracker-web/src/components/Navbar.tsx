@@ -16,6 +16,8 @@ interface NavbarProps {
   isTracking: boolean;
   latestPointTs: number | null;
   isDemoMode: boolean;
+  largeText?: boolean;
+  onToggleLargeText?: () => void;
 }
 
 function formatLastActiveBadge(
@@ -68,6 +70,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   isTracking,
   latestPointTs,
   isDemoMode,
+  largeText = false,
+  onToggleLargeText,
 }) => {
   const [now, setNow] = useState(() => Date.now());
 
@@ -117,7 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="no-print sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-xl overflow-hidden sm:overflow-visible">
+    <header className="no-print sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl overflow-hidden sm:overflow-visible">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-3">
         {/* Brand */}
         <button
@@ -130,14 +134,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-bold text-sm sm:text-base tracking-tight text-white truncate">
+              <span className="font-bold text-sm sm:text-base tracking-tight text-slate-100 truncate">
                 LacakHP
               </span>
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded text-[0.6875rem] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/25">
                 Open-Source Charity
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block truncate">
+            <p className="text-xs text-slate-300 hidden sm:block truncate">
               Zero-Knowledge E2EE • Multi-Relay Nostr
             </p>
           </div>
@@ -152,8 +156,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 key={item.id}
                 type="button"
                 onClick={() => onChangeTab(item.id)}
-                className={`relative inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  active ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                className={`relative inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[0.8125rem] font-semibold transition-colors ${
+                  active ? 'text-slate-50' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 {active && (
@@ -172,10 +176,33 @@ export const Navbar: React.FC<NavbarProps> = ({
           })}
         </nav>
 
-        {/* Live Status Pill */}
-        <div className="flex items-center gap-1.5 shrink-0 max-w-[55%] sm:max-w-none">
+        {/* Accessibility Font Toggle + Live Status Pill */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 max-w-[64%] sm:max-w-none">
+          {onToggleLargeText && (
+            <button
+              type="button"
+              onClick={onToggleLargeText}
+              aria-pressed={largeText}
+              title={
+                largeText
+                  ? 'Kembalikan ukuran huruf standar'
+                  : 'Perbesar huruf (Mode Baca Nyaman untuk warga/orang tua)'
+              }
+              className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 sm:py-1.5 rounded-xl text-xs font-bold border transition min-h-[34px] touch-manipulation shrink-0 ${
+                largeText
+                  ? 'bg-sky-500/20 text-sky-200 border-sky-400/50 shadow-sm'
+                  : 'bg-slate-900/90 text-slate-200 hover:text-white border-slate-700/90 hover:bg-slate-800'
+              }`}
+            >
+              <span>{largeText ? 'A+' : 'Aa'}</span>
+              <span className="hidden xl:inline font-medium text-[0.75rem]">
+                {largeText ? 'Huruf Besar' : 'Perbesar'}
+              </span>
+            </button>
+          )}
+
           {isDemoMode && (
-            <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-300 border border-sky-500/30">
+            <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[0.625rem] sm:text-[0.6875rem] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-300 border border-sky-500/30">
               Demo
             </span>
           )}
@@ -185,9 +212,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               title={`Titik GPS terbaru: ${new Date(
                 latestPointTs!
               ).toLocaleString('id-ID')}`}
-              className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all duration-300 ${
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[0.6875rem] sm:text-xs font-semibold tabular-nums backdrop-blur-md transition-all duration-300 ${
                 activeBadge.tier === 'fresh'
-                  ? 'bg-gradient-to-r from-emerald-950/85 via-slate-900/90 to-emerald-950/75 text-emerald-300 border border-emerald-500/35 shadow-[0_0_20px_-5px_rgba(16,185,129,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)]'
+                  ? 'bg-gradient-to-r from-emerald-950/85 via-slate-900/90 to-emerald-950/75 text-emerald-200 border border-emerald-500/35 shadow-[0_0_20px_-5px_rgba(16,185,129,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)]'
                   : activeBadge.tier === 'standby'
                   ? 'bg-gradient-to-r from-sky-950/85 via-slate-900/90 to-sky-950/75 text-sky-200 border border-sky-500/35 shadow-[0_0_20px_-5px_rgba(56,189,248,0.35),inset_0_1px_0_0_rgba(255,255,255,0.1)]'
                   : 'bg-gradient-to-r from-amber-950/80 via-slate-900/90 to-amber-950/70 text-amber-200 border border-amber-500/35 shadow-[0_0_20px_-5px_rgba(245,158,11,0.3),inset_0_1px_0_0_rgba(255,255,255,0.1)]'
@@ -217,7 +244,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </span>
           ) : isTracking ? (
-            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gradient-to-r from-indigo-950/85 via-slate-900/90 to-indigo-950/75 text-indigo-200 border border-indigo-500/35 shadow-[0_0_20px_-5px_rgba(99,102,241,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)] backdrop-blur-md">
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[0.6875rem] sm:text-xs font-semibold bg-gradient-to-r from-indigo-950/85 via-slate-900/90 to-indigo-950/75 text-indigo-200 border border-indigo-500/35 shadow-[0_0_20px_-5px_rgba(99,102,241,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)] backdrop-blur-md">
               <RefreshCw className="w-3 h-3 text-indigo-400 animate-spin shrink-0" />
               <span className="tracking-tight whitespace-nowrap hidden sm:inline">
                 Kueri Relay...
@@ -227,8 +254,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium bg-slate-900/90 text-slate-400 border border-slate-800/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-              <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-slate-600 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[0.6875rem] sm:text-xs font-medium bg-slate-900/90 text-slate-300 border border-slate-800/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+              <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-emerald-400/80 shrink-0" />
               <span className="tracking-tight whitespace-nowrap">
                 E2EE Siap
               </span>
@@ -249,8 +276,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               key={item.id}
               type="button"
               onClick={() => onChangeTab(item.id)}
-              className={`relative flex flex-col items-center justify-center min-h-[46px] py-1 px-1 rounded-xl text-[10px] font-semibold transition-colors touch-manipulation ${
-                active ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+              className={`relative flex flex-col items-center justify-center min-h-[46px] py-1 px-1 rounded-xl text-[0.6875rem] font-semibold transition-colors touch-manipulation ${
+                active ? 'text-slate-50' : 'text-slate-300 hover:text-white'
               }`}
             >
               {active && (

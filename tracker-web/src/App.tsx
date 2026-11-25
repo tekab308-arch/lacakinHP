@@ -53,6 +53,13 @@ export const App: React.FC = () => {
       ? isOfficialWebHost(window.location.hostname)
       : true;
   const [activeTab, setActiveTab] = useState<ActiveTab>('tracker');
+  const [largeText, setLargeText] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('lacakhp_ui_large_text') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [deviceId, setDeviceId] = useState<string>(
     () => localStorage.getItem('lacakhp_e2ee_device_id') || ''
   );
@@ -99,6 +106,21 @@ export const App: React.FC = () => {
       liveUnsubRef.current = null;
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('font-comfortable', largeText);
+    if (!hasMagicHash) {
+      try {
+        if (largeText) {
+          localStorage.setItem('lacakhp_ui_large_text', '1');
+        } else {
+          localStorage.removeItem('lacakhp_ui_large_text');
+        }
+      } catch {
+        // Ignore storage quota / private mode restrictions
+      }
+    }
+  }, [largeText, hasMagicHash]);
 
   const { cleanPoints, filteredCount: filteredOutlierCount } = useMemo(
     () => (isDemoMode ? { cleanPoints: rawPoints, filteredCount: 0 } : filterCoarseJumps(rawPoints)),
@@ -495,10 +517,22 @@ export const App: React.FC = () => {
             isTracking={isTracking}
             latestPointTs={latestPointTs}
             isDemoMode={isDemoMode}
+            largeText={largeText}
+            onToggleLargeText={() =>
+              setLargeText((prev) => {
+                const next = !prev;
+                showToast(
+                  next
+                    ? 'Mode Baca Nyaman (Huruf Besar A+) diaktifkan'
+                    : 'Ukuran huruf dikembalikan ke standar'
+                );
+                return next;
+              })
+            }
           />
 
           {!isOfficialDomain && (
-            <div className="no-print bg-rose-950/95 border-b border-rose-500/50 px-4 py-2.5 text-center text-xs text-rose-200">
+            <div className="no-print bg-rose-950/95 border-b border-rose-500/50 px-4 py-3 text-center text-xs sm:text-sm text-rose-100 leading-relaxed">
               <b>⚠️ PERINGATAN KEAMANAN (DOMAIN TIDAK RESMI):</b> Halaman ini
               berjalan di luar domain resmi LacakHP (
               <code>lacakinhp110.my.id</code>). Jangan pernah membayar biaya apa
@@ -576,7 +610,7 @@ export const App: React.FC = () => {
             </motion.div>
           </main>
 
-          <footer className="no-print border-t border-slate-900/90 bg-slate-950/60 backdrop-blur-sm py-5 px-4 text-center text-xs text-slate-500 space-y-1.5">
+          <footer className="no-print border-t border-slate-900/90 bg-slate-950/70 backdrop-blur-sm py-6 px-4 text-center text-xs sm:text-sm text-slate-300 space-y-2">
             <div>
               LacakHP Open-Source Charity • Zero-Knowledge E2EE • Tanpa Server
               Pelacakan Terpusat •{' '}
@@ -586,12 +620,12 @@ export const App: React.FC = () => {
                   setActiveTab('about');
                   window.scrollTo(0, 0);
                 }}
-                className="text-sky-400 hover:underline font-medium"
+                className="text-sky-400 hover:underline font-semibold"
               >
                 Tentang Projek (Inisiator: Sena)
               </button>
             </div>
-            <div className="text-[11px] text-amber-400/80">
+            <div className="text-xs text-amber-300/90 max-w-2xl mx-auto leading-relaxed">
               Projek Amal Open-Source Demi Mendukung Tugas Kepolisian — Kami
               tidak pernah meminta biaya, transfer uang, PIN, atau kode OTP
               untuk membuka lokasi.
@@ -601,7 +635,7 @@ export const App: React.FC = () => {
 
         {/* Floating Toast */}
       <div
-        className={`no-print fixed bottom-4 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-md z-50 flex items-center gap-2 px-4 py-2.5 rounded-2xl sm:rounded-full bg-slate-900/95 border border-slate-700 text-xs font-medium text-white shadow-2xl backdrop-blur-md transition-all duration-300 ${
+        className={`no-print fixed bottom-4 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-md z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl sm:rounded-full bg-slate-900/95 border border-slate-700 text-xs sm:text-sm font-medium text-slate-100 shadow-2xl backdrop-blur-md transition-all duration-300 ${
           toast.visible
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 translate-y-3 pointer-events-none'

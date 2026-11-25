@@ -94,27 +94,27 @@ export const LegalConsentModal: React.FC<LegalConsentModalProps> = ({
             </div>
 
             {/* Content Body */}
-            <div className="p-4 sm:p-5 space-y-3.5 text-xs sm:text-[13px] leading-relaxed max-h-[70vh] overflow-y-auto">
-              <p className="text-slate-200">
+            <div className="p-4 sm:p-5 space-y-3.5 text-sm leading-relaxed max-h-[70vh] overflow-y-auto">
+              <p className="text-slate-100">
                 Aplikasi <b>LacakHP</b> dibangun secara sukarela murni untuk{' '}
-                <span className="text-emerald-400 font-semibold">
+                <span className="text-emerald-300 font-semibold">
                   perlindungan darurat perangkat pribadi, inventaris kerja sah,
                   atau perlindungan keluarga atas persetujuan bersama
                 </span>.
               </p>
 
               {/* Sanction Box */}
-              <div className="rounded-xl bg-rose-950/30 border border-rose-500/35 p-3.5 space-y-2 text-rose-100/90 text-xs">
-                <div className="flex items-center gap-1.5 font-bold text-rose-300">
+              <div className="rounded-xl bg-rose-950/35 border border-rose-500/35 p-4 space-y-2.5 text-rose-100 text-[0.8125rem] sm:text-sm">
+                <div className="flex items-center gap-2 font-bold text-rose-300">
                   <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
                   <span>DILARANG KERAS MEMATA-MATAI ATAU MENYADAP:</span>
                 </div>
-                <p className="text-slate-200/95 leading-relaxed">
+                <p className="text-slate-100 leading-relaxed">
                   Memasang aplikasi ini secara diam-diam tanpa izin pada HP milik
                   orang lain untuk memata-matai (<i>stalking</i>) atau melacak
                   lokasi secara melawan hukum merupakan <b>Tindak Pidana Kejahatan Siber</b>:
                 </p>
-                <ul className="list-disc list-inside space-y-1 text-slate-300 font-mono text-[11px]">
+                <ul className="list-disc list-inside space-y-1.5 text-slate-200 text-[0.8125rem]">
                   <li>
                     <b>Pasal 30 &amp; 31 UU ITE:</b> Pidana penjara hingga{' '}
                     <span className="text-rose-300 font-bold">10 Tahun</span> dan/atau
@@ -128,20 +128,20 @@ export const LegalConsentModal: React.FC<LegalConsentModalProps> = ({
                 </ul>
               </div>
 
-              <p className="text-[11px] text-slate-400 italic">
+              <p className="text-xs text-slate-300 italic">
                 * Inisiator dan pengembang LacakHP berlepas diri dari segala
                 bentuk penyalahgunaan yang melanggar hukum dan norma kemanusiaan.
               </p>
 
               {/* Consent Checkbox */}
-              <label className="flex items-start gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition select-none">
+              <label className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-950 border border-slate-700 cursor-pointer hover:border-slate-600 transition select-none">
                 <input
                   type="checkbox"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
                   className="mt-0.5 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/20 focus:ring-offset-0 cursor-pointer"
                 />
-                <span className="text-xs text-slate-200 leading-snug">
+                <span className="text-[0.8125rem] sm:text-sm text-slate-100 leading-snug">
                   Saya menyatakan bahwa aplikasi ini{' '}
                   <b>hanya akan saya pasang pada perangkat milik saya pribadi</b>{' '}
                   atau keluarga atas persetujuan yang sah demi keperluan
@@ -155,7 +155,7 @@ export const LegalConsentModal: React.FC<LegalConsentModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 transition text-center"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[0.8125rem] font-semibold text-slate-200 transition text-center min-h-[44px]"
               >
                 Batal
               </button>
@@ -163,13 +163,13 @@ export const LegalConsentModal: React.FC<LegalConsentModalProps> = ({
                 type="button"
                 disabled={!agreed}
                 onClick={handleConfirm}
-                className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-lg ${
+                className={`inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[0.8125rem] font-bold transition shadow-lg min-h-[44px] ${
                   agreed
                     ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20 cursor-pointer'
                     : 'bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed opacity-60'
                 }`}
               >
-                <Download className="w-3.5 h-3.5 shrink-0" />
+                <Download className="w-4 h-4 shrink-0" />
                 <span>Saya Setuju &amp; Unduh APK</span>
               </button>
             </div>

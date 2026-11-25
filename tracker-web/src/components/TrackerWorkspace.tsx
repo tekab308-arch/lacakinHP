@@ -234,20 +234,20 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             contentClassName="p-4 sm:p-5 space-y-4"
           >
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-bold text-white truncate">
+              <h2 className="text-base font-bold text-slate-100 truncate">
                 Akses Dekripsi Perangkat
               </h2>
-              <span className="text-[11px] font-medium text-emerald-400 flex items-center gap-1 shrink-0">
-                <ShieldCheck className="w-3.5 h-3.5" />
+              <span className="text-xs font-semibold text-emerald-300 flex items-center gap-1 shrink-0">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 Lokal di RAM
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-[0.8125rem] sm:text-sm font-semibold text-slate-200 mb-1.5">
                   ID Perangkat{' '}
-                  <span className="text-slate-500 font-normal">
+                  <span className="text-slate-400 font-normal">
                     (dari Kartu Darurat)
                   </span>
                 </label>
@@ -256,16 +256,16 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                   value={deviceId}
                   onChange={(e) => setDeviceId(e.target.value)}
                   placeholder="mis. samsung-sm-a217f"
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-white placeholder-slate-600 outline-none transition"
+                  className="w-full bg-slate-950 border border-slate-700/90 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 outline-none transition"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <label className="text-xs font-medium text-slate-300 shrink-0">
+                  <label className="text-[0.8125rem] sm:text-sm font-semibold text-slate-200 shrink-0">
                     Kunci Rahasia
                   </label>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 truncate">
+                  <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 truncate">
                     {detectedMode}
                   </span>
                 </div>
@@ -278,7 +278,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                       if (e.key === 'Enter') onTrack();
                     }}
                     placeholder="Kata sandi pribadi atau 12 kata seed..."
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 rounded-xl px-3.5 py-2.5 pr-11 text-base sm:text-sm text-sky-300 font-medium placeholder-slate-600 outline-none transition"
+                    className="w-full bg-slate-950 border border-slate-700/90 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 rounded-xl px-3.5 py-2.5 pr-11 text-base sm:text-sm text-sky-200 font-medium placeholder-slate-500 outline-none transition"
                   />
                   <button
                     type="button"
@@ -286,7 +286,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                     aria-label={
                       showSecret ? 'Sembunyikan kunci' : 'Lihat kunci'
                     }
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition touch-manipulation"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition touch-manipulation"
                   >
                     {showSecret ? (
                       <EyeOff className="w-4 h-4" />
@@ -301,7 +301,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                 type="button"
                 onClick={onTrack}
                 disabled={isTracking}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-60 active:scale-[0.99] text-slate-950 font-bold text-sm shadow-lg shadow-sky-500/15 transition-all min-h-[46px] touch-manipulation"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-60 active:scale-[0.99] text-slate-950 font-bold text-sm sm:text-[0.9375rem] shadow-lg shadow-sky-500/15 transition-all min-h-[48px] touch-manipulation"
               >
                 {isTracking ? (
                   <>
@@ -320,26 +320,26 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={onCopyMagicLink}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition min-h-[42px] touch-manipulation"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[0.8125rem] font-semibold text-slate-100 transition min-h-[44px] touch-manipulation"
                 >
-                  <Link2 className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <Link2 className="w-4 h-4 text-sky-400 shrink-0" />
                   <span className="truncate">Salin Link 1-Klik</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsPoliceModalOpen(true)}
                   title="Siapkan dan cetak lembar bukti A4 untuk lampiran LP/STPL Kepolisian & Blokir IMEI"
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 border border-amber-500/40 text-xs font-semibold text-amber-200 transition min-h-[42px] touch-manipulation"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 border border-amber-500/40 text-[0.8125rem] font-semibold text-amber-200 transition min-h-[44px] touch-manipulation"
                 >
-                  <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <FileText className="w-4 h-4 text-amber-400 shrink-0" />
                   <span className="truncate">Bukti Polisi &amp; IMEI</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="col-span-2 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-300 transition min-h-[38px] touch-manipulation"
+                  className="col-span-2 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-[0.8125rem] font-medium text-slate-200 transition min-h-[40px] touch-manipulation"
                 >
-                  <Printer className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <Printer className="w-4 h-4 text-slate-300 shrink-0" />
                   <span className="truncate">Cetak Ringkasan Peta (PDF)</span>
                 </button>
               </div>
@@ -349,17 +349,17 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                   type="button"
                   onClick={onClearSession}
                   title="Hapus ID, kunci rahasia, & riwayat dari RAM serta penyimpanan browser (penting jika memakai HP pinjaman)"
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-500/30 text-[11px] font-semibold text-rose-300 transition min-h-[38px] touch-manipulation"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-500/35 text-xs font-semibold text-rose-200 transition min-h-[40px] touch-manipulation"
                 >
                   <Trash2 className="w-3.5 h-3.5 shrink-0" />
                   <span>Bersihkan Sesi &amp; Hapus Kunci dari RAM</span>
                 </button>
               )}
 
-              <div className="rounded-xl bg-amber-500/10 border border-amber-500/25 px-3 py-2.5 flex items-start gap-2 text-[11px] text-amber-200/95 leading-relaxed">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/25 px-3.5 py-3 flex items-start gap-2.5 text-xs sm:text-[0.8125rem] text-amber-100 leading-relaxed">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  <b>Waspada Penipuan:</b> LacakHP adalah projek amal
+                  <b className="text-amber-300">Waspada Penipuan:</b> LacakHP adalah projek amal
                   open-source 100% gratis demi mendukung tugas kepolisian. Kami{' '}
                   <b>tidak pernah</b> meminta biaya, transfer uang, PIN, atau
                   kode OTP untuk membuka lokasi.
@@ -382,17 +382,17 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <Wifi className="w-4 h-4 text-sky-400 shrink-0" />
-                <span className="text-xs font-bold text-white truncate">
+                <span className="text-[0.8125rem] sm:text-sm font-bold text-slate-100 truncate">
                   Status Jaringan Nostr Relay
                 </span>
-                <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded text-[0.625rem] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
                   Auto-Failover
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowRelayConfig((v) => !v)}
-                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-white shrink-0"
+                className="inline-flex items-center gap-1 text-xs text-slate-300 hover:text-white shrink-0 font-medium"
               >
                 <span>Ubah Relay</span>
                 {showRelayConfig ? (
@@ -403,41 +403,41 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
               </button>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 tabular-nums">
               {displayedRelays.map((url) => {
                 const st = relayStatuses[url];
                 const isFallback = st?.isFallback || !parsedRelays.includes(url);
                 return (
                   <div
                     key={url}
-                    className="flex items-center justify-between gap-2 text-[11px] bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2 min-w-0"
+                    className="flex items-center justify-between gap-2 text-xs bg-slate-950/75 border border-slate-800/85 rounded-xl px-3 py-2 min-w-0"
                   >
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="font-mono text-slate-300 truncate min-w-0">
+                      <span className="font-mono text-slate-200 truncate min-w-0">
                         {url.replace(/^wss?:\/\//, '')}
                       </span>
                       {isFallback && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded text-[0.625rem] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">
                           CADANGAN
                         </span>
                       )}
                     </div>
                     {!st ? (
-                      <span className="text-slate-500 shrink-0">Siaga</span>
+                      <span className="text-slate-400 shrink-0">Siaga</span>
                     ) : st.state === 'connecting' ||
                       st.state === 'connected' ? (
                       <span className="inline-flex items-center gap-1 text-indigo-300 shrink-0">
-                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         Kueri...
                       </span>
                     ) : st.state === 'done' ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-400 shrink-0">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1 text-emerald-300 shrink-0 font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                         {st.eventCount} ({st.latencyMs}ms)
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-amber-400 shrink-0">
-                        <AlertCircle className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1 text-amber-300 shrink-0">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
                         Timeout
                       </span>
                     )}
@@ -455,17 +455,17 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                   transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                    <label className="block text-[11px] text-slate-400">
+                  <div className="pt-2.5 border-t border-slate-800 space-y-1.5">
+                    <label className="block text-xs font-medium text-slate-300">
                       Daftar URL Relay (pisahkan koma):
                     </label>
                     <input
                       type="text"
                       value={relaysCsv}
                       onChange={(e) => setRelaysCsv(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-base sm:text-xs font-mono text-slate-300 outline-none"
+                      className="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-base sm:text-xs font-mono text-slate-200 outline-none"
                     />
-                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                    <p className="text-xs text-slate-300 leading-relaxed">
                       Sudah terisi otomatis untuk masyarakat umum. Ubah hanya
                       jika Anda memiliki server relay Nostr pribadi.
                     </p>
@@ -488,18 +488,18 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             <button
               type="button"
               onClick={() => setShowCryptoAudit((v) => !v)}
-              className="w-full px-4 py-3 flex items-center justify-between gap-2 text-left hover:bg-slate-800/40 transition"
+              className="w-full px-4 py-3.5 flex items-center justify-between gap-2 text-left hover:bg-slate-800/40 transition"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="text-xs font-bold text-slate-200 truncate">
+                <span className="text-[0.8125rem] sm:text-sm font-bold text-slate-100 truncate">
                   Inspeksi Kriptografi (Zero-Knowledge)
                 </span>
               </div>
               {showCryptoAudit ? (
-                <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
+                <ChevronUp className="w-4 h-4 text-slate-300 shrink-0" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                <ChevronDown className="w-4 h-4 text-slate-300 shrink-0" />
               )}
             </button>
 
@@ -512,11 +512,11 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                   transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 pb-4 pt-1 border-t border-slate-800/80 space-y-2.5 text-[11px] min-w-0">
+                  <div className="px-4 pb-4 pt-1 border-t border-slate-800/80 space-y-2.5 text-xs min-w-0">
                     <div className="flex items-center justify-between gap-2 pt-1">
-                      <span className="text-slate-400">Versi Derivasi Kunci:</span>
+                      <span className="text-slate-300">Versi Derivasi Kunci:</span>
                       <span
-                        className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold ${
+                        className={`px-2 py-0.5 rounded font-mono text-[0.6875rem] font-semibold ${
                           matchedCryptoVersion === 'v1'
                             ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                             : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
@@ -530,10 +530,10 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                       </span>
                     </div>
                     <div>
-                      <div className="text-slate-400">
+                      <div className="text-slate-300">
                         Nostr Pubkey Turunan Lokal (x-only secp256k1):
                       </div>
-                      <div className="font-mono text-sky-300 break-all bg-slate-950 p-2 rounded-lg border border-slate-800 mt-1">
+                      <div className="font-mono text-[0.6875rem] text-sky-300 break-all bg-slate-950 p-2 rounded-lg border border-slate-800 mt-1">
                         {derivedPubHex ||
                           'Masukkan ID & Kunci untuk menghitung pubkey secara lokal'}
                       </div>
@@ -541,13 +541,13 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
 
                     {rawSampleEvent && (
                       <div>
-                        <div className="text-slate-400 flex items-center justify-between gap-2">
+                        <div className="text-slate-300 flex items-center justify-between gap-2">
                           <span>Data Mentah yang Dilihat Server Relay:</span>
-                          <span className="text-emerald-400 shrink-0">
+                          <span className="text-emerald-400 shrink-0 tabular-nums">
                             {totalEncryptedEvents} event
                           </span>
                         </div>
-                        <pre className="font-mono text-[10px] text-amber-300/90 bg-slate-950 p-2 rounded-lg border border-slate-800 mt-1 max-w-full overflow-x-auto whitespace-pre-wrap break-all">
+                        <pre className="font-mono text-[0.6875rem] text-amber-300/95 bg-slate-950 p-2 rounded-lg border border-slate-800 mt-1 max-w-full overflow-x-auto whitespace-pre-wrap break-all">
                           {JSON.stringify(
                             {
                               kind: rawSampleEvent.kind,
@@ -571,24 +571,24 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             <SpotlightCard
               tone="radar"
               radius={360}
-              restingBgClassName="bg-slate-900/50"
+              restingBgClassName="bg-slate-900/55"
               hoverBgClassName="bg-slate-900/85"
               className="w-full min-w-0 order-7"
               contentClassName="p-4 space-y-2.5"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-slate-200">
+                <span className="text-sm font-bold text-slate-100">
                   Panduan Cepat 3 Langkah
                 </span>
                 <button
                   type="button"
                   onClick={onStartDemo}
-                  className="text-[11px] font-semibold text-sky-400 hover:underline shrink-0"
+                  className="text-xs font-semibold text-sky-400 hover:underline shrink-0"
                 >
                   Coba Demo
                 </button>
               </div>
-              <ol className="text-[11px] text-slate-400 space-y-1.5 list-decimal pl-4 leading-relaxed">
+              <ol className="text-[0.8125rem] sm:text-sm text-slate-200 space-y-2 list-decimal pl-4 leading-relaxed">
                 <li>
                   Masukkan <b>ID Perangkat</b> &amp; <b>Kunci Rahasia</b> dari
                   Kartu Darurat (atau klik link 1-klik di WhatsApp).
@@ -599,7 +599,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                 </li>
                 <li>
                   Gunakan tombol <b>Google Maps</b> untuk rute navigasi atau{' '}
-                  <b>Cetak PDF</b> untuk laporan kepolisian.
+                  <b>Bukti Polisi &amp; IMEI</b> untuk laporan kepolisian.
                 </li>
               </ol>
             </SpotlightCard>
@@ -610,7 +610,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
         <div className="contents lg:block lg:col-span-8 lg:space-y-4 min-w-0">
           {/* 4 Telemetry Metric Tiles */}
           <div
-            className={`w-full min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 ${
+            className={`w-full min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 tabular-nums ${
               points.length > 0 ? 'order-1' : 'order-3'
             }`}
           >
@@ -621,21 +621,21 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
               radius={220}
               onClick={handleCopyCoords}
               disabled={!latest}
-              restingBgClassName="bg-slate-950/55"
+              restingBgClassName="bg-slate-950/60"
               hoverBgClassName="bg-slate-950/85"
               className="print-card text-left group min-w-0"
               contentClassName="p-3 sm:p-3.5"
             >
-              <div className="flex items-center justify-between text-[11px] font-medium text-slate-400 print-text-muted">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-300 print-text-muted">
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                   Koordinat
                 </span>
                 {latest && (
-                  <Copy className="no-print w-3 h-3 text-slate-500 group-hover:text-emerald-400 shrink-0" />
+                  <Copy className="no-print w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-400 shrink-0" />
                 )}
               </div>
-              <div className="mt-1.5 font-mono font-bold text-[11px] sm:text-xs text-white print-text-dark leading-tight break-all">
+              <div className="mt-1.5 font-mono font-bold text-xs sm:text-[0.8125rem] text-slate-50 print-text-dark leading-snug break-all tabular-nums">
                 {latest
                   ? `${latest.lat.toFixed(6)}, ${latest.lng.toFixed(6)}`
                   : '-'}
@@ -645,16 +645,16 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             <SpotlightCard
               tone="radar"
               radius={220}
-              restingBgClassName="bg-slate-950/55"
+              restingBgClassName="bg-slate-950/60"
               hoverBgClassName="bg-slate-950/85"
               className="print-card min-w-0"
               contentClassName="p-3 sm:p-3.5"
             >
-              <div className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 print-text-muted">
+              <div className="inline-flex items-center gap-1 text-xs font-semibold text-slate-300 print-text-muted">
                 <Target className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 Akurasi
               </div>
-              <div className="mt-1.5 font-bold text-xs sm:text-sm text-emerald-400 print-text-dark break-words">
+              <div className="mt-1.5 font-bold text-[0.8125rem] sm:text-sm text-emerald-300 print-text-dark break-words tabular-nums">
                 {latest
                   ? `±${Math.round(latest.acc || 0)}m (${latest.prv || 'gps'})`
                   : '-'}
@@ -664,25 +664,25 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             <SpotlightCard
               tone="radar"
               radius={220}
-              restingBgClassName="bg-slate-950/55"
+              restingBgClassName="bg-slate-950/60"
               hoverBgClassName="bg-slate-950/85"
               className="print-card min-w-0"
               contentClassName="p-3 sm:p-3.5"
             >
-              <div className="flex items-center justify-between gap-1 text-[11px] font-medium text-slate-400 print-text-muted">
+              <div className="flex items-center justify-between gap-1 text-xs font-semibold text-slate-300 print-text-muted">
                 <span className="inline-flex items-center gap-1">
                   <Battery className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   Baterai
                 </span>
                 {latest && latest.bat >= 0 && latest.bat <= 15 && (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300">
+                  <span className="px-1.5 py-0.5 rounded text-[0.625rem] font-bold bg-rose-500/20 text-rose-300">
                     KRITIS
                   </span>
                 )}
               </div>
               <div className="mt-1.5 flex items-center gap-2">
                 <span
-                  className={`font-bold text-xs sm:text-sm print-text-dark shrink-0 ${
+                  className={`font-bold text-[0.8125rem] sm:text-sm print-text-dark shrink-0 tabular-nums ${
                     latest && latest.bat >= 0 && latest.bat <= 15
                       ? 'text-rose-400'
                       : 'text-amber-300'
@@ -712,20 +712,20 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
             <SpotlightCard
               tone="radar"
               radius={220}
-              restingBgClassName="bg-slate-950/55"
+              restingBgClassName="bg-slate-950/60"
               hoverBgClassName="bg-slate-950/85"
               className="print-card min-w-0"
               contentClassName="p-3 sm:p-3.5"
             >
-              <div className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 print-text-muted">
+              <div className="inline-flex items-center gap-1 text-xs font-semibold text-slate-300 print-text-muted">
                 <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 Laporan Terakhir
               </div>
-              <div className="mt-1.5 font-bold text-xs text-sky-300 print-text-dark truncate">
+              <div className="mt-1.5 font-bold text-[0.8125rem] sm:text-sm text-sky-300 print-text-dark truncate">
                 {latest ? formatRelativeTime(latest.ts) : '-'}
               </div>
               {latest && (
-                <div className="text-[10px] text-slate-500 truncate font-mono">
+                <div className="text-[0.6875rem] text-slate-300 truncate font-mono tabular-nums mt-0.5">
                   {new Date(latest.ts).toLocaleString('id-ID')}
                 </div>
               )}
@@ -755,23 +755,23 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
               <div className="min-w-0">
-                <h2 className="text-sm font-bold text-white print-text-dark truncate">
+                <h2 className="text-base font-bold text-slate-100 print-text-dark truncate">
                   Riwayat Jejak (Breadcrumbs)
                 </h2>
-                <p className="text-[11px] text-slate-400 print-text-muted">
+                <p className="text-xs text-slate-300 print-text-muted">
                   Ketuk titik mana pun untuk memfokuskan peta
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+              <div className="flex flex-wrap items-center gap-1.5 sm:justify-end tabular-nums">
                 {filteredOutlierCount > 0 && onToggleShowRaw && (
                   <button
                     type="button"
                     onClick={onToggleShowRaw}
                     title="Beralih antara tampilan bersih (loncatan BTS disaring) dan seluruh titik mentah"
-                    className={`no-print px-2.5 py-1.5 sm:py-1 rounded-full text-[11px] font-medium border transition touch-manipulation ${
+                    className={`no-print px-3 py-1.5 rounded-full text-xs font-medium border transition touch-manipulation ${
                       showRawPoints
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 hover:bg-amber-500/25'
-                        : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
+                        ? 'bg-amber-500/15 text-amber-200 border-amber-500/40 hover:bg-amber-500/25'
+                        : 'bg-emerald-500/10 text-emerald-200 border-emerald-500/30 hover:bg-emerald-500/20'
                     }`}
                   >
                     {showRawPoints
@@ -785,43 +785,43 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                       type="button"
                       onClick={() => setIsPoliceModalOpen(true)}
                       title="Siapkan dan cetak lembar bukti A4 untuk lampiran LP/STPL Kepolisian & Blokir IMEI"
-                      className="no-print inline-flex items-center gap-1 px-2.5 py-1.5 sm:py-1 rounded-full text-[11px] font-medium bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/35 transition touch-manipulation"
+                      className="no-print inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-500/40 transition touch-manipulation"
                     >
-                      <FileText className="w-3 h-3 text-amber-400" />
+                      <FileText className="w-3.5 h-3.5 text-amber-400" />
                       <span>Bukti Polisi A4</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDownloadExport('csv')}
                       title="Unduh riwayat koordinat format CSV"
-                      className="no-print inline-flex items-center gap-1 px-2.5 py-1.5 sm:py-1 rounded-full text-[11px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition touch-manipulation"
+                      className="no-print inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition touch-manipulation"
                     >
-                      <Download className="w-3 h-3 text-sky-400" />
+                      <Download className="w-3.5 h-3.5 text-sky-400" />
                       CSV
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDownloadExport('gpx')}
                       title="Unduh jalur koordinat format GPX (Google Earth / QGIS)"
-                      className="no-print inline-flex items-center gap-1 px-2.5 py-1.5 sm:py-1 rounded-full text-[11px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition touch-manipulation"
+                      className="no-print inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition touch-manipulation"
                     >
-                      <Download className="w-3 h-3 text-indigo-400" />
+                      <Download className="w-3.5 h-3.5 text-indigo-400" />
                       GPX
                     </button>
                   </>
                 )}
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700">
                   {points.length} titik
                 </span>
               </div>
             </div>
 
             {points.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
+              <div className="py-8 text-center text-sm text-slate-400">
                 Belum ada riwayat koordinat terdekripsi.
               </div>
             ) : (
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-800/70">
+              <div className="max-h-72 overflow-y-auto divide-y divide-slate-800/70 tabular-nums">
                 {points.slice(0, 50).map((p, idx) => {
                   const isSelected =
                     focusedPoint !== null &&
@@ -840,7 +840,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                         setFocusedPoint({ ...p });
                       }
                     }}
-                    className={`py-2.5 px-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2 transition-colors min-w-0 ${
+                    className={`py-3 px-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-2 transition-colors min-w-0 ${
                       isSelected
                         ? 'bg-sky-500/15 ring-1 ring-inset ring-sky-500/40'
                         : 'hover:bg-slate-800/40'
@@ -848,7 +848,7 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                   >
                     <div className="flex items-start gap-2.5 min-w-0">
                       <span
-                        className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
+                        className={`mt-2 w-2 h-2 rounded-full shrink-0 ${
                           idx === 0 || isSelected
                             ? 'bg-sky-400 shadow-[0_0_8px_#38bdf8]'
                             : 'bg-indigo-500/70'
@@ -856,32 +856,32 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                       />
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="font-mono text-xs font-semibold text-sky-300 print-text-dark break-all">
+                          <span className="font-mono text-xs sm:text-[0.8125rem] font-semibold text-sky-300 print-text-dark break-all">
                             {p.lat.toFixed(6)}, {p.lng.toFixed(6)}
                           </span>
                           {idx === 0 && (
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30 shrink-0">
+                            <span className="px-1.5 py-0.5 rounded text-[0.625rem] font-bold bg-sky-500/15 text-sky-200 border border-sky-500/30 shrink-0">
                               TERBARU
                             </span>
                           )}
                           {isSelected && idx !== 0 && (
-                            <span className="no-print px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-200 border border-indigo-400/35 shrink-0">
+                            <span className="no-print px-1.5 py-0.5 rounded text-[0.625rem] font-bold bg-indigo-500/20 text-indigo-200 border border-indigo-400/35 shrink-0">
                               DIPILIH
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-400 print-text-muted mt-0.5">
+                        <div className="text-xs text-slate-300 print-text-muted mt-0.5">
                           ±{Math.round(p.acc || 0)}m ({p.prv || 'gps'}) • Baterai{' '}
                           {p.bat >= 0 ? `${p.bat}%` : '-'}
                         </div>
-                        <div className="sm:hidden font-mono text-[10px] text-slate-500 print-text-muted mt-0.5">
+                        <div className="sm:hidden font-mono text-[0.6875rem] text-slate-400 print-text-muted mt-0.5">
                           {p.ts ? new Date(p.ts).toLocaleString('id-ID') : '-'}
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="hidden sm:inline font-mono text-[11px] text-slate-400 print-text-muted">
+                      <span className="hidden sm:inline font-mono text-xs text-slate-300 print-text-muted">
                         {p.ts ? new Date(p.ts).toLocaleString('id-ID') : '-'}
                       </span>
                       <a
@@ -890,9 +890,9 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                         title="Buka di Google Maps"
-                        className="no-print p-2 sm:p-1.5 rounded-lg bg-slate-800 hover:bg-emerald-600/20 text-slate-300 hover:text-emerald-400 transition shrink-0"
+                        className="no-print p-2 rounded-lg bg-slate-800 hover:bg-emerald-600/20 text-slate-200 hover:text-emerald-300 transition shrink-0"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>
                   </div>

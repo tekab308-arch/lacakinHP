@@ -26,6 +26,7 @@ import {
   Check,
   Terminal,
   ShieldCheck,
+  ChevronDown,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 import { LegalConsentModal } from './LegalConsentModal';
@@ -199,12 +200,12 @@ export const ArchitectureGuide: React.FC = () => {
       >
         {/* Header + Controls */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+          <div className="space-y-1.5 max-w-[62ch]">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/25">
               <Lock className="w-3.5 h-3.5" />
               <span>Alur Kerja LacakHP (Zero-Knowledge E2EE)</span>
             </div>
-            <h1 className="text-base sm:text-xl font-bold text-white tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-50 tracking-tight leading-snug">
               Dari Kunci Rahasia di HP hingga Peta Lokasi di Browser Keluarga
             </h1>
           </div>
@@ -212,7 +213,7 @@ export const ArchitectureGuide: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsPlaying((v) => !v)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-medium text-slate-300 transition shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 transition shrink-0 min-h-[40px]"
           >
             {isPlaying ? (
               <>
@@ -286,15 +287,15 @@ export const ArchitectureGuide: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-2"
+                className="space-y-2.5"
               >
-                <div className="font-mono text-[10px] font-bold tracking-wider text-sky-400">
+                <div className="font-mono text-xs font-bold tracking-wider text-sky-400">
                   {current.badge}
                 </div>
-                <h2 className="text-sm sm:text-base font-bold text-white leading-snug">
+                <h2 className="text-base sm:text-lg font-bold text-slate-50 leading-snug">
                   {current.title}
                 </h2>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
                   {current.desc}
                 </p>
               </motion.div>
@@ -565,23 +566,23 @@ export const ArchitectureGuide: React.FC = () => {
               <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-400">
                 <Smartphone className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-mono text-slate-500">
+              <span className="text-xs font-mono text-slate-300">
                 TAHAP 1 • DI HP PEMILIK
               </span>
             </div>
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-base font-bold text-slate-100 leading-snug">
               Enkripsi AES-256-GCM Sebelum Keluar HP
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
               Koordinat GPS satelit diacak menjadi teks sandi acak langsung di
               memori HP memakai kunci yang diturunkan dari{' '}
               <b>ID Perangkat + Kata Sandi / 12 Kata Seed</b>.
             </p>
           </div>
-          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 font-mono text-[10px] text-emerald-400">
+          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3 font-mono text-[0.6875rem] text-emerald-400 leading-relaxed">
             Plaintext: &#123;"lat":-6.175,"lng":106.827,"bat":14&#125;
             <br />
-            <span className="text-slate-500">&#8595; AES-256-GCM + IV Acak</span>
+            <span className="text-slate-400">&#8595; AES-256-GCM + IV Acak</span>
             <br />
             <span className="text-sky-400">Cipher: v1:r7KpQ9x...:mZ4tYpQ1...</span>
           </div>
@@ -599,14 +600,14 @@ export const ArchitectureGuide: React.FC = () => {
               <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400">
                 <Server className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-mono text-slate-500">
+              <span className="text-xs font-mono text-slate-300">
                 TAHAP 2 • NOSTR RELAY
               </span>
             </div>
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-base font-bold text-slate-100 leading-snug">
               Jalur Relay Terdesentralisasi (Tak Bisa Melihat Isi Lokasi)
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
               Titik lokasi yang sudah terkunci dikirim lewat WebSocket ke
               jaringan relay Nostr independen (<code>damus.io</code>,{' '}
               <code>nos.lol</code>, <code>primal.net</code>). Server relay
@@ -614,8 +615,8 @@ export const ArchitectureGuide: React.FC = () => {
               sekali tidak dapat membaca posisi Anda.
             </p>
           </div>
-          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-[11px] text-amber-300/90 flex items-center gap-2">
-            <ArrowRight className="w-4 h-4 shrink-0" />
+          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-xs text-amber-200 flex items-center gap-2 leading-relaxed">
+            <ArrowRight className="w-4 h-4 shrink-0 text-amber-400" />
             <span>
               Jika 1 relay sedang gangguan/down, 2 relay lain otomatis menjadi
               cadangan.
@@ -635,23 +636,23 @@ export const ArchitectureGuide: React.FC = () => {
               <div className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-400">
                 <Globe className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-mono text-slate-500">
+              <span className="text-xs font-mono text-slate-300">
                 TAHAP 3 • DI BROWSER ANDA
               </span>
             </div>
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-base font-bold text-slate-100 leading-snug">
               Dekripsi Lokal &amp; Tautan 1-Klik (#Hash)
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
               Browser keluarga membuka enkripsi langsung di RAM perangkat
               mereka. Pada tautan 1-klik (<code>#id=...&amp;key=...</code>),
               bagian setelah tanda <b>#</b> tidak pernah dikirim ke server
               Vercel.
             </p>
           </div>
-          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 font-mono text-[10px] text-slate-300">
+          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3 font-mono text-[0.6875rem] text-slate-200 leading-relaxed">
             HTTP ke Vercel: <span className="text-emerald-400">GET /</span>{' '}
-            <span className="text-slate-500">(Bersih!)</span>
+            <span className="text-slate-400">(Bersih!)</span>
             <br />
             Lokal JS Browser:{' '}
             <span className="text-sky-400">Baca #hash &#8594; Buka Peta</span>
@@ -663,16 +664,16 @@ export const ArchitectureGuide: React.FC = () => {
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SpotlightCard
           radius={360}
-          contentClassName="p-4 flex items-start gap-3.5"
+          contentClassName="p-5 flex items-start gap-3.5"
         >
-          <div className="p-2 rounded-xl bg-slate-800 text-sky-400 shrink-0">
+          <div className="p-2.5 rounded-xl bg-slate-800 text-sky-400 shrink-0">
             <WifiOff className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-base font-bold text-slate-100 leading-snug">
               Antrean Kotak Hitam SQLite (Offline-First)
             </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 mt-1.5 leading-relaxed">
               Meski SIM dicabut atau kuota mati, chip GPS satelit tidak butuh
               internet. HP tetap mencatat hingga 2.000 titik ke SQLite lokal dan
               langsung mengirimkannya begitu terhubung ke WiFi mana pun.
@@ -682,16 +683,16 @@ export const ArchitectureGuide: React.FC = () => {
 
         <SpotlightCard
           radius={360}
-          contentClassName="p-4 flex items-start gap-3.5"
+          contentClassName="p-5 flex items-start gap-3.5"
         >
-          <div className="p-2 rounded-xl bg-slate-800 text-emerald-400 shrink-0">
+          <div className="p-2.5 rounded-xl bg-slate-800 text-emerald-400 shrink-0">
             <MessageSquare className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-base font-bold text-slate-100 leading-snug">
               Perintah SMS Darurat, Kunci Layar &amp; Anti-SIM Swap
             </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 mt-1.5 leading-relaxed">
               Nomor keluarga bisa mengirim SMS <code>LACAK</code>,{' '}
               <code>LACAK KUNCI</code> (kunci paksa layar HP), atau{' '}
               <code>LACAK BUNYI</code> saat data seluler mati. Jika pencuri
@@ -703,16 +704,16 @@ export const ArchitectureGuide: React.FC = () => {
 
         <SpotlightCard
           radius={360}
-          contentClassName="p-4 flex items-start gap-3.5"
+          contentClassName="p-5 flex items-start gap-3.5"
         >
-          <div className="p-2 rounded-xl bg-slate-800 text-amber-400 shrink-0">
+          <div className="p-2.5 rounded-xl bg-slate-800 text-amber-400 shrink-0">
             <BatteryWarning className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-base font-bold text-slate-100 leading-snug">
               Last-Gasp Baterai &le; 8%, Matikan Daya &amp; Mode Pesawat
             </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 mt-1.5 leading-relaxed">
               Saat baterai kritis &le; 8%, tombol Matikan Daya ditekan paksa,
               atau Mode Pesawat dinyalakan, HP otomatis mengunci koordinat GPS
               terakhir ke kotak hitam SQLite dan menembakkan laporan darurat ke
@@ -723,16 +724,16 @@ export const ArchitectureGuide: React.FC = () => {
 
         <SpotlightCard
           radius={360}
-          contentClassName="p-4 flex items-start gap-3.5"
+          contentClassName="p-5 flex items-start gap-3.5"
         >
-          <div className="p-2 rounded-xl bg-slate-800 text-indigo-400 shrink-0">
+          <div className="p-2.5 rounded-xl bg-slate-800 text-indigo-400 shrink-0">
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-base font-bold text-slate-100 leading-snug">
               Anti-Uninstall, Direct Boot, Stealth &amp; Deteksi Salah PIN
             </h3>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 mt-1.5 leading-relaxed">
               Administrator Perangkat mengunci tombol Uninstall dan mendeteksi
               percobaan salah PIN layar kunci (3x kirim ke Nostr, 5x kirim SMS
               darurat). Mendukung Mode Penyamaran (<i>Stealth</i> menjadi{' '}
@@ -746,14 +747,14 @@ export const ArchitectureGuide: React.FC = () => {
       <SpotlightCard
         as="section"
         radius={580}
-        restingBgClassName="bg-slate-950/55"
+        restingBgClassName="bg-slate-950/60"
       >
-        <div className="p-4 sm:p-5 border-b border-slate-800">
-          <h2 className="text-sm font-bold text-white">
+        <div className="p-4 sm:p-6 border-b border-slate-800 max-w-[66ch]">
+          <h2 className="text-base sm:text-lg font-bold text-slate-100 leading-snug">
             Perbandingan Realistis: Kenapa Tidak Hanya Mengandalkan Google Find
             My Device?
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-[0.8125rem] sm:text-sm text-slate-200 mt-1 leading-relaxed">
             LacakHP hadir sebagai jaring pengaman (<i>fail-safe</i>) ketika akses
             akun Google terkunci di saat paling genting.
           </p>
@@ -784,18 +785,18 @@ export const ArchitectureGuide: React.FC = () => {
               title: 'Jika HP Di-Factory Reset Paksa',
               google: 'Mengunci perangkat dengan FRP (Factory Reset Protection)',
               lacakhp:
-                'Aplikasi terhapus wipe data; tetap andalkan FRP bawaan + riwayat jejak sebelum reset',
+                'Aplikasi terhapus wipe data (kecuali Device Owner Level 2 aktif); tetap andalkan FRP bawaan + riwayat jejak sebelum reset',
             },
           ].map((row) => (
-            <div key={row.title} className="p-4 space-y-2 text-xs">
-              <div className="font-bold text-white">{row.title}</div>
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
-                <div className="text-slate-400">
-                  <span className="font-semibold text-slate-300">Google: </span>
+            <div key={row.title} className="p-4 space-y-2 text-[0.8125rem]">
+              <div className="font-bold text-slate-100 text-sm">{row.title}</div>
+              <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 leading-relaxed">
+                <div className="text-slate-300">
+                  <span className="font-semibold text-slate-200">Google: </span>
                   {row.google}
                 </div>
-                <div className="text-emerald-300 border-t border-slate-800/80 pt-1.5">
-                  <span className="font-semibold text-sky-400">LacakHP: </span>
+                <div className="text-emerald-200 border-t border-slate-800/80 pt-2">
+                  <span className="font-semibold text-sky-300">LacakHP: </span>
                   {row.lacakhp}
                 </div>
               </div>
@@ -805,66 +806,66 @@ export const ArchitectureGuide: React.FC = () => {
 
         {/* Desktop Table View (>= md) */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/70 text-slate-400 border-b border-slate-800">
+          <table className="w-full text-left text-[0.8125rem] sm:text-sm">
+            <thead className="bg-slate-950/75 text-slate-200 border-b border-slate-800">
               <tr>
-                <th className="py-3 px-4 font-semibold">Skenario Lapangan</th>
-                <th className="py-3 px-4 font-semibold">Google Find My Device</th>
-                <th className="py-3 px-4 font-semibold text-sky-400">
+                <th className="py-3.5 px-4 font-semibold">Skenario Lapangan</th>
+                <th className="py-3.5 px-4 font-semibold">Google Find My Device</th>
+                <th className="py-3.5 px-4 font-semibold text-sky-300">
                   LacakHP (Charity Open-Source)
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/70">
+            <tbody className="divide-y divide-slate-800/70 leading-relaxed">
               <tr>
-                <td className="py-3 px-4 font-medium text-white">
+                <td className="py-3.5 px-4 font-semibold text-slate-100">
                   Akses dari HP Keluarga
                 </td>
-                <td className="py-3 px-4 text-slate-400">
-                  <span className="inline-flex items-center gap-1.5 text-rose-300">
-                    <XCircle className="w-3.5 h-3.5 shrink-0" /> Sering
+                <td className="py-3.5 px-4 text-slate-300">
+                  <span className="inline-flex items-center gap-1.5 text-rose-200">
+                    <XCircle className="w-4 h-4 text-rose-400 shrink-0" /> Sering
                     terkunci verifikasi 2FA / OTP ke HP yang justru hilang
                   </span>
                 </td>
-                <td className="py-3 px-4 text-emerald-300">
+                <td className="py-3.5 px-4 text-emerald-200">
                   <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Klik
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> Klik
                     tautan 1-klik di WA, langsung buka peta tanpa login/OTP
                   </span>
                 </td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-medium text-white">
+                <td className="py-3.5 px-4 font-semibold text-slate-100">
                   Data Seluler Dimatikan / Habis Kuota
                 </td>
-                <td className="py-3 px-4 text-slate-400">
+                <td className="py-3.5 px-4 text-slate-300">
                   Tidak bisa meminta lokasi aktif via internet
                 </td>
-                <td className="py-3 px-4 text-emerald-300">
+                <td className="py-3.5 px-4 text-emerald-200">
                   Bisa dipancing via SMS <code>LACAK</code> (versi Lengkap) +
                   catat rute satelit ke SQLite
                 </td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-medium text-white">
+                <td className="py-3.5 px-4 font-semibold text-slate-100">
                   Privasi Data Lokasi
                 </td>
-                <td className="py-3 px-4 text-slate-400">
+                <td className="py-3.5 px-4 text-slate-300">
                   Tersimpan di server terpusat perusahaan
                 </td>
-                <td className="py-3 px-4 text-emerald-300">
+                <td className="py-3.5 px-4 text-emerald-200">
                   100% Zero-Knowledge AES-256-GCM (admin pun buta)
                 </td>
               </tr>
               <tr>
-                <td className="py-3 px-4 font-medium text-white">
+                <td className="py-3.5 px-4 font-semibold text-slate-100">
                   Jika HP Di-Factory Reset Paksa
                 </td>
-                <td className="py-3 px-4 text-slate-300">
+                <td className="py-3.5 px-4 text-slate-200">
                   Mengunci perangkat dengan FRP (Factory Reset Protection)
                 </td>
-                <td className="py-3 px-4 text-slate-300">
-                  Aplikasi terhapus oleh wipe data; tetap andalkan FRP bawaan +
+                <td className="py-3.5 px-4 text-slate-200">
+                  Aplikasi terhapus oleh wipe data (kecuali Device Owner Level 2 aktif); tetap andalkan FRP bawaan +
                   riwayat jejak sebelum reset
                 </td>
               </tr>
@@ -880,22 +881,22 @@ export const ArchitectureGuide: React.FC = () => {
         radius={580}
         restingBgClassName="bg-slate-950/70"
         restingBorderClassName="border-sky-500/30"
-        contentClassName="p-4 sm:p-5 space-y-4"
+        contentClassName="p-4 sm:p-6 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-sky-400 shrink-0" />
-            <h2 className="text-sm font-bold text-white">
+            <h2 className="text-base font-bold text-slate-100">
               Transparansi Izin Aplikasi: Apa yang Dibaca &amp; Dampak Jika
               Dimatikan
             </h2>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/15 text-sky-200 border border-sky-500/30">
             Hak Kontrol Penuh Pengguna
           </span>
         </div>
 
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed max-w-[66ch]">
           Demi menghilangkan rasa curiga, berikut rincian jujur mengenai setiap
           izin yang diminta aplikasi Android.{' '}
           <b className="text-sky-300">
@@ -905,69 +906,75 @@ export const ArchitectureGuide: React.FC = () => {
           lewat Pengaturan Izin HP.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div className="font-bold text-white flex items-center justify-between">
-              <span>1. Izin Lokasi (GPS &amp; Sepanjang Waktu)</span>
-            </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              <b>Kenapa diminta:</b> Mengambil titik lokasi satelit ketika HP
-              hilang, termasuk saat layar sedang terkunci.
-            </p>
-            <p className="text-[11px] text-emerald-300/95 leading-relaxed">
-              <b>Yang dibaca:</b> Hanya koordinat, akurasi, &amp; waktu lalu
-              langsung dienkripsi AES-256-GCM sebelum keluar dari HP.
-            </p>
-            <p className="text-[11px] text-amber-300/95 leading-relaxed">
-              <b>Jika dimatikan:</b> Pelacakan peta dan balas lokasi SMS tidak
-              bisa mengambil posisi terbaru HP (atau berhenti saat layar mati).
-            </p>
-          </div>
-
-          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div className="font-bold text-white flex items-center justify-between">
-              <span>2. Bebas Pembatasan Baterai</span>
-            </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              <b>Kenapa diminta:</b> Mencegah penghemat baterai bawaan HP
-              mematikan proses pelacak saat layar tidur berjam-jam.
-            </p>
-            <p className="text-[11px] text-emerald-300/95 leading-relaxed">
-              <b>Yang dibaca:</b> Tidak membaca data pribadi apa pun; hanya cek
-              persentase baterai untuk sinyal darurat saat daya &le; 8%.
-            </p>
-            <p className="text-[11px] text-amber-300/95 leading-relaxed">
-              <b>Jika dimatikan / dibatasi:</b> Sistem HP dapat menidurkan
-              aplikasi pelacak di belakang layar sehingga laporan berhenti.
-            </p>
-          </div>
-
-          <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div className="font-bold text-white flex items-center justify-between">
-              <span>3. Izin SMS &amp; Telepon (Versi Lengkap)</span>
-            </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              <b>Kenapa diminta:</b> Cadangan darurat ketika kuota/Wi-Fi
-              dimatikan pencuri serta pendeteksi penggantian kartu SIM.
-            </p>
-            <p className="text-[11px] text-emerald-300/95 leading-relaxed">
-              <b>Yang dibaca:</b> TIDAK pernah membaca SMS OTP bank atau isi
-              chat SMS pribadi Anda — hanya mengecek SMS yang diawali Kata Kunci
-              &amp; PIN Anda.
-            </p>
-            <p className="text-[11px] text-amber-300/95 leading-relaxed">
-              <b>Jika dimatikan:</b> Pelacakan via internet (Nostr Relay) tetap
-              berjalan normal; hanya perintah SMS darurat &amp; peringatan ganti
-              SIM yang tidak aktif.
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-3.5 py-2.5 text-[11px] text-emerald-200 leading-relaxed">
-          <b>Izin yang TIDAK PERNAH diminta LacakHP:</b> Aplikasi tidak meminta
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3 text-[0.8125rem] sm:text-sm text-emerald-100 leading-relaxed max-w-[68ch]">
+          <b className="text-emerald-300">Izin yang TIDAK PERNAH diminta LacakHP:</b> Aplikasi tidak meminta
           akses ke <b>Daftar Kontak, Galeri/Foto, Kamera, Mikrofon, File Pribadi,</b>{' '}
           maupun login akun Google Anda.
         </div>
+
+        <details className="rounded-xl bg-slate-900/60 border border-slate-800 overflow-hidden" open>
+          <summary className="px-4 py-3 cursor-pointer flex items-center justify-between gap-2 text-[0.8125rem] sm:text-sm font-semibold text-sky-200 hover:bg-slate-900 transition select-none">
+            <span>🔍 Lihat Rincian 3 Izin Utama (Lokasi, Baterai, SMS/Telepon)</span>
+            <ChevronDown className="details-chevron w-4 h-4 text-sky-300 shrink-0 transition-transform duration-200" />
+          </summary>
+          <div className="p-3.5 pt-2 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-3 gap-3 text-[0.8125rem]">
+            <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 space-y-2.5 leading-relaxed">
+              <div className="font-bold text-slate-100 text-sm">
+                1. Izin Lokasi (GPS &amp; Sepanjang Waktu)
+              </div>
+              <p className="text-slate-200">
+                <b>Kenapa diminta:</b> Mengambil titik lokasi satelit ketika HP
+                hilang, termasuk saat layar sedang terkunci.
+              </p>
+              <p className="text-emerald-200">
+                <b>Yang dibaca:</b> Hanya koordinat, akurasi, &amp; waktu lalu
+                langsung dienkripsi AES-256-GCM sebelum keluar dari HP.
+              </p>
+              <p className="text-amber-200">
+                <b>Jika dimatikan:</b> Pelacakan peta dan balas lokasi SMS tidak
+                bisa mengambil posisi terbaru HP (atau berhenti saat layar mati).
+              </p>
+            </div>
+
+            <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 space-y-2.5 leading-relaxed">
+              <div className="font-bold text-slate-100 text-sm">
+                2. Bebas Pembatasan Baterai
+              </div>
+              <p className="text-slate-200">
+                <b>Kenapa diminta:</b> Mencegah penghemat baterai bawaan HP
+                mematikan proses pelacak saat layar tidur berjam-jam.
+              </p>
+              <p className="text-emerald-200">
+                <b>Yang dibaca:</b> Tidak membaca data pribadi apa pun; hanya cek
+                persentase baterai untuk sinyal darurat saat daya &le; 8%.
+              </p>
+              <p className="text-amber-200">
+                <b>Jika dimatikan / dibatasi:</b> Sistem HP dapat menidurkan
+                aplikasi pelacak di belakang layar sehingga laporan berhenti.
+              </p>
+            </div>
+
+            <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-4 space-y-2.5 leading-relaxed">
+              <div className="font-bold text-slate-100 text-sm">
+                3. Izin SMS &amp; Telepon (Versi Lengkap)
+              </div>
+              <p className="text-slate-200">
+                <b>Kenapa diminta:</b> Cadangan darurat ketika kuota/Wi-Fi
+                dimatikan pencuri serta pendeteksi penggantian kartu SIM.
+              </p>
+              <p className="text-emerald-200">
+                <b>Yang dibaca:</b> TIDAK pernah membaca SMS OTP bank atau isi
+                chat SMS pribadi Anda — hanya mengecek SMS yang diawali Kata Kunci
+                &amp; PIN Anda.
+              </p>
+              <p className="text-amber-200">
+                <b>Jika dimatikan:</b> Pelacakan via internet (Nostr Relay) tetap
+                berjalan normal; hanya perintah SMS darurat &amp; peringatan ganti
+                SIM yang tidak aktif.
+              </p>
+            </div>
+          </div>
+        </details>
       </SpotlightCard>
 
       {/* Benteng Proteksi 2 Tingkat: Device Owner (MDM Anti-Hapus Permanen) */}
@@ -980,62 +987,62 @@ export const ArchitectureGuide: React.FC = () => {
         contentClassName="p-4 sm:p-6 space-y-5"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25">
+          <div className="space-y-1.5 max-w-[64ch]">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/25">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Benteng Anti-Hapus Android Enterprise (Murni Device Owner)</span>
             </div>
-            <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-slate-50 tracking-tight leading-snug">
               Aktivasi Proteksi 2 Tingkat: Dari Pemilik Awam hingga Benteng Maksimal
             </h2>
-            <p className="text-xs text-slate-300">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
               100% Mematuhi Kebijakan Google Play Protect (Murni izin resmi <code>BIND_DEVICE_ADMIN</code> tanpa modifikasi berbahaya).
             </p>
           </div>
 
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-900 text-amber-300 border border-amber-500/30">
+          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-slate-900 text-amber-300 border border-amber-500/30">
             Paket: com.lacakhp.app
           </span>
         </div>
 
         {/* 2 Levels Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-sky-400 text-xs">Level 1: Device Administrator (Awam)</span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20">
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-950/85 border border-slate-800 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-bold text-sky-300 text-sm">Level 1: Device Administrator (Awam)</span>
+              <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded bg-sky-500/15 text-sky-200 border border-sky-500/25 shrink-0">
                 1-Klik di Aplikasi
               </span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Cukup ketuk tombol <i>"Aktifkan Administrator Perangkat"</i> di dalam aplikasi LacakHP. Menjaga aplikasi dari pencopotan biasa dan mencatat peringatan jika ada yang salah menebak PIN layar 3 kali.
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
+              Cukup ketuk tombol <i>&quot;Aktifkan Administrator Perangkat&quot;</i> di dalam aplikasi LacakHP. Menjaga aplikasi dari pencopotan biasa dan mencatat peringatan jika ada yang salah menebak PIN layar 3 kali.
             </p>
-            <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-800/80">
+            <div className="text-xs text-slate-300 pt-2 border-t border-slate-800/80">
               Cocok untuk: Penggunaan harian keluarga tanpa butuh koneksi kabel atau alat tambahan.
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/30 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-amber-300 text-xs">Level 2: Benteng Device Owner (Maksimal)</span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-950/85 border border-amber-500/35 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-bold text-amber-300 text-sm">Level 2: Benteng Device Owner (Maksimal)</span>
+              <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded bg-amber-500/15 text-amber-200 border border-amber-500/30 shrink-0">
                 Anti-Hapus Absolut
               </span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
+            <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
               Menetapkan LacakHP sebagai pemilik sah sistem (Enterprise MDM). Tombol hapus instalan <b>dinonaktifkan di OS</b>, Factory Reset diblokir, Safe Boot diblokir, dan izin GPS/SMS dikunci permanen.
             </p>
-            <div className="text-[10px] text-amber-200/90 pt-1 border-t border-amber-500/20">
+            <div className="text-xs text-amber-200 pt-2 border-t border-amber-500/20">
               Pelepasan sah wajib lolos PIN Layar <b>DAN</b> mengetik ulang Kunci Rahasia LacakHP.
             </div>
           </div>
         </div>
 
         {/* Interactive Activation Tabs */}
-        <div className="space-y-3 pt-1">
+        <div className="space-y-3.5 pt-1">
           <div className="flex items-center justify-between">
-            <div className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Terminal className="w-4 h-4 text-sky-400" />
+            <div className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-sky-400 shrink-0" />
               <span>Panduan Aktivasi Level 2 (Pilih Cara Paling Mudah Bagi Anda):</span>
             </div>
           </div>
@@ -1044,10 +1051,10 @@ export const ArchitectureGuide: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveOwnerTab('shizuku')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition touch-manipulation ${
+              className={`px-3.5 py-2 rounded-xl text-[0.8125rem] font-semibold transition touch-manipulation min-h-[42px] ${
                 activeOwnerTab === 'shizuku'
                   ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                  : 'bg-slate-900 text-slate-200 hover:bg-slate-800 border border-slate-700/80'
               }`}
             >
               📱 1. Shizuku + aShell (Tanpa PC)
@@ -1055,10 +1062,10 @@ export const ArchitectureGuide: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveOwnerTab('adb')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition touch-manipulation ${
+              className={`px-3.5 py-2 rounded-xl text-[0.8125rem] font-semibold transition touch-manipulation min-h-[42px] ${
                 activeOwnerTab === 'adb'
                   ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                  : 'bg-slate-900 text-slate-200 hover:bg-slate-800 border border-slate-700/80'
               }`}
             >
               💻 2. Terminal ADB (Laptop / Kabel USB)
@@ -1066,10 +1073,10 @@ export const ArchitectureGuide: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveOwnerTab('qr')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition touch-manipulation ${
+              className={`px-3.5 py-2 rounded-xl text-[0.8125rem] font-semibold transition touch-manipulation min-h-[42px] ${
                 activeOwnerTab === 'qr'
                   ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                  : 'bg-slate-900 text-slate-200 hover:bg-slate-800 border border-slate-700/80'
               }`}
             >
               📷 3. QR Provisioning (HP Baru / Reset)
@@ -1078,11 +1085,11 @@ export const ArchitectureGuide: React.FC = () => {
 
           {/* Tab Content 1: Shizuku + aShell */}
           {activeOwnerTab === 'shizuku' && (
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs leading-relaxed">
+            <div className="p-4 sm:p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3.5 text-[0.8125rem] sm:text-sm leading-relaxed">
               <div className="font-bold text-amber-300">
                 Cara Paling Praktis Tanpa Butuh Laptop (Cukup dari HP yang Bersangkutan)
               </div>
-              <ol className="list-decimal list-inside space-y-2 text-slate-300">
+              <ol className="list-decimal list-inside space-y-2.5 text-slate-200 max-w-[65ch]">
                 <li>
                   Pasang aplikasi <b>Shizuku</b> &amp; <b>aShell</b> dari Play Store / GitHub. Aktifkan Shizuku melalui <i>Wireless Debugging</i> (memerlukan sambungan Wi-Fi sebentar).
                 </li>
@@ -1095,13 +1102,13 @@ export const ArchitectureGuide: React.FC = () => {
               </ol>
 
               {/* Copyable ADB Command Box */}
-              <div className="relative group bg-slate-900 border border-slate-700/80 rounded-xl p-3 font-mono text-[11px] text-sky-300 break-all flex items-center justify-between gap-2">
+              <div className="relative group bg-slate-900 border border-slate-700/80 rounded-xl p-3.5 font-mono text-xs text-sky-300 break-all flex items-center justify-between gap-2">
                 <code>{adbCommand}</code>
                 <button
                   type="button"
                   onClick={handleCopyAdb}
                   title="Salin Perintah ADB"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-sans font-bold text-xs shrink-0 transition"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-sans font-bold text-xs shrink-0 transition"
                 >
                   {copiedAdb ? (
                     <>
@@ -1117,21 +1124,19 @@ export const ArchitectureGuide: React.FC = () => {
                 </button>
               </div>
 
-              <div className="text-slate-300">
-                <li>
-                  Setelah muncul teks <code>Success: Device owner set to package com.lacakhp.app</code>, silakan <b>login kembali ke Akun Google &amp; Samsung Anda</b>. Seluruh data dan aplikasi tetap aman, dan benteng LacakHP kini aktif permanen!
-                </li>
+              <div className="text-slate-200 max-w-[65ch]">
+                4. Setelah muncul teks <code>Success: Device owner set to package com.lacakhp.app</code>, silakan <b>login kembali ke Akun Google &amp; Samsung Anda</b>. Seluruh data dan aplikasi tetap aman, dan benteng LacakHP kini aktif permanen!
               </div>
             </div>
           )}
 
           {/* Tab Content 2: Terminal ADB */}
           {activeOwnerTab === 'adb' && (
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs leading-relaxed">
+            <div className="p-4 sm:p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3.5 text-[0.8125rem] sm:text-sm leading-relaxed">
               <div className="font-bold text-sky-300">
                 Aktivasi Standar via Terminal / Command Prompt Laptop
               </div>
-              <ol className="list-decimal list-inside space-y-2 text-slate-300">
+              <ol className="list-decimal list-inside space-y-2.5 text-slate-200 max-w-[65ch]">
                 <li>
                   Aktifkan <b>USB Debugging</b> di menu <i>Opsi Pengembang (Developer Options)</i> HP Anda, lalu hubungkan HP ke laptop dengan kabel data.
                 </li>
@@ -1144,13 +1149,13 @@ export const ArchitectureGuide: React.FC = () => {
               </ol>
 
               {/* Copyable ADB Command Box */}
-              <div className="relative group bg-slate-900 border border-slate-700/80 rounded-xl p-3 font-mono text-[11px] text-sky-300 break-all flex items-center justify-between gap-2">
+              <div className="relative group bg-slate-900 border border-slate-700/80 rounded-xl p-3.5 font-mono text-xs text-sky-300 break-all flex items-center justify-between gap-2">
                 <code>{adbCommand}</code>
                 <button
                   type="button"
                   onClick={handleCopyAdb}
                   title="Salin Perintah ADB"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-sans font-bold text-xs shrink-0 transition"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-sans font-bold text-xs shrink-0 transition"
                 >
                   {copiedAdb ? (
                     <>
@@ -1166,27 +1171,25 @@ export const ArchitectureGuide: React.FC = () => {
                 </button>
               </div>
 
-              <div className="text-slate-300">
-                <li>
-                  Begitu sukses, login kembali ke akun Google Anda. Port USB Debugging pada HP akan <b>otomatis dinonaktifkan</b> oleh LacakHP untuk mencegah laptop asing atau konter servis membobol HP Anda.
-                </li>
+              <div className="text-slate-200 max-w-[65ch]">
+                4. Begitu sukses, login kembali ke akun Google Anda. Port USB Debugging pada HP akan <b>otomatis dinonaktifkan</b> oleh LacakHP untuk mencegah laptop asing atau konter servis membobol HP Anda.
               </div>
             </div>
           )}
 
-              {/* Tab Content 3: QR Provisioning */}
+          {/* Tab Content 3: QR Provisioning */}
           {activeOwnerTab === 'qr' && (
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3.5 text-xs leading-relaxed">
+            <div className="p-4 sm:p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3.5 text-[0.8125rem] sm:text-sm leading-relaxed">
               <div className="font-bold text-emerald-300">
                 Metode Resmi Google Enterprise untuk HP Baru atau HP yang Baru Di-Reset Pabrik
               </div>
-              <p className="text-slate-300">
+              <p className="text-slate-200 max-w-[65ch]">
                 Pada layar selamat datang pertama kali setelah HP di-factory reset (layar <i>&quot;Halo / Selamat Datang&quot;</i>), <b>ketuk layar kosong sebanyak 6 kali berturut-turut</b>. Kamera pemindai QR Enterprise bawaan Android 10–15 akan terbuka otomatis — arahkan kamera langsung ke kode QR di bawah ini:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 {provisioningQrSvg && (
-                  <div className="md:col-span-5 flex flex-col items-center justify-center p-3.5 bg-white rounded-xl border border-slate-300 shadow-lg">
+                  <div className="md:col-span-5 flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-slate-300 shadow-lg">
                     <svg
                       viewBox={`0 0 ${provisioningQrSvg.viewBoxSize} ${provisioningQrSvg.viewBoxSize}`}
                       shapeRendering="crispEdges"
@@ -1201,14 +1204,14 @@ export const ArchitectureGuide: React.FC = () => {
                       />
                       <path d={provisioningQrSvg.pathD} fill="#000000" />
                     </svg>
-                    <span className="mt-2 text-[10px] font-semibold text-slate-800 text-center">
+                    <span className="mt-2.5 text-xs font-semibold text-slate-800 text-center">
                       100% Digenerate Lokal di Browser • Siap Pindai Ketuk-6x
                     </span>
                   </div>
                 )}
 
-                <div className={`${provisioningQrSvg ? 'md:col-span-7' : 'md:col-span-12'} space-y-1.5 min-w-0`}>
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className={`${provisioningQrSvg ? 'md:col-span-7' : 'md:col-span-12'} space-y-2 min-w-0`}>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
                     <span>Profil JSON Provisioning Resmi (DevicePolicyManager):</span>
                     <button
                       type="button"
@@ -1219,10 +1222,10 @@ export const ArchitectureGuide: React.FC = () => {
                       <span>{copiedJson ? 'JSON Tersalin' : 'Salin JSON'}</span>
                     </button>
                   </div>
-                  <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-[10px] text-slate-300 overflow-x-auto leading-relaxed">
+                  <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-[0.6875rem] text-slate-200 overflow-x-auto leading-relaxed">
                     {provisioningJson}
                   </pre>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     Checksum tanda tangan kriptografi (Base64URL SHA-256 tanpa padding) dihitung otomatis dari sertifikat rilis resmi <code>{releaseInfo.certSha256.slice(0, 17)}...</code>.
                   </p>
                 </div>
@@ -1231,57 +1234,60 @@ export const ArchitectureGuide: React.FC = () => {
           )}
         </div>
 
-        {/* Smart Lockdown Policies Details */}
-        <div className="p-4 rounded-xl bg-slate-950/90 border border-slate-800/90 space-y-2.5">
-          <div className="font-bold text-white text-xs flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 text-amber-400" />
-            <span>6 Perlindungan Mode Cerdas (Smart MDM Policies) Saat Device Owner Aktif:</span>
-          </div>
+        {/* Smart Lockdown Policies Details (Collapsible Layer 2) */}
+        <details className="rounded-xl bg-slate-950/90 border border-slate-800/90 overflow-hidden">
+          <summary className="px-4 py-3.5 cursor-pointer flex items-center justify-between gap-2 text-[0.8125rem] sm:text-sm font-bold text-slate-100 hover:bg-slate-900/80 transition select-none">
+            <span className="flex items-center gap-2 min-w-0">
+              <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>6 Perlindungan Mode Cerdas (Smart MDM Policies) Saat Device Owner Aktif (Ketuk untuk detail)</span>
+            </span>
+            <ChevronDown className="details-chevron w-4 h-4 text-amber-300 shrink-0 transition-transform duration-200" />
+          </summary>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-[11px]">
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+          <div className="p-4 pt-2 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-[0.8125rem] leading-relaxed">
+            <div className="p-3 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1">
               <span className="font-bold text-amber-300 block">1. Anti-Hapus Permanen</span>
-              <span className="text-slate-400 block">
+              <span className="text-slate-200 block">
                 Tombol copot pemasangan aplikasi dinonaktifkan di level OS (<code>setUninstallBlocked</code>).
               </span>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+            <div className="p-3 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1">
               <span className="font-bold text-amber-300 block">2. Blokir Factory Reset</span>
-              <span className="text-slate-400 block">
+              <span className="text-slate-200 block">
                 Pencuri tidak bisa menghapus HP melalui menu Setelan (<code>DISALLOW_FACTORY_RESET</code>).
               </span>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+            <div className="p-3 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1">
               <span className="font-bold text-amber-300 block">3. Blokir Safe Mode</span>
-              <span className="text-slate-400 block">
+              <span className="text-slate-200 block">
                 Mencegah pencuri me-restart HP ke Mode Aman untuk mematikan layanan LacakHP (<code>DISALLOW_SAFE_BOOT</code>).
               </span>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+            <div className="p-3 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1">
               <span className="font-bold text-amber-300 block">4. Kunci Izin GPS &amp; SMS</span>
-              <span className="text-slate-400 block">
+              <span className="text-slate-200 block">
                 Izin Lokasi, SMS, &amp; Telepon dikunci permanen sehingga tidak dapat dimatikan sepihak oleh pencuri.
               </span>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+            <div className="p-3 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1">
               <span className="font-bold text-amber-300 block">5. Kunci Port USB Debugging</span>
-              <span className="text-slate-400 block">
+              <span className="text-slate-200 block">
                 Port USB ditutup otomatis (<code>DISALLOW_DEBUGGING_FEATURES</code>) agar laptop konter servis ditolak OS.
               </span>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-1">
+            <div className="p-3 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1">
               <span className="font-bold text-amber-300 block">6. Verifikasi Ganda Pemilik</span>
-              <span className="text-slate-400 block">
+              <span className="text-slate-200 block">
                 Pelepasan benteng wajib lolos PIN layar <b>DAN</b> mengetik ulang Kunci Rahasia LacakHP (anti-intip PIN di tempat umum).
               </span>
             </div>
           </div>
-        </div>
+        </details>
       </SpotlightCard>
 
       {/* Official APK Cryptographic Signature & Non-Commercial License Card */}
@@ -1289,24 +1295,24 @@ export const ArchitectureGuide: React.FC = () => {
         as="section"
         tone="emerald"
         radius={560}
-        restingBgClassName="bg-slate-950/70"
+        restingBgClassName="bg-slate-950/75"
         restingBorderClassName="border-emerald-500/30"
-        contentClassName="p-4 sm:p-5 space-y-3"
+        contentClassName="p-4 sm:p-6 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
-            <h2 className="text-sm font-bold text-white">
+            <Shield className="w-5 h-5 text-emerald-400 shrink-0" />
+            <h2 className="text-base font-bold text-slate-100">
               Verifikasi Keaslian APK Resmi (SHA-256) &amp; Lisensi Amal
               Non-Komersial
             </h2>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-200 border border-emerald-500/30">
             Anti-Clone &amp; Anti-Phishing
           </span>
         </div>
 
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed max-w-[66ch]">
           Meskipun kode sumber dibuka untuk audit transparansi publik dan
           mendukung tugas kepolisian, setiap file APK resmi LacakHP
           ditandatangani dengan kunci kriptografi privat pengembang yang{' '}
@@ -1315,22 +1321,22 @@ export const ArchitectureGuide: React.FC = () => {
           dengan kode resmi berikut:
         </p>
 
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5 font-mono text-[11px]">
-          <div className="text-slate-400">
+        <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2 font-mono text-xs tabular-nums">
+          <div className="text-slate-300">
             Sidik Jari Sertifikat Penandatangan APK Resmi (SHA-256):
           </div>
-          <div className="text-emerald-400 break-all font-semibold">
+          <div className="text-emerald-300 break-all font-semibold">
             {releaseInfo.certSha256}
           </div>
-          <div className="text-slate-400 pt-1">
+          <div className="text-slate-300 pt-1">
             Checksum File APK Resmi (lacakhp-resmi.apk v{releaseInfo.versionName} • SHA-256):
           </div>
           <div className="text-sky-300 break-all">
             {releaseInfo.apkSha256}
           </div>
-          <div className="text-slate-500 text-[10px] pt-1">
+          <div className="text-slate-300 text-[0.6875rem] pt-1">
             Domain Web Resmi: https://lacakinhp110.my.id • Mirror Resmi:
-            https://tracker-web-xi.vercel.app • Paket Resmi: com.lacakhp.app
+            https://lacakinhp.pages.dev • Paket Resmi: com.lacakhp.app
           </div>
         </div>
 
@@ -1338,16 +1344,16 @@ export const ArchitectureGuide: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsLegalModalOpen(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-lg shadow-emerald-500/15 transition min-h-[44px] touch-manipulation cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[0.8125rem] sm:text-sm font-bold shadow-lg shadow-emerald-500/15 transition min-h-[46px] touch-manipulation cursor-pointer"
           >
             <span>Unduh APK Resmi v{releaseInfo.versionName} (lacakhp-resmi.apk)</span>
           </button>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-xs text-slate-300">
             Versi Lengkap (Internet Nostr + SMS Darurat + Anti-Uninstall)
           </span>
         </div>
 
-        {/* Client-Side SHA-256 APK Authenticity Verifier (100% Local in Browser) */}
+        {/* Client-Side SHA-256 APK Authenticity Verifier */}
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -1357,28 +1363,28 @@ export const ArchitectureGuide: React.FC = () => {
             const f = e.dataTransfer?.files?.[0];
             if (f) void handleVerifyLocalApk(f);
           }}
-          className="rounded-xl bg-slate-950/90 border border-slate-800 p-3.5 space-y-2.5"
+          className="rounded-xl bg-slate-950/90 border border-slate-800 p-4 space-y-3"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-white">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
               <FileCheck2 className="w-4 h-4 text-sky-400 shrink-0" />
               <span>Cek Keaslian File APK di Browser (100% Lokal)</span>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/25">
+            <span className="text-[0.6875rem] font-mono px-2.5 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/25">
               File Tidak Diunggah ke Server
             </span>
           </div>
 
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed max-w-[65ch]">
             Menerima file <code>.apk</code> dari WhatsApp, Telegram, atau pihak
             lain? Pilih atau seret file tersebut ke sini untuk mencocokkan sidik
             jari <b>SHA-256</b>-nya secara langsung di RAM browser Anda dengan
             rilis resmi <b>v{releaseInfo.versionName}</b>.
           </p>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-100 cursor-pointer transition min-h-[40px] touch-manipulation">
-              <Upload className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[0.8125rem] font-semibold text-slate-100 cursor-pointer transition min-h-[44px] touch-manipulation">
+              <Upload className="w-4 h-4 text-sky-400 shrink-0" />
               <span>Pilih File .APK untuk Diperiksa</span>
               <input
                 type="file"
@@ -1395,7 +1401,7 @@ export const ArchitectureGuide: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setApkCheckState({ status: 'idle' })}
-                className="text-[11px] text-slate-400 hover:text-white underline underline-offset-4 px-2 py-1"
+                className="text-xs text-slate-300 hover:text-white underline underline-offset-4 px-2 py-1"
               >
                 Reset
               </button>
@@ -1403,7 +1409,7 @@ export const ArchitectureGuide: React.FC = () => {
           </div>
 
           {apkCheckState.status === 'hashing' && (
-            <div className="flex items-center gap-2 text-xs text-sky-300 bg-sky-500/10 border border-sky-500/30 rounded-xl px-3 py-2.5">
+            <div className="flex items-center gap-2 text-[0.8125rem] text-sky-200 bg-sky-500/10 border border-sky-500/30 rounded-xl px-3.5 py-3">
               <Loader2 className="w-4 h-4 animate-spin shrink-0" />
               <span>
                 Menghitung hash SHA-256 untuk <b>{apkCheckState.fileName}</b> (
@@ -1413,40 +1419,40 @@ export const ArchitectureGuide: React.FC = () => {
           )}
 
           {apkCheckState.status === 'match' && (
-            <div className="rounded-xl bg-emerald-950/60 border border-emerald-500/45 p-3 space-y-1.5 text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-emerald-300">
+            <div className="rounded-xl bg-emerald-950/60 border border-emerald-500/45 p-3.5 space-y-2 text-[0.8125rem]">
+              <div className="flex items-center gap-2 font-bold text-emerald-300">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>
                   ASLI &amp; TERVERIFIKASI — 100% Cocok dengan APK Resmi LacakHP v
                   {releaseInfo.versionName}
                 </span>
               </div>
-              <div className="text-[11px] text-emerald-100/90">
+              <div className="text-emerald-100 leading-relaxed">
                 File <b>{apkCheckState.fileName}</b> ({apkCheckState.fileSizeMb}{' '}
                 MB) identik bit-demi-bit dan belum dimodifikasi pihak mana pun.
               </div>
-              <div className="font-mono text-[10px] text-emerald-300/90 break-all bg-slate-950/80 rounded-lg px-2.5 py-1.5 border border-emerald-500/25">
+              <div className="font-mono text-xs text-emerald-300 break-all bg-slate-950/85 rounded-lg px-3 py-2 border border-emerald-500/25">
                 SHA-256: {apkCheckState.computedSha256}
               </div>
             </div>
           )}
 
           {apkCheckState.status === 'mismatch' && (
-            <div className="rounded-xl bg-rose-950/60 border border-rose-500/50 p-3 space-y-1.5 text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-rose-300">
+            <div className="rounded-xl bg-rose-950/60 border border-rose-500/50 p-3.5 space-y-2 text-[0.8125rem]">
+              <div className="flex items-center gap-2 font-bold text-rose-300">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 <span>
                   TIDAK COCOK — Waspada APK Modifikasi / Palsu atau Versi Lama!
                 </span>
               </div>
-              <p className="text-[11px] text-rose-100/90 leading-relaxed">
+              <p className="text-rose-100 leading-relaxed">
                 Hash file <b>{apkCheckState.fileName}</b> (
                 {apkCheckState.fileSizeMb} MB) <b>berbeda</b> dari rilis resmi v
                 {releaseInfo.versionName}. Demi keamanan, jangan instal file dari
                 sumber tidak jelas — unduh ulang langsung dari tombol resmi di
                 atas.
               </p>
-              <div className="font-mono text-[10px] space-y-1 bg-slate-950/80 rounded-lg px-2.5 py-1.5 border border-rose-500/30 break-all">
+              <div className="font-mono text-xs space-y-1 bg-slate-950/85 rounded-lg px-3 py-2 border border-rose-500/30 break-all">
                 <div className="text-rose-300">
                   File Anda: {apkCheckState.computedSha256}
                 </div>
@@ -1458,22 +1464,27 @@ export const ArchitectureGuide: React.FC = () => {
           )}
 
           {apkCheckState.status === 'error' && (
-            <div className="flex items-center gap-2 text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2.5">
+            <div className="flex items-center gap-2 text-[0.8125rem] text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3.5 py-3">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{apkCheckState.errorMsg}</span>
             </div>
           )}
         </div>
 
-        <div className="text-[11px] text-slate-400 leading-relaxed pt-1 border-t border-slate-800/80">
-          <b>Peringatan Hukum &amp; Ketentuan Etika Penggunaan:</b> Dilarang keras
-          memperjualbelikan aplikasi ini, memungut biaya pembukaan lokasi,
-          menyamar menggunakan nama/merek <b>LacakHP</b> pada situs/APK
-          modifikasi, atau memasang secara diam-diam untuk memata-matai perangkat
-          orang lain tanpa izin sah. Pelanggaran merupakan Tindak Pidana Penyadapan &amp; Ilegal Akses
-          berdasarkan <b>Pasal 30 &amp; 31 UU ITE</b> (ancaman penjara hingga 10 tahun / denda Rp 800 Juta)
-          serta <b>Pasal 65 UU Pelindungan Data Pribadi No. 27/2022</b> (ancaman penjara hingga 5 tahun / denda Rp 5 Miliar).
-        </div>
+        <details className="rounded-xl bg-slate-900/50 border border-slate-800/80 overflow-hidden">
+          <summary className="px-4 py-3 cursor-pointer flex items-center justify-between gap-2 text-xs sm:text-[0.8125rem] font-semibold text-slate-200 hover:bg-slate-900 transition select-none">
+            <span>⚖️ Peringatan Hukum &amp; Ketentuan Etika Penggunaan (UU ITE &amp; UU PDP)</span>
+            <ChevronDown className="details-chevron w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200" />
+          </summary>
+          <div className="px-4 pb-3.5 pt-1.5 border-t border-slate-800/80 text-xs sm:text-[0.8125rem] text-slate-200 leading-relaxed max-w-[68ch]">
+            Dilarang keras memperjualbelikan aplikasi ini, memungut biaya pembukaan lokasi,
+            menyamar menggunakan nama/merek <b>LacakHP</b> pada situs/APK
+            modifikasi, atau memasang secara diam-diam untuk memata-matai perangkat
+            orang lain tanpa izin sah. Pelanggaran merupakan Tindak Pidana Penyadapan &amp; Ilegal Akses
+            berdasarkan <b>Pasal 30 &amp; 31 UU ITE</b> (ancaman penjara hingga 10 tahun / denda Rp 800 Juta)
+            serta <b>Pasal 65 UU Pelindungan Data Pribadi No. 27/2022</b> (ancaman penjara hingga 5 tahun / denda Rp 5 Miliar).
+          </div>
+        </details>
       </SpotlightCard>
 
       <LegalConsentModal
