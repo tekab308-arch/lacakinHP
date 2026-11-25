@@ -17,6 +17,7 @@ class BootReceiver : BroadcastReceiver() {
             Intent.ACTION_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
+                DeviceOwnerHelper.onBootOrUpgrade(context.applicationContext)
                 try {
                     val serviceIntent = Intent(context, TrackerService::class.java)
                     ContextCompat.startForegroundService(context, serviceIntent)

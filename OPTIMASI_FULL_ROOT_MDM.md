@@ -89,9 +89,22 @@
 
 ---
 
-## 3. Ceklis Urutan Eksekusi Bertahap
+## 3. Keputusan Tambahan Fase B & Ketahanan Rilis (Sesi `/grill-me` Lanjutan — 25 November 2026)
+
+| No | Cabang Teknis | Keputusan yang Dikunci | Status Kode |
+| :---: | :--- | :--- | :---: |
+| **8** | **Signing Release & `debuggable=false`** | Build produksi beralih ke `assembleFullRelease` (`isDebuggable = false`, `isMinifyEnabled = false`) menggunakan kunci resmi `E3:10:0D:61...` via `keystore.properties` (gitignored). Menutup celah `adb shell run-as` tanpa merusak kompatibilitas update menimpa & tanpa membatalkan review whitelist Google Play Protect. | ✅ Siap Lokal |
+| **9** | **`UpdateChecker` Multi-Mirror** | Auto-failover berurutan (`lacakinhp110.my.id` $\rightarrow$ `lacakinhp.pages.dev` $\rightarrow$ `tracker-web-xi.vercel.app`) + validasi kecocokan `certSha256` + tampilan & tombol salin `apkSha256` di dialog update (unduh tetap via browser tanpa izin sensitif `REQUEST_INSTALL_PACKAGES`). | ✅ Siap Lokal |
+| **10** | **Auto-Relock USB Debugging** | Saklar sementara USB Debugging wajib Verifikasi Ganda dan **otomatis mengunci kembali dalam 30 menit** (`USB_DEBUG_WINDOW_MS`) serta setiap kali HP me-restart (`BootReceiver`). | ✅ Siap Lokal |
+| **11** | **Eskalasi 0 Detik & Mode Kejar** | `enforceEmergencyLockdown` dieksekusi langsung di `BroadcastReceiver` (0 ms walau Doze Mode) + Direct SMS Fallback salah PIN 5x + **Mode Kejar 2 Menit otomatis selama 45 menit** (kembali hemat baterai otomatis). Blokir Mode Pesawat hanya bisa dibuka lewat Verifikasi Ganda pemilik. | ✅ Siap Lokal |
+| **12** | **Privasi IMEI & Mirror Kartu WA** | IMEI dimasking (`3567•••••••••67`) di UI aplikasi, dicantumkan pada teks Kartu Darurat WA beserta URL Mirror Cadangan (`lacakinhp.pages.dev`), dan **tidak pernah** dimasukkan ke fragmen `#hash` URL maupun Nostr. | ✅ Siap Lokal |
+| **13** | **Kepatuhan QR Android 12–15 & SVG Offline** | Menambahkan `ProvisioningModeActivity` & `AdminPolicyComplianceActivity` resmi Android Enterprise di APK lokal, serta generator gambar QR Code SVG 100% offline dengan checksum Base64URL dinamis di Web & Lembar Bukti Polisi A4. | ✅ Live Web / Siap Lokal |
+
+---
+
+## 4. Ceklis Urutan Eksekusi Bertahap
 - [x] **Tahap 0:** Kunci seluruh keputusan desain & keselarasan whitelist Google Play Protect (`/grill-me`).
-- [ ] **Tahap 1 (Web — Aman Deploy Sekarang):** Implementasi penyimpanan bukti `eventId/pubkey/sig` Nostr + Modal **Lembar Bukti Polisi & Blokir IMEI (Cetak A4 Resmi)** di `tracker-web`.
-- [ ] **Tahap 2 (Web — Aman Deploy Sekarang):** Tambahkan panduan aktivasi `Device Owner` (ADB / Shizuku) di tab *Cara Kerja & Keamanan*.
-- [ ] **Tahap 3 (Android — Build & Unit Test Lokal):** Implementasi `DeviceOwnerHelper`, Mode Cerdas, Eskalasi Darurat, Verifikasi Ganda, Kunci USB Debugging, & IMEI pada Kartu Darurat di `tracker-android`.
-- [ ] **Tahap 4 (Rilis APK Setelah Email Whitelist Play Protect Keluar):** Publikasikan APK v2.7+ ke `/lacakhp-resmi.apk` dan uji fisik di perangkat nyata.
+- [x] **Tahap 1 (Web — LIVE):** Implementasi penyimpanan bukti `eventId/pubkey/sig` Nostr + Modal **Lembar Bukti Polisi & Blokir IMEI (Cetak A4 Resmi)** di `tracker-web`.
+- [x] **Tahap 2 (Web — LIVE):** Panduan aktivasi `Device Owner` (ADB / Shizuku) + Generator Gambar QR Code Provisioning SVG Offline di tab *Cara Kerja & Keamanan*.
+- [x] **Tahap 3 (Android — Teruji Unit Test & Build Release Lokal):** Implementasi `DeviceOwnerHelper`, Kepatuhan Android 12–15, Mode Kejar 2 Menit, Auto-Relock USB 30 Menit, Verifikasi Ganda, `UpdateChecker` Multi-Mirror, & IMEI Kartu Darurat di `tracker-android`.
+- [ ] **Tahap 4 (Rilis APK Setelah Email Whitelist Play Protect Keluar):** Jalankan `./publish-update.sh 9 "2.7" "..."` untuk mempublikasikan APK Release (`debuggable=false`) ke `/lacakhp-resmi.apk` dan uji fisik di perangkat nyata.

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { DecryptedLocationPoint } from '../lib/crypto';
 import { RawNostrEvent } from '../lib/nostr';
+import { encodeQrMatrix, buildQrSvgPath } from '../lib/qrSvg';
 
 interface PoliceEvidenceModalProps {
   isOpen: boolean;
@@ -77,6 +78,18 @@ export const PoliceEvidenceModal: React.FC<PoliceEvidenceModalProps> = ({
 
   // Last 15 clean history points for chronological proof table
   const trailPoints = points.slice(0, 15);
+  const mapsUrl = latestPoint
+    ? `https://www.google.com/maps?q=${latestPoint.lat.toFixed(6)},${latestPoint.lng.toFixed(6)}`
+    : '';
+  const mapsQrSvg = mapsUrl
+    ? (() => {
+        try {
+          return buildQrSvgPath(encodeQrMatrix(mapsUrl), 2);
+        } catch {
+          return null;
+        }
+      })()
+    : null;
 
   return (
     <AnimatePresence>
@@ -458,11 +471,24 @@ export const PoliceEvidenceModal: React.FC<PoliceEvidenceModalProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-gray-200 text-[11px]">
-                  <span className="font-semibold">Tautan Peta Langsung (Google Maps):</span>{' '}
-                  <span className="font-mono text-[10px] break-all">
-                    https://www.google.com/maps?q={latestPoint.lat.toFixed(6)},{latestPoint.lng.toFixed(6)}
-                  </span>
+                <div className="pt-2 border-t border-gray-200 flex items-center justify-between gap-3 text-[11px]">
+                  <div className="min-w-0">
+                    <span className="font-semibold block">Tautan Peta Langsung (Google Maps):</span>
+                    <span className="font-mono text-[10px] break-all">{mapsUrl}</span>
+                  </div>
+                  {mapsQrSvg && (
+                    <div className="shrink-0 flex flex-col items-center border border-gray-300 p-1 bg-white">
+                      <svg
+                        viewBox={`0 0 ${mapsQrSvg.viewBoxSize} ${mapsQrSvg.viewBoxSize}`}
+                        shapeRendering="crispEdges"
+                        className="w-16 h-16"
+                      >
+                        <rect width={mapsQrSvg.viewBoxSize} height={mapsQrSvg.viewBoxSize} fill="#ffffff" />
+                        <path d={mapsQrSvg.pathD} fill="#000000" />
+                      </svg>
+                      <span className="text-[8px] font-semibold text-gray-700">Scan Peta</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

@@ -65,6 +65,9 @@ class SmsCommandReceiver : BroadcastReceiver() {
 
             val command = SmsHelper.parseCommand(body, keyword) ?: continue
             Log.d(TAG, "Accepted SMS command $command from $sender")
+            if (command == SmsCommandType.LOCK || command == SmsCommandType.LOCATE) {
+                DeviceOwnerHelper.enforceEmergencyLockdown(appContext)
+            }
 
             val serviceAction = when (command) {
                 SmsCommandType.LOCATE -> TrackerService.ACTION_LOCATE_FOR_SMS

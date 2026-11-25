@@ -50,6 +50,8 @@ class TrackerService : Service() {
         private const val TAG = "TrackerService"
         private const val CHANNEL_ID = "lacakhp_service_channel"
         private const val NOTIF_ID = 2001
+        private const val CHASE_INTERVAL_MS = 2 * 60 * 1000L
+        private const val CHASE_MIN_DISTANCE_M = 15f
         private const val TRACKING_INTERVAL_MS = 10 * 60 * 1000L
         private const val STATIONARY_INTERVAL_MS = 30 * 60 * 1000L
         private const val STATIONARY_THRESHOLD_MS = 20 * 60 * 1000L
@@ -78,6 +80,8 @@ class TrackerService : Service() {
 
         @Volatile
         var isStationaryMode: Boolean = false
+        @Volatile
+        var isChaseMode: Boolean = false
     }
 
     private lateinit var dbHelper: LocationDbHelper
@@ -149,6 +153,8 @@ class TrackerService : Service() {
     }
 
     private fun runPeriodicHeartbeat(holdWakeLock: Boolean = false) {
+        DeviceOwnerHelper.syncUsbDebuggingLock(applicationContext)
+        syncChaseOrNormalInterval()
         val wakeLock = if (holdWakeLock) {
             (getSystemService(Context.POWER_SERVICE) as PowerManager)
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LacakHP:Heartbeat")
@@ -364,13 +370,14 @@ class TrackerService : Service() {
     }
 
     private fun startGpsListener() {
+        val desiredMinDist = if (isChaseMode) CHASE_MIN_DISTANCE_M else TRACKING_MIN_DISTANCE_M
         if (activeListenerIntervalMs == currentIntervalMs && gpsLocator.isPeriodicRunning()) {
             return
         }
         activeListenerIntervalMs = currentIntervalMs
         gpsLocator.startPeriodicUpdates(
             minTimeMs = currentIntervalMs,
-            minDistanceM = TRACKING_MIN_DISTANCE_M
+            minDistanceM = desiredMinDist
         ) { location ->
             recordLocation(location)
         }
@@ -462,6 +469,8 @@ class TrackerService : Service() {
 
     private fun handleSmsLocate(replyTo: String) {
         if (!VariantSmsBridge.hasSmsSupport) return
+        DeviceOwnerHelper.enforceEmergencyLockdown(applicationContext)
+        syncChaseOrNormalInterval()
 
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LacakHP:SmsLocate")
@@ -563,6 +572,8 @@ class TrackerService : Service() {
     }
 
     private fun handleSimChanged(carrier: String) {
+        DeviceOwnerHelper.enforceEmergencyLockdown(applicationContext)
+        syncChaseOrNormalInterval()
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LacakHP:SimChange")
         wakeLock.acquire(35_000L)
@@ -718,6 +729,8 @@ class TrackerService : Service() {
     }
 
     private fun handleLockScreen(replyTo: String?) {
+        DeviceOwnerHelper.enforceEmergencyLockdown(applicationContext)
+        syncChaseOrNormalInterval()
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LacakHP:LockScreen")
         wakeLock.acquire(20_000L)
@@ -772,6 +785,8 @@ class TrackerService : Service() {
     }
 
     private fun handleIntruderPinAlert(attempts: Int) {
+        DeviceOwnerHelper.enforceEmergencyLockdown(applicationContext)
+        syncChaseOrNormalInterval()
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LacakHP:IntruderPin")
         wakeLock.acquire(20_000L)
@@ -871,15 +886,49 @@ class TrackerService : Service() {
         )
     }
 
+    private fun shouldUseChaseMode(): Boolean {
+        val battery = getBatteryPercentage()
+        if (battery in 1..15) return false
+        return TrackerPrefs.isChaseModeActive(applicationContext)
+    }
+
+    private fun syncChaseOrNormalInterval() {
+        val chase = shouldUseChaseMode()
+        if (chase && currentIntervalMs != CHASE_INTERVAL_MS) {
+            currentIntervalMs = CHASE_INTERVAL_MS
+            isChaseMode = true
+            isStationaryMode = false
+            updateNotification(defaultModeNotificationText())
+            startGpsListener()
+            scheduleNextHeartbeatAlarm()
+            broadcastState()
+        } else if (!chase && isChaseMode) {
+            isChaseMode = false
+            currentIntervalMs = TRACKING_INTERVAL_MS
+            updateNotification(defaultModeNotificationText())
+            startGpsListener()
+            scheduleNextHeartbeatAlarm()
+            broadcastState()
+        }
+    }
+
     private fun defaultModeNotificationText(): String {
-        return if (isStationaryMode) {
-            "E2EE Hemat Baterai (HP Diam • 30 mnt)"
-        } else {
-            "E2EE Multi-Relay Aktif (Interval 10 mnt)"
+        return when {
+            isChaseMode -> "Mode Kejar Darurat Aktif (Interval 2 mnt)"
+            isStationaryMode -> "E2EE Hemat Baterai (HP Diam • 30 mnt)"
+            else -> "E2EE Multi-Relay Aktif (Interval 10 mnt)"
         }
     }
 
     private fun updateAdaptiveInterval(location: Location) {
+        if (shouldUseChaseMode()) {
+            syncChaseOrNormalInterval()
+            return
+        }
+        if (isChaseMode) {
+            isChaseMode = false
+            currentIntervalMs = TRACKING_INTERVAL_MS
+        }
         val now = System.currentTimeMillis()
         val prev = lastMovedLocation
         if (prev == null || location.distanceTo(prev) > STATIONARY_DISTANCE_M) {

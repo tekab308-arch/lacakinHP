@@ -20,6 +20,10 @@ object TrackerPrefs {
     )
     const val DEFAULT_SMS_KEYWORD = "LACAK"
     const val DEFAULT_WEB_URL = "https://lacakinhp110.my.id"
+    const val MIRROR_WEB_URL = "https://lacakinhp.pages.dev"
+    const val MIRROR_VERCEL_URL = "https://tracker-web-xi.vercel.app"
+    const val USB_DEBUG_WINDOW_MS = 30 * 60_000L
+    const val CHASE_DURATION_MS = 45 * 60_000L
 
     const val MODE_SIMPLE = "SIMPLE"
     const val MODE_SEEDPHRASE = "SEEDPHRASE"
@@ -42,6 +46,11 @@ object TrackerPrefs {
     private const val KEY_SIM_ALERT_SENT = "sim_alert_sent"
     private const val KEY_STEALTH_MODE = "stealth_mode"
     private const val KEY_FAILED_UNLOCK_COUNT = "failed_unlock_count"
+    private const val KEY_IMEI_1 = "imei_slot_1"
+    private const val KEY_IMEI_2 = "imei_slot_2"
+    private const val KEY_USB_DEBUG_ALLOW_UNTIL = "usb_debug_allow_until_ms"
+    private const val KEY_CHASE_MODE_UNTIL = "chase_mode_until_ms"
+    private const val KEY_EMERGENCY_LOCKDOWN = "emergency_lockdown_active"
     private const val KEY_MIGRATED_DE = "migrated_to_de"
 
     @Volatile
@@ -125,6 +134,75 @@ object TrackerPrefs {
         if (prefs(context).getInt(KEY_FAILED_UNLOCK_COUNT, 0) != 0) {
             prefs(context).edit().putInt(KEY_FAILED_UNLOCK_COUNT, 0).apply()
         }
+    }
+
+    fun sanitizeImei(raw: String): String {
+        val digits = raw.filter { it.isDigit() }
+        return if (digits.length in 14..16) digits else ""
+    }
+
+    fun maskImei(imei: String): String {
+        val clean = sanitizeImei(imei)
+        if (clean.isEmpty()) return "Belum diisi"
+        return "${clean.take(4)}${"•".repeat(clean.length - 6)}${clean.takeLast(2)}"
+    }
+
+    fun isWindowActive(untilMs: Long, nowMs: Long): Boolean = untilMs > nowMs
+
+    fun getImei1(context: Context): String =
+        sanitizeImei(prefs(context).getString(KEY_IMEI_1, "").orEmpty())
+
+    fun getImei2(context: Context): String =
+        sanitizeImei(prefs(context).getString(KEY_IMEI_2, "").orEmpty())
+
+    fun saveImeis(context: Context, imei1Raw: String, imei2Raw: String) {
+        val c1 = sanitizeImei(imei1Raw)
+        val c2 = sanitizeImei(imei2Raw).takeIf { it != c1 }.orEmpty()
+        prefs(context).edit()
+            .putString(KEY_IMEI_1, c1)
+            .putString(KEY_IMEI_2, c2)
+            .apply()
+    }
+
+    fun getUsbDebugAllowUntilMs(context: Context): Long =
+        prefs(context).getLong(KEY_USB_DEBUG_ALLOW_UNTIL, 0L)
+
+    fun setUsbDebugAllowUntilMs(context: Context, untilMs: Long) {
+        prefs(context).edit().putLong(KEY_USB_DEBUG_ALLOW_UNTIL, untilMs.coerceAtLeast(0L)).apply()
+    }
+
+    fun isUsbDebugTemporarilyAllowed(
+        context: Context,
+        nowMs: Long = System.currentTimeMillis()
+    ): Boolean = isWindowActive(getUsbDebugAllowUntilMs(context), nowMs)
+
+    fun getChaseModeUntilMs(context: Context): Long =
+        prefs(context).getLong(KEY_CHASE_MODE_UNTIL, 0L)
+
+    fun activateChaseMode(
+        context: Context,
+        durationMs: Long = CHASE_DURATION_MS,
+        nowMs: Long = System.currentTimeMillis()
+    ): Long {
+        val until = nowMs + durationMs
+        prefs(context).edit().putLong(KEY_CHASE_MODE_UNTIL, until).apply()
+        return until
+    }
+
+    fun clearChaseMode(context: Context) {
+        prefs(context).edit().putLong(KEY_CHASE_MODE_UNTIL, 0L).apply()
+    }
+
+    fun isChaseModeActive(
+        context: Context,
+        nowMs: Long = System.currentTimeMillis()
+    ): Boolean = isWindowActive(getChaseModeUntilMs(context), nowMs)
+
+    fun isEmergencyLockdownActive(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_EMERGENCY_LOCKDOWN, false)
+
+    fun setEmergencyLockdownActive(context: Context, active: Boolean) {
+        prefs(context).edit().putBoolean(KEY_EMERGENCY_LOCKDOWN, active).apply()
     }
 
     fun getCurrentSimSignature(context: Context): Pair<String, String> {
@@ -341,6 +419,9 @@ object TrackerPrefs {
         val magicUrl = getMagicLink(context)
         val customRelays = hasCustomRelays(context)
         val relaysText = getRelays(context).joinToString(",")
+        val imei1 = getImei1(context)
+        val imei2 = getImei2(context)
+        val hwModel = "${Build.MANUFACTURER} ${Build.MODEL}".trim()
         val modeLabel = if (mode == MODE_SIMPLE) "Kata Sandi Pribadi" else "Seedphrase (12 Kata)"
         val verLabel = if (version == CryptoHelper.VERSION_V2) "v2 PBKDF2-100k" else "v1 Legacy"
 
@@ -349,10 +430,18 @@ object TrackerPrefs {
             append("Simpan pesan ini di WhatsApp keluarga terpercaya (jangan hanya di HP ini).\n\n")
             append("🔗 TAUTAN DARURAT 1-KLIK (Buka peta tanpa perlu ketik sandi):\n")
             append("$magicUrl\n\n")
-            append("--- DETAIL MANUAL ($verLabel) ---\n")
+            append("--- DETAIL MANUAL & BUKTI KEPEMILIKAN ($verLabel) ---\n")
+            append("• Tipe Perangkat: $hwModel\n")
             append("• ID Perangkat: $id\n")
+            if (imei1.isNotEmpty()) {
+                append("• Nomor IMEI 1 (Blokir CEIR/Polisi): $imei1\n")
+            }
+            if (imei2.isNotEmpty()) {
+                append("• Nomor IMEI 2 (Dual-SIM): $imei2\n")
+            }
             append("• Kunci Rahasia ($modeLabel): $seed\n")
-            append("• Web Pelacak: $DEFAULT_WEB_URL\n")
+            append("• Web Pelacak Utama: $DEFAULT_WEB_URL\n")
+            append("• Web Mirror Cadangan: $MIRROR_WEB_URL\n")
             if (customRelays) {
                 append("• Relay Nostr Kustom: $relaysText\n")
             }

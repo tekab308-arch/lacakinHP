@@ -93,4 +93,52 @@ class TrackerUnitTests {
             CryptoHelper.normalizeSeedphrase("  Kucing   Lucu\t2026 ")
         )
     }
+
+    @Test
+    fun validatesMirrorUrlsCertAndApkHashStrictly() {
+        assertTrue(UpdateChecker.isTrustedUpdateUrl("https://lacakinhp110.my.id/lacakhp-resmi.apk"))
+        assertTrue(UpdateChecker.isTrustedUpdateUrl("https://lacakinhp.pages.dev/lacakhp-resmi.apk"))
+        assertTrue(UpdateChecker.isTrustedUpdateUrl("https://tracker-web-xi.vercel.app/lacakhp-resmi.apk"))
+
+        // Reject subdomain/prefix spoofing & plain HTTP
+        assertFalse(UpdateChecker.isTrustedUpdateUrl("https://lacakinhp110.my.id.evil.com/lacakhp-resmi.apk"))
+        assertFalse(UpdateChecker.isTrustedUpdateUrl("http://lacakinhp110.my.id/lacakhp-resmi.apk"))
+
+        // When failing over to Cloudflare mirror, APK URL rewrites to active mirror
+        assertEquals(
+            "https://lacakinhp.pages.dev/lacakhp-resmi.apk",
+            UpdateChecker.resolveMirrorApkUrl(
+                "https://lacakinhp110.my.id/lacakhp-resmi.apk",
+                "https://lacakinhp.pages.dev"
+            )
+        )
+
+        assertTrue(
+            UpdateChecker.isOfficialCertSha256(
+                "E3:10:0D:61:55:7B:49:1F:65:E4:B2:42:CC:43:29:25:27:3B:7C:96:F5:55:27:CA:27:A9:EB:48:C3:A8:07:48"
+            )
+        )
+        assertFalse(
+            UpdateChecker.isOfficialCertSha256(
+                "00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF"
+            )
+        )
+        assertTrue(
+            UpdateChecker.isValidApkSha256(
+                "de81c0fe3bc3d6cbe50a467bb4143fe4a0a41d9207ba56f12281f105cea1d970"
+            )
+        )
+        assertFalse(UpdateChecker.isValidApkSha256("not-a-valid-sha256"))
+    }
+
+    @Test
+    fun sanitizesMasksImeiAndChecksAutoRelockWindow() {
+        assertEquals("356789101234567", TrackerPrefs.sanitizeImei("3567-8910-1234-567"))
+        assertEquals("", TrackerPrefs.sanitizeImei("12345"))
+        assertEquals("3567•••••••••67", TrackerPrefs.maskImei("356789101234567"))
+        assertEquals("Belum diisi", TrackerPrefs.maskImei(""))
+
+        assertTrue(TrackerPrefs.isWindowActive(untilMs = 1_000_000L, nowMs = 999_999L))
+        assertFalse(TrackerPrefs.isWindowActive(untilMs = 1_000_000L, nowMs = 1_000_000L))
+    }
 }

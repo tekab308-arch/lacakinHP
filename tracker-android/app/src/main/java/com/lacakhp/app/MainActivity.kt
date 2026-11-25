@@ -16,8 +16,11 @@ import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.InputType
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.View
@@ -34,6 +37,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.card.MaterialCardView
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -98,6 +103,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnTestSms: Button
 
     private lateinit var dbHelper: LocationDbHelper
+    private val uiHandler = Handler(Looper.getMainLooper())
+    private val usbAutoRelockRunnable = Runnable {
+        DeviceOwnerHelper.syncUsbDebuggingLock(this)
+        if (!isFinishing && !isDestroyed) {
+            updatePermissionsUI()
+        }
+    }
     private var isKeyRevealed = false
     private var isAdvancedExpanded = false
     private var hasPromptedAdminThisSession = false
@@ -165,6 +177,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        DeviceOwnerHelper.syncUsbDebuggingLock(this)
+        if (DeviceOwnerHelper.isDeviceOwner(this)) {
+            DeviceOwnerHelper.applySmartOwnerPolicies(this)
+        }
         applySecretMasking()
         updatePermissionsUI()
         refreshDashboard()
@@ -184,6 +200,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         isKeyRevealed = false
+        uiHandler.removeCallbacks(usbAutoRelockRunnable)
         try {
             unregisterReceiver(stateReceiver)
         } catch (_: Exception) {}
@@ -362,6 +379,64 @@ class MainActivity : AppCompatActivity() {
         pendingSecureAction = onVerified
         isAwaitingCredential = true
         confirmDeviceCredential.launch(authIntent)
+    }
+
+    /**
+     * Anti-Shoulder-Surfing Dual Verification:
+     * Requires passing OS screen lock (PIN/Biometric) AND re-entering the LacakHP Secret Key
+     * (personal password or 12-word seed) before unlocking Device Owner / USB Debugging / Airplane Lock.
+     */
+    private fun requireDualOwnerAuth(title: String, reason: String, onVerified: () -> Unit) {
+        requireDeviceCredential(title, reason) {
+            val density = resources.displayMetrics.density
+            fun dp(v: Int): Int = (v * density).toInt()
+            val mode = TrackerPrefs.getSecurityMode(this)
+            val modeHint = if (mode == TrackerPrefs.MODE_SIMPLE) {
+                "Ketik Kata Sandi Pribadi LacakHP Anda"
+            } else {
+                "Ketik 12 Kata Seed Rahasia LacakHP Anda"
+            }
+
+            val container = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(20), dp(10), dp(20), dp(6))
+            }
+            val input = EditText(this).apply {
+                hint = modeHint
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                setTextColor(Color.WHITE)
+                setHintTextColor(Color.GRAY)
+                setBackgroundColor(Color.parseColor("#0F172A"))
+                setPadding(dp(14), dp(12), dp(14), dp(12))
+            }
+            container.addView(input)
+
+            AlertDialog.Builder(this)
+                .setTitle("Verifikasi Ganda Pemilik Sah")
+                .setMessage(
+                    "Demi mencegah pencuri yang mengintip PIN layar Anda di tempat umum, masukkan kembali Kunci Rahasia LacakHP Anda (sesuai Kartu Darurat keluarga):"
+                )
+                .setView(container)
+                .setPositiveButton("Verifikasi") { _, _ ->
+                    val enteredNorm = CryptoHelper.normalizeSeedphrase(input.text.toString())
+                    val expectedNorm = CryptoHelper.normalizeSeedphrase(TrackerPrefs.getSeedphrase(this))
+                    val matched = enteredNorm.isNotEmpty() && MessageDigest.isEqual(
+                        enteredNorm.toByteArray(StandardCharsets.UTF_8),
+                        expectedNorm.toByteArray(StandardCharsets.UTF_8)
+                    )
+                    if (matched) {
+                        onVerified()
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "Kunci Rahasia LacakHP tidak cocok! Aksi ditolak demi keamanan.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+                .setNegativeButton("Batal", null)
+                .show()
+        }
     }
 
     private fun setupListeners() {
@@ -578,27 +653,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnPermAdmin.setOnClickListener {
-            val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            val adminComponent = ComponentName(this, TrackerAdminReceiver::class.java)
-            if (dpm.isAdminActive(adminComponent)) {
-                requireDeviceCredential(
-                    "Lepas Kunci Anti-Uninstall?",
-                    "Verifikasi PIN/Sidik Jari sebelum melepas Administrator Perangkat."
-                ) {
-                    AlertDialog.Builder(this)
-                        .setTitle("Lepas Kunci Anti-Uninstall?")
-                        .setMessage("Jika dilepas, siapa pun dapat mencopot pemasangan aplikasi ini tanpa perlindungan.")
-                        .setPositiveButton("Lepas Kunci") { _, _ ->
-                            dpm.removeActiveAdmin(adminComponent)
-                            updatePermissionsUI()
-                            Toast.makeText(this, "Kunci Anti-Uninstall dilepas", Toast.LENGTH_SHORT).show()
-                        }
-                        .setNegativeButton("Batal", null)
-                        .show()
-                }
-            } else {
-                launchDeviceAdminActivation()
-            }
+            showProtectionFortressDialog()
         }
 
         btnPermSim.setOnClickListener {
@@ -757,10 +812,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshDashboard() {
         val online = NostrRelayClient.isNetworkOnline(this)
-        tvServiceStatus.text = if (TrackerService.isStationaryMode) {
-            "Hemat Baterai Aktif (HP Diam • 30 mnt)"
-        } else {
-            "Pelacak E2EE Aktif (Interval 10 mnt)"
+        val chaseActive = TrackerService.isChaseMode || TrackerPrefs.isChaseModeActive(this)
+        tvServiceStatus.text = when {
+            chaseActive -> "🚨 Mode Kejar Darurat Aktif (Interval 2 mnt)"
+            TrackerService.isStationaryMode -> "Hemat Baterai Aktif (HP Diam • 30 mnt)"
+            else -> "Pelacak E2EE Aktif (Interval 10 mnt)"
         }
         tvNetworkStatus.text = if (online) {
             "NOSTR RELAY: SIAP"
@@ -825,10 +881,37 @@ class MainActivity : AppCompatActivity() {
         val batteryOk = pm.isIgnoringBatteryOptimizations(packageName)
         applyBadge(tvPermBattery, btnPermBattery, batteryOk, "Diizinkan", "Perlu diizinkan")
 
-        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val adminComponent = ComponentName(this, TrackerAdminReceiver::class.java)
-        val adminActive = dpm.isAdminActive(adminComponent)
-        applyBadge(tvPermAdmin, btnPermAdmin, adminActive, "Aktif (Terkunci)", "Belum aktif (Bisa dihapus)")
+        DeviceOwnerHelper.syncUsbDebuggingLock(this)
+        val isOwner = DeviceOwnerHelper.isDeviceOwner(this)
+        val adminActive = isOwner || DeviceOwnerHelper.isAdminActive(this)
+        if (isOwner) {
+            val usbOpenUntil = TrackerPrefs.getUsbDebugAllowUntilMs(this)
+            val nowMs = System.currentTimeMillis()
+            val statusDetail = when {
+                TrackerPrefs.isWindowActive(usbOpenUntil, nowMs) -> {
+                    val minsLeft = ((usbOpenUntil - nowMs + 59_999L) / 60_000L).coerceAtLeast(1L)
+                    "✓ Benteng Level 2 Aktif (USB Terbuka ${minsLeft}m)"
+                }
+                TrackerPrefs.isEmergencyLockdownActive(this) ->
+                    "✓ Benteng Level 2 + Mode Darurat Aktif"
+                else ->
+                    "✓ Benteng Device Owner Aktif (Anti-Reset & Anti-Hapus)"
+            }
+            tvPermAdmin.text = statusDetail
+            tvPermAdmin.setTextColor(Color.parseColor("#10B981"))
+            btnPermAdmin.text = "Kelola"
+            btnPermAdmin.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#059669"))
+        } else if (adminActive) {
+            tvPermAdmin.text = "✓ Level 1 Aktif • Ketuk untuk Benteng Level 2 / IMEI"
+            tvPermAdmin.setTextColor(Color.parseColor("#10B981"))
+            btnPermAdmin.text = "Kelola"
+            btnPermAdmin.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#059669"))
+        } else {
+            tvPermAdmin.text = "Belum aktif (Bisa dihapus)"
+            tvPermAdmin.setTextColor(Color.parseColor("#F87171"))
+            btnPermAdmin.text = "Kunci"
+            btnPermAdmin.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4F46E5"))
+        }
 
         if (VariantSmsBridge.hasSmsSupport) {
             val trustedSig = TrackerPrefs.getTrustedSimSignature(this)
@@ -1121,14 +1204,15 @@ class MainActivity : AppCompatActivity() {
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val batteryOk = pm.isIgnoringBatteryOptimizations(packageName)
 
-        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val adminOk = dpm.isAdminActive(ComponentName(this, TrackerAdminReceiver::class.java))
+        val isOwner = DeviceOwnerHelper.isDeviceOwner(this)
+        val adminOk = isOwner || DeviceOwnerHelper.isAdminActive(this)
 
         val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         val lockOk = km.isDeviceSecure
 
         val isV2 = TrackerPrefs.getCryptoVersion(this) == CryptoHelper.VERSION_V2
         val integrity = ApkIntegrityHelper.verify(this)
+        val imeiMasked = TrackerPrefs.maskImei(TrackerPrefs.getImei1(this))
 
         val msg = buildString {
             append(if (integrity.isOfficial) "✅ " else "🚨 ")
@@ -1141,7 +1225,15 @@ class MainActivity : AppCompatActivity() {
             append("Abaikan Optimasi Baterai: ${if (batteryOk) "Diizinkan" else "Belum diizinkan"}\n")
 
             append(if (adminOk) "✅ " else "⚠️ ")
-            append("Anti-Uninstall Admin: ${if (adminOk) "Terkunci" else "Belum dikunci"}\n")
+            val adminLabel = when {
+                isOwner -> "Benteng Level 2 (Device Owner Anti-Reset)"
+                adminOk -> "Level 1 (Device Admin Standar)"
+                else -> "Belum dikunci"
+            }
+            append("Anti-Uninstall: $adminLabel\n")
+
+            append(if (TrackerPrefs.getImei1(this@MainActivity).isNotEmpty()) "✅ " else "ℹ️ ")
+            append("IMEI Kartu Darurat: $imeiMasked\n")
 
             append(if (lockOk) "✅ " else "⚠️ ")
             append("Kunci Layar HP (PIN/Sidik Jari): ${if (lockOk) "Aktif" else "Belum dipasang!"}\n")
@@ -1235,7 +1327,8 @@ class MainActivity : AppCompatActivity() {
 
         val message = "$statusHeader\n\n" +
             "Sidik Jari Sertifikat APK (SHA-256):\n${integrity.colonFormatted}\n\n" +
-            "Domain Web Resmi:\n${TrackerPrefs.DEFAULT_WEB_URL}\n\n" +
+            "Domain Web Resmi:\n${TrackerPrefs.DEFAULT_WEB_URL}\n" +
+            "Mirror Resmi:\n${TrackerPrefs.MIRROR_WEB_URL}\n\n" +
             "Peringatan Hukum (UU ITE & UU PDP):\n" +
             "Aplikasi amal ini 100% Gratis. Dilarang keras dipasang secara diam-diam untuk memata-matai orang lain tanpa izin sah (melanggar Pasal 30 & 31 UU ITE pidana penjara maks 10 tahun / denda Rp 800 Juta, serta Pasal 65 UU PDP No. 27/2022 denda maks Rp 5 Miliar)."
 
@@ -1243,7 +1336,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Verifikasi Keaslian & Update LacakHP")
             .setMessage(message)
             .setPositiveButton("Cek Update Resmi") { _, _ ->
-                Toast.makeText(this, "Memeriksa pembaruan di ${TrackerPrefs.DEFAULT_WEB_URL}...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Memeriksa pembaruan di server resmi & mirror...", Toast.LENGTH_SHORT).show()
                 checkForAppUpdate(silentIfUpToDate = false)
             }
             .setNeutralButton("Salin SHA-256") { _, _ ->
@@ -1264,7 +1357,7 @@ class MainActivity : AppCompatActivity() {
                 if (!silentIfUpToDate) {
                     Toast.makeText(
                         this,
-                        "Gagal menghubungi server pembaruan. Periksa koneksi internet Anda.",
+                        "Gagal menghubungi server utama maupun mirror pembaruan. Periksa koneksi internet Anda.",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -1272,31 +1365,272 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (res.hasUpdate) {
+                val shortSha = if (res.apkSha256.length >= 20) {
+                    "${res.apkSha256.take(12)}...${res.apkSha256.takeLast(8)}"
+                } else {
+                    ""
+                }
                 val msg = buildString {
                     append("Versi terbaru LacakHP v${res.remoteVersionName} (Build ${res.remoteVersionCode}) sudah tersedia!\n\n")
                     if (res.notes.isNotBlank()) {
                         append("Pembaruan:\n${res.notes}\n\n")
                     }
-                    append("• Data, Kunci Rahasia, Kunci SIM, dan Anti-Uninstall Anda TETAP AMAN (tidak perlu uninstall aplikasi lama, cukup instal menimpa versi ini).")
+                    append("Sumber Resmi: ${res.sourceOrigin}\n")
+                    if (res.apkSha256.isNotEmpty()) {
+                        append("SHA-256 File APK ($shortSha):\n${res.apkSha256}\n\n")
+                    }
+                    append("• Data, Kunci Rahasia, Kunci SIM, dan Benteng Anti-Uninstall Anda TETAP AMAN (cukup instal menimpa versi ini lewat browser).")
                 }
-                AlertDialog.Builder(this)
+                val builder = AlertDialog.Builder(this)
                     .setTitle("🎉 Pembaruan Resmi Tersedia!")
                     .setMessage(msg)
-                    .setPositiveButton("Unduh & Perbarui Sekarang") { _, _ ->
+                    .setPositiveButton("Unduh via Browser") { _, _ ->
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(res.apkUrl)))
                     }
                     .setNegativeButton("Nanti", null)
-                    .show()
+                if (res.apkSha256.isNotEmpty()) {
+                    builder.setNeutralButton("Salin Hash APK") { _, _ ->
+                        val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        cm.setPrimaryClip(
+                            android.content.ClipData.newPlainText("LacakHP APK File SHA-256", res.apkSha256)
+                        )
+                        Toast.makeText(this, "SHA-256 file APK disalin", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                builder.show()
             } else if (!silentIfUpToDate) {
                 AlertDialog.Builder(this)
                     .setTitle("✓ Sudah Versi Terbaru")
                     .setMessage(
-                        "Aplikasi LacakHP Anda sudah menggunakan rilis resmi terbaru (v${res.localVersionName} • Build ${res.localVersionCode})."
+                        "Aplikasi LacakHP Anda sudah menggunakan rilis resmi terbaru (v${res.localVersionName} • Build ${res.localVersionCode}).\nSumber terverifikasi: ${res.sourceOrigin}"
                     )
                     .setPositiveButton("OK", null)
                     .show()
             }
         }
+    }
+
+    private fun showProtectionFortressDialog() {
+        DeviceOwnerHelper.syncUsbDebuggingLock(this)
+        val isOwner = DeviceOwnerHelper.isDeviceOwner(this)
+        val isAdmin = DeviceOwnerHelper.isAdminActive(this)
+        val imeiSummary = TrackerPrefs.maskImei(TrackerPrefs.getImei1(this))
+
+        if (isOwner) {
+            DeviceOwnerHelper.readAndCacheHardwareImeis(this)
+            val nowMs = System.currentTimeMillis()
+            val usbUntil = TrackerPrefs.getUsbDebugAllowUntilMs(this)
+            val usbOpen = TrackerPrefs.isWindowActive(usbUntil, nowMs)
+            val emergencyLocked = TrackerPrefs.isEmergencyLockdownActive(this)
+
+            val options = mutableListOf<Pair<String, () -> Unit>>()
+            if (usbOpen) {
+                val minsLeft = ((usbUntil - nowMs + 59_999L) / 60_000L).coerceAtLeast(1L)
+                options.add("🔒 Kunci Ulang USB Debugging Sekarang (Sisa ${minsLeft}m)" to {
+                    uiHandler.removeCallbacks(usbAutoRelockRunnable)
+                    DeviceOwnerHelper.relockUsbDebuggingNow(this)
+                    updatePermissionsUI()
+                    Toast.makeText(this, "Port USB Debugging kembali dikunci rapat!", Toast.LENGTH_SHORT).show()
+                })
+            } else {
+                options.add("🔌 Izinkan USB Debugging Sementara (Auto-Relock 30 Menit)" to {
+                    requireDualOwnerAuth(
+                        "Buka USB Debugging 30 Menit",
+                        "Verifikasi PIN/Sidik Jari + Kunci Rahasia untuk membuka port USB sementara."
+                    ) {
+                        val until = DeviceOwnerHelper.allowUsbDebuggingTemporarily(this)
+                        val delay = (until - System.currentTimeMillis()).coerceAtLeast(1_000L)
+                        uiHandler.removeCallbacks(usbAutoRelockRunnable)
+                        uiHandler.postDelayed(usbAutoRelockRunnable, delay + 250L)
+                        updatePermissionsUI()
+                        Toast.makeText(
+                            this,
+                            "USB Debugging diizinkan selama 30 menit (otomatis terkunci kembali & saat reboot).",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                })
+            }
+
+            if (emergencyLocked) {
+                options.add("✈️ Pulihkan Status Darurat (Buka Blokir Mode Pesawat)" to {
+                    requireDualOwnerAuth(
+                        "Pulihkan Status Darurat",
+                        "Verifikasi PIN/Sidik Jari + Kunci Rahasia untuk membuka kembali akses Mode Pesawat."
+                    ) {
+                        DeviceOwnerHelper.clearEmergencyLockdown(this)
+                        updatePermissionsUI()
+                        refreshDashboard()
+                        Toast.makeText(this, "Status darurat dipulihkan. Mode Pesawat kembali normal.", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+
+            options.add("📱 Atur / Lihat Nomor IMEI Kartu Darurat ($imeiSummary)" to {
+                requireDeviceCredential(
+                    "Kelola Nomor IMEI",
+                    "Verifikasi PIN/Sidik Jari untuk melihat atau menyimpan nomor IMEI Kartu Darurat."
+                ) {
+                    showImeiConfigDialog()
+                }
+            })
+
+            options.add("🔓 Lepas Benteng Device Owner Sepenuhnya" to {
+                requireDualOwnerAuth(
+                    "Lepas Benteng Device Owner",
+                    "Verifikasi PIN/Sidik Jari + Kunci Rahasia sebelum melepas kepemilikan sistem."
+                ) {
+                    AlertDialog.Builder(this)
+                        .setTitle("Lepas Benteng Device Owner?")
+                        .setMessage(
+                            "Seluruh kunci anti-reset pabrik, kunci izin GPS/SMS, dan proteksi anti-hapus permanen akan dilepas (misalnya saat Anda hendak menjual atau mereset HP)."
+                        )
+                        .setPositiveButton("Ya, Lepas Benteng") { _, _ ->
+                            val ok = DeviceOwnerHelper.releaseDeviceOwner(this)
+                            updatePermissionsUI()
+                            Toast.makeText(
+                                this,
+                                if (ok) "Benteng Device Owner berhasil dilepas" else "Gagal melepas Device Owner",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        .setNegativeButton("Batal", null)
+                        .show()
+                }
+            })
+
+            AlertDialog.Builder(this)
+                .setTitle("🏰 Benteng Device Owner Aktif")
+                .setItems(options.map { it.first }.toTypedArray()) { _, which ->
+                    options[which].second.invoke()
+                }
+                .setNegativeButton("Tutup", null)
+                .show()
+        } else {
+            val options = mutableListOf<Pair<String, () -> Unit>>()
+            if (!isAdmin) {
+                options.add("🛡️ Aktifkan Level 1: Kunci Admin Standar (1-Klik)" to {
+                    launchDeviceAdminActivation()
+                })
+            }
+            options.add("🏰 Upgrade ke Level 2: Benteng Device Owner (aShell / ADB)" to {
+                showLevel2ActivationGuideDialog()
+            })
+            options.add("📱 Simpan Nomor IMEI (*#06#) ke Kartu Darurat ($imeiSummary)" to {
+                requireDeviceCredential(
+                    "Simpan Nomor IMEI",
+                    "Verifikasi PIN/Sidik Jari untuk melihat atau mengisi nomor IMEI Kartu Darurat."
+                ) {
+                    showImeiConfigDialog()
+                }
+            })
+            if (isAdmin) {
+                options.add("🔓 Lepas Kunci Anti-Uninstall Level 1" to {
+                    requireDualOwnerAuth(
+                        "Lepas Kunci Anti-Uninstall",
+                        "Verifikasi PIN/Sidik Jari + Kunci Rahasia sebelum melepas Administrator Perangkat."
+                    ) {
+                        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+                        dpm.removeActiveAdmin(DeviceOwnerHelper.adminComponent(this))
+                        updatePermissionsUI()
+                        Toast.makeText(this, "Kunci Anti-Uninstall Level 1 dilepas", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+
+            AlertDialog.Builder(this)
+                .setTitle("Kunci Anti-Hapus & Benteng Perangkat")
+                .setItems(options.map { it.first }.toTypedArray()) { _, which ->
+                    options[which].second.invoke()
+                }
+                .setNegativeButton("Tutup", null)
+                .show()
+        }
+    }
+
+    private fun showLevel2ActivationGuideDialog() {
+        val cmd = DeviceOwnerHelper.adbActivationCommand(this)
+        val msg = "Benteng Level 2 (Device Owner resmi Android) menonaktifkan tombol Hapus Instalan, memblokir Factory Reset & Safe Mode, mengunci izin GPS/SMS permanen, serta menutup port USB Debugging otomatis.\n\n" +
+            "Cara praktis tanpa laptop (cukup 1 menit via Shizuku + aShell):\n" +
+            "1️⃣ Lepas sementara akun Google/Samsung/Xiaomi di Pengaturan > Akun.\n" +
+            "2️⃣ Buka aShell (tersambung Shizuku) atau ADB di laptop, tempel perintah berikut:\n\n" +
+            "$cmd\n\n" +
+            "3️⃣ Setelah muncul 'Success: Device owner set', silakan login kembali ke akun Google Anda seperti biasa."
+
+        AlertDialog.Builder(this)
+            .setTitle("Upgrade ke Benteng Device Owner")
+            .setMessage(msg)
+            .setPositiveButton("Salin Perintah ADB") { _, _ ->
+                val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Perintah ADB LacakHP", cmd))
+                Toast.makeText(this, "Perintah disalin! Tempel di aShell atau Terminal ADB.", Toast.LENGTH_LONG).show()
+            }
+            .setNegativeButton("Tutup", null)
+            .show()
+    }
+
+    private fun showImeiConfigDialog() {
+        val density = resources.displayMetrics.density
+        fun dp(v: Int): Int = (v * density).toInt()
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(10), dp(20), dp(6))
+        }
+        val etImei1 = EditText(this).apply {
+            hint = "IMEI Slot 1 (15 angka — ketik *#06# di Telepon)"
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(TrackerPrefs.getImei1(this@MainActivity))
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            setBackgroundColor(Color.parseColor("#0F172A"))
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+        }
+        val etImei2 = EditText(this).apply {
+            hint = "IMEI Slot 2 (Opsional Dual-SIM)"
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(TrackerPrefs.getImei2(this@MainActivity))
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            setBackgroundColor(Color.parseColor("#0F172A"))
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = dp(10)
+            }
+        }
+        container.addView(etImei1)
+        container.addView(etImei2)
+
+        AlertDialog.Builder(this)
+            .setTitle("Nomor IMEI Kartu Darurat (100% Lokal)")
+            .setMessage(
+                "Nomor IMEI TIDAK PERNAH dikirim ke jaringan Nostr. IMEI hanya dicantumkan pada teks Kartu Darurat WhatsApp keluarga agar Anda tidak panik mencari dus HP saat melapor ke Polisi / memblokir CEIR."
+            )
+            .setView(container)
+            .setPositiveButton("Simpan Lokal") { _, _ ->
+                val raw1 = etImei1.text.toString().trim()
+                val raw2 = etImei2.text.toString().trim()
+                if (raw1.isNotEmpty() && TrackerPrefs.sanitizeImei(raw1).isEmpty()) {
+                    Toast.makeText(this, "IMEI 1 harus 14–16 angka valid!", Toast.LENGTH_LONG).show()
+                    return@setPositiveButton
+                }
+                if (raw2.isNotEmpty() && TrackerPrefs.sanitizeImei(raw2).isEmpty()) {
+                    Toast.makeText(this, "IMEI 2 harus 14–16 angka valid!", Toast.LENGTH_LONG).show()
+                    return@setPositiveButton
+                }
+                TrackerPrefs.saveImeis(this, raw1, raw2)
+                updatePermissionsUI()
+                Toast.makeText(
+                    this,
+                    "IMEI tersimpan aman! Kirim ulang Kartu Darurat ke WA keluarga untuk memperbarui catatan mereka.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun showSmsRestrictedSettingsGuideDialog() {

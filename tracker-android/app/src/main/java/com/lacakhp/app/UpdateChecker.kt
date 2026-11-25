@@ -7,6 +7,7 @@ import android.os.Looper
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -19,22 +20,58 @@ data class UpdateCheckResult(
     val remoteVersionName: String = localVersionName,
     val apkUrl: String = "${TrackerPrefs.DEFAULT_WEB_URL}/lacakhp-resmi.apk",
     val apkSha256: String = "",
-    val notes: String = ""
+    val notes: String = "",
+    val sourceOrigin: String = TrackerPrefs.DEFAULT_WEB_URL
 )
 
 /**
- * Checks https://lacakinhp110.my.id/version.json in the background to notify users
- * when a newer official signed APK is available for in-place upgrade.
+ * Checks official LacakHP mirrors in sequence (lacakinhp110.my.id -> lacakinhp.pages.dev -> vercel mirror),
+ * verifies signing certificate fingerprint continuity, and surfaces the APK SHA-256 hash without
+ * requiring REQUEST_INSTALL_PACKAGES permission.
  */
 object UpdateChecker {
 
+    val OFFICIAL_UPDATE_ORIGINS = listOf(
+        TrackerPrefs.DEFAULT_WEB_URL,
+        TrackerPrefs.MIRROR_WEB_URL,
+        TrackerPrefs.MIRROR_VERCEL_URL
+    )
+
+    private val SHA256_HEX_RE = Regex("^[0-9a-f]{64}$")
+
     private val client = OkHttpClient.Builder()
-        .connectTimeout(6, TimeUnit.SECONDS)
-        .readTimeout(6, TimeUnit.SECONDS)
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.SECONDS)
         .build()
 
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    fun isTrustedUpdateUrl(url: String): Boolean {
+        val clean = url.trim()
+        return OFFICIAL_UPDATE_ORIGINS.any { origin ->
+            clean.startsWith("$origin/")
+        }
+    }
+
+    fun isOfficialCertSha256(certSha256: String): Boolean {
+        val normalized = certSha256.trim().replace(":", "").lowercase(Locale.ROOT)
+        if (normalized.isEmpty()) return true
+        return normalized == ApkIntegrityHelper.OFFICIAL_PRIMARY_SHA256
+    }
+
+    fun isValidApkSha256(sha: String): Boolean {
+        return SHA256_HEX_RE.matches(sha.trim().lowercase(Locale.ROOT))
+    }
+
+    fun resolveMirrorApkUrl(rawApkUrl: String, activeOrigin: String): String {
+        val fallbackForOrigin = "$activeOrigin/lacakhp-resmi.apk"
+        if (activeOrigin != TrackerPrefs.DEFAULT_WEB_URL) {
+            return fallbackForOrigin
+        }
+        val clean = rawApkUrl.trim()
+        return if (isTrustedUpdateUrl(clean)) clean else fallbackForOrigin
+    }
 
     fun getLocalVersion(context: Context): Pair<Int, String> {
         return try {
@@ -57,61 +94,62 @@ object UpdateChecker {
         onResult: (UpdateCheckResult) -> Unit
     ) {
         val (localCode, localName) = getLocalVersion(context)
-        val versionUrl = "${TrackerPrefs.DEFAULT_WEB_URL}/version.json?t=${System.currentTimeMillis()}"
 
         executor.execute {
-            val result = try {
-                val req = Request.Builder()
-                    .url(versionUrl)
-                    .header("Cache-Control", "no-cache")
-                    .build()
-                client.newCall(req).execute().use { resp ->
-                    if (!resp.isSuccessful) {
-                        UpdateCheckResult(
-                            success = false,
-                            hasUpdate = false,
-                            localVersionCode = localCode,
-                            localVersionName = localName
-                        )
-                    } else {
-                        val bodyStr = resp.body?.string().orEmpty()
-                        val json = JSONObject(bodyStr)
-                        val remoteCode = json.optInt("versionCode", localCode)
-                        val remoteName = json.optString("versionName", localName)
-                        val defaultApkUrl = "${TrackerPrefs.DEFAULT_WEB_URL}/lacakhp-resmi.apk"
-                        val rawApkUrl = json.optString("apkUrl", defaultApkUrl).trim()
-                        val apkUrl = if (rawApkUrl.startsWith("${TrackerPrefs.DEFAULT_WEB_URL}/")) {
-                            rawApkUrl
-                        } else {
-                            defaultApkUrl
-                        }
-                        val apkSha256 = json.optString("apkSha256", "")
-                        val notes = json.optString("notes", "")
+            var resolvedResult: UpdateCheckResult? = null
 
-                        UpdateCheckResult(
-                            success = true,
-                            hasUpdate = remoteCode > localCode,
-                            localVersionCode = localCode,
-                            localVersionName = localName,
-                            remoteVersionCode = remoteCode,
-                            remoteVersionName = remoteName,
-                            apkUrl = apkUrl,
-                            apkSha256 = apkSha256,
-                            notes = notes
-                        )
+            for (origin in OFFICIAL_UPDATE_ORIGINS) {
+                val versionUrl = "$origin/version.json?t=${System.currentTimeMillis()}"
+                try {
+                    val req = Request.Builder()
+                        .url(versionUrl)
+                        .header("Cache-Control", "no-cache")
+                        .build()
+                    client.newCall(req).execute().use { resp ->
+                        if (resp.isSuccessful) {
+                            val bodyStr = resp.body?.string().orEmpty()
+                            val json = JSONObject(bodyStr)
+                            val remoteCert = json.optString("certSha256", "")
+                            if (!isOfficialCertSha256(remoteCert)) {
+                                return@use
+                            }
+                            val remoteCode = json.optInt("versionCode", localCode)
+                            val remoteName = json.optString("versionName", localName)
+                            val rawApkUrl = json.optString("apkUrl", "$origin/lacakhp-resmi.apk")
+                            val apkUrl = resolveMirrorApkUrl(rawApkUrl, origin)
+                            val rawSha = json.optString("apkSha256", "").trim().lowercase(Locale.ROOT)
+                            val apkSha256 = if (isValidApkSha256(rawSha)) rawSha else ""
+                            val notes = json.optString("notes", "")
+
+                            resolvedResult = UpdateCheckResult(
+                                success = true,
+                                hasUpdate = remoteCode > localCode,
+                                localVersionCode = localCode,
+                                localVersionName = localName,
+                                remoteVersionCode = remoteCode,
+                                remoteVersionName = remoteName,
+                                apkUrl = apkUrl,
+                                apkSha256 = apkSha256,
+                                notes = notes,
+                                sourceOrigin = origin
+                            )
+                        }
                     }
+                } catch (_: Exception) {
+                    // Try next official mirror
                 }
-            } catch (_: Exception) {
-                UpdateCheckResult(
-                    success = false,
-                    hasUpdate = false,
-                    localVersionCode = localCode,
-                    localVersionName = localName
-                )
+                if (resolvedResult != null) break
             }
 
+            val finalResult = resolvedResult ?: UpdateCheckResult(
+                success = false,
+                hasUpdate = false,
+                localVersionCode = localCode,
+                localVersionName = localName
+            )
+
             mainHandler.post {
-                onResult(result)
+                onResult(finalResult)
             }
         }
     }

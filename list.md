@@ -60,13 +60,13 @@
 
 ## 🟢 Prioritas 4 — Keamanan & Ekosistem Jangka Panjang
 
-- [ ] **Migrasi ke Release Signing Keystore (`debuggable = false`)**
-  - Beralih dari `app-full-debug.apk` ke APK release yang ditandatangani dengan keystore produksi khusus (disiapkan untuk rilis mayor v3.0 / Play Store / F-Droid dengan panduan migrasi satu kali bagi pengguna lama).
+- [x] **Migrasi Build ke Release Non-Debuggable (`debuggable = false`, `isMinifyEnabled = false`)**
+  - Selesai di kode lokal (`build.gradle.kts` & `publish-update.sh` memakai `assembleFullRelease` dengan sertifikat resmi `E3:10:0D:61...` agar kompatibel update menimpa & patuh whitelist Play Protect).
 - [ ] **Tindak Lanjut Banding Google Play Protect**
   - Pantau hasil pengajuan appeal yang tercatat pada `GOOGLE_PLAY_PROTECT_APPEAL.md`.
 - [ ] **Bangun Jaringan Relay Nostr Komunitas Terkurasi**
   - Eksekusi rencana infrastruktur pada `RELAY_PLANNING.md` agar tidak bergantung penuh pada relay publik global.
-- [ ] **Implementasi Benteng `Device Owner` Mode Cerdas, Verifikasi Ganda & IMEI Kartu Darurat (`tracker-android`)**
-  - Spesifikasi desain sudah dikunci 100% di `OPTIMASI_FULL_ROOT_MDM.md` Fase B (murni `BIND_DEVICE_ADMIN` tanpa `AccessibilityService` agar 100% aman untuk whitelist Google Play Protect).
-- [ ] **Tampilkan Potongan SHA-256 APK pada Dialog Update di Android (`UpdateChecker`)**
-  - Mempermudah pengguna memverifikasi keaslian file `.apk` yang baru diunduh sebelum instalasi.
+- [x] **Implementasi Benteng `Device Owner` Mode Cerdas, Mode Kejar 2 Menit, Verifikasi Ganda & IMEI Kartu Darurat (`tracker-android`)**
+  - Selesai & lulus uji lokal (`DeviceOwnerHelper.kt`, Kepatuhan QR Android 12–15, Auto-Relock USB 30 menit, Eskalasi 0 detik di Receiver, & Masking IMEI). Menunggu rilis APK v2.7 setelah email Play Protect keluar.
+- [x] **Auto-Failover Mirror & Tampilkan SHA-256 APK pada Dialog Update di Android (`UpdateChecker`)**
+  - Selesai di kode lokal (`lacakinhp110.my.id` -> `lacakinhp.pages.dev` -> `tracker-web-xi.vercel.app` + validasi `certSha256` & tombol salin `apkSha256`).

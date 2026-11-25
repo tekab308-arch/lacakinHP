@@ -23,6 +23,7 @@ try {
   const cryptoMod = await import(bundle('src/lib/crypto.ts', 'crypto.mjs'));
   const nostrMod = await import(bundle('src/lib/nostr.ts', 'nostr.mjs'));
   const releaseMod = await import(bundle('src/lib/releaseInfo.ts', 'releaseInfo.mjs'));
+  const qrMod = await import(bundle('src/lib/qrSvg.ts', 'qrSvg.mjs'));
 
   // 1. Deterministic v2 PBKDF2-100k & v1 SHA-256 key derivation + AES-256-GCM round-trip
   const dualA = await cryptoMod.deriveAllKeyVersions('Samsung-SM-A217F-Test', '  Kucing   Lucu 2026 ');
@@ -270,7 +271,30 @@ try {
     'Recomputed ID without private key signature must fail BIP-340 Schnorr check'
   );
 
-  console.log('✓ All tracker-web checks passed (crypto v1/v2 + AES-GCM + BIP-340 Schnorr NIP-01 + filterCoarseJumps + CSV/GPX + Web Security + APK Verifier)');
+  // Offline QR Provisioning SVG & Android Base64URL signature checksum verification
+  const certHex = 'E3:10:0D:61:55:7B:49:1F:65:E4:B2:42:CC:43:29:25:27:3B:7C:96:F5:55:27:CA:27:A9:EB:48:C3:A8:07:48';
+  const b64UrlSig = qrMod.hexSha256ToBase64UrlNoPad(certHex);
+  assert.equal(b64UrlSig.length, 43, '32-byte SHA-256 Base64URL without padding must be 43 chars');
+  assert.equal(
+    Buffer.from(b64UrlSig, 'base64url').toString('hex').toUpperCase(),
+    certHex.replace(/:/g, ''),
+    'Base64URL checksum must round-trip byte-for-byte to certificate SHA-256'
+  );
+  const provJson = JSON.stringify({
+    'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME': 'com.lacakhp.app/.TrackerAdminReceiver',
+    'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION': 'https://lacakinhp110.my.id/lacakhp-resmi.apk',
+    'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM': b64UrlSig,
+  });
+  const qrMatrix = qrMod.encodeQrMatrix(provJson);
+  assert.equal(qrMatrix.length, 65, '332-byte provisioning JSON must fit Version 12 (65x65) EC-L QR');
+  assert.equal(qrMatrix[0][0], true, 'Top-left finder corner must be dark');
+  assert.equal(qrMatrix[6][6], true, 'Finder center/timing intersection must be dark');
+  assert.equal(qrMatrix[qrMatrix.length - 8][8], true, 'Dark module must be set');
+  const svgOut = qrMod.buildQrSvgPath(qrMatrix, 4);
+  assert.equal(svgOut.viewBoxSize, 73);
+  assert.ok(svgOut.pathD.startsWith('M4,4h1v1h-1z'));
+
+  console.log('✓ All tracker-web checks passed (crypto v1/v2 + AES-GCM + BIP-340 Schnorr NIP-01 + filterCoarseJumps + CSV/GPX + QR Provisioning + Web Security + APK Verifier)');
 } finally {
   fs.rmSync(tmpDir, { recursive: true, force: true });
 }

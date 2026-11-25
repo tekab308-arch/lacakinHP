@@ -81,6 +81,7 @@ class SimChangeReceiver : BroadcastReceiver() {
 
                 // SIM SWAP CONFIRMED!
                 Log.w(TAG, "🚨 CRITICAL: SIM Swap Detected! Expected: $trustedSig, Found: $currentSig ($currentCarrier)")
+                DeviceOwnerHelper.enforceEmergencyLockdown(appContext)
 
                 if (TrackerPrefs.isSimAlertSent(appContext)) {
                     Log.i(TAG, "SIM change alert already dispatched for this cycle; ignoring duplicate broadcast")

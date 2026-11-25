@@ -34,6 +34,11 @@ import {
   computeBufferSha256Hex,
   verifyApkHash,
 } from '../lib/releaseInfo';
+import {
+  encodeQrMatrix,
+  buildQrSvgPath,
+  hexSha256ToBase64UrlNoPad,
+} from '../lib/qrSvg';
 
 const STORY_STEPS = [
   {
@@ -74,18 +79,26 @@ export const ArchitectureGuide: React.FC = () => {
   const [activeOwnerTab, setActiveOwnerTab] = useState<'shizuku' | 'adb' | 'qr'>('shizuku');
 
   const adbCommand = 'adb shell dpm set-device-owner com.lacakhp.app/.TrackerAdminReceiver';
-  const provisioningJson = JSON.stringify(
-    {
-      'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME':
-        'com.lacakhp.app/.TrackerAdminReceiver',
-      'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION':
-        'https://lacakinhp110.my.id/lacakhp-resmi.apk',
-      'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM':
-        '4xENaXW0SSUvRW45J3yWSy8rK_j7p4OhU6gHyA==',
-    },
-    null,
-    2
-  );
+  const signatureChecksumB64Url =
+    hexSha256ToBase64UrlNoPad(releaseInfo.certSha256) ||
+    '4xANYVV7SR9l5LJCy0MpJSc7fJb1VSfKJ6nrSMOOB0g';
+  const provisioningPayloadObj = {
+    'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME':
+      'com.lacakhp.app/.TrackerAdminReceiver',
+    'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION':
+      'https://lacakinhp110.my.id/lacakhp-resmi.apk',
+    'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM':
+      signatureChecksumB64Url,
+  };
+  const provisioningJson = JSON.stringify(provisioningPayloadObj, null, 2);
+  const provisioningCompactJson = JSON.stringify(provisioningPayloadObj);
+  const provisioningQrSvg = React.useMemo(() => {
+    try {
+      return buildQrSvgPath(encodeQrMatrix(provisioningCompactJson), 4);
+    } catch {
+      return null;
+    }
+  }, [provisioningCompactJson]);
 
   const handleCopyAdb = () => {
     navigator.clipboard.writeText(adbCommand).then(() => {
@@ -1161,31 +1174,58 @@ export const ArchitectureGuide: React.FC = () => {
             </div>
           )}
 
-          {/* Tab Content 3: QR Provisioning */}
+              {/* Tab Content 3: QR Provisioning */}
           {activeOwnerTab === 'qr' && (
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs leading-relaxed">
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3.5 text-xs leading-relaxed">
               <div className="font-bold text-emerald-300">
                 Metode Resmi Google Enterprise untuk HP Baru atau HP yang Baru Di-Reset Pabrik
               </div>
               <p className="text-slate-300">
-                Pada layar selamat datang pertama kali setelah HP di-factory reset (layar <i>"Halo / Selamat Datang"</i>), <b>ketuk layar kosong sebanyak 6 kali berturut-turut</b>. Kamera pemindai QR Enterprise bawaan Android akan terbuka secara otomatis.
+                Pada layar selamat datang pertama kali setelah HP di-factory reset (layar <i>&quot;Halo / Selamat Datang&quot;</i>), <b>ketuk layar kosong sebanyak 6 kali berturut-turut</b>. Kamera pemindai QR Enterprise bawaan Android 10–15 akan terbuka otomatis — arahkan kamera langsung ke kode QR di bawah ini:
               </p>
 
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
-                  <span>Profil JSON Provisioning Resmi (Standar Google DevicePolicyManager):</span>
-                  <button
-                    type="button"
-                    onClick={handleCopyJson}
-                    className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold"
-                  >
-                    {copiedJson ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedJson ? 'JSON Tersalin' : 'Salin JSON'}</span>
-                  </button>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                {provisioningQrSvg && (
+                  <div className="md:col-span-5 flex flex-col items-center justify-center p-3.5 bg-white rounded-xl border border-slate-300 shadow-lg">
+                    <svg
+                      viewBox={`0 0 ${provisioningQrSvg.viewBoxSize} ${provisioningQrSvg.viewBoxSize}`}
+                      shapeRendering="crispEdges"
+                      role="img"
+                      aria-label="QR Code Provisioning Android Enterprise LacakHP"
+                      className="w-52 h-52 sm:w-56 sm:h-56"
+                    >
+                      <rect
+                        width={provisioningQrSvg.viewBoxSize}
+                        height={provisioningQrSvg.viewBoxSize}
+                        fill="#ffffff"
+                      />
+                      <path d={provisioningQrSvg.pathD} fill="#000000" />
+                    </svg>
+                    <span className="mt-2 text-[10px] font-semibold text-slate-800 text-center">
+                      100% Digenerate Lokal di Browser • Siap Pindai Ketuk-6x
+                    </span>
+                  </div>
+                )}
+
+                <div className={`${provisioningQrSvg ? 'md:col-span-7' : 'md:col-span-12'} space-y-1.5 min-w-0`}>
+                  <div className="flex items-center justify-between text-[11px] text-slate-400">
+                    <span>Profil JSON Provisioning Resmi (DevicePolicyManager):</span>
+                    <button
+                      type="button"
+                      onClick={handleCopyJson}
+                      className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold"
+                    >
+                      {copiedJson ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedJson ? 'JSON Tersalin' : 'Salin JSON'}</span>
+                    </button>
+                  </div>
+                  <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-[10px] text-slate-300 overflow-x-auto leading-relaxed">
+                    {provisioningJson}
+                  </pre>
+                  <p className="text-[10px] text-slate-400">
+                    Checksum tanda tangan kriptografi (Base64URL SHA-256 tanpa padding) dihitung otomatis dari sertifikat rilis resmi <code>{releaseInfo.certSha256.slice(0, 17)}...</code>.
+                  </p>
                 </div>
-                <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl font-mono text-[10px] text-slate-300 overflow-x-auto leading-relaxed">
-                  {provisioningJson}
-                </pre>
               </div>
             </div>
           )}

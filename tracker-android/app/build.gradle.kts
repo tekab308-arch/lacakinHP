@@ -1,5 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
+}
+
+val keystoreProps = Properties()
+val keystorePropsFile = listOf(
+    rootProject.file("keystore.properties"),
+    rootProject.file("../keystore.properties")
+).firstOrNull { it.exists() }
+if (keystorePropsFile != null) {
+    keystorePropsFile.inputStream().use { keystoreProps.load(it) }
 }
 
 android {
@@ -12,6 +23,20 @@ android {
         targetSdk = 35
         versionCode = 8
         versionName = "2.6"
+    }
+
+    signingConfigs {
+        if (keystorePropsFile != null) {
+            create("official") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
     }
 
     flavorDimensions += "variant"
@@ -27,7 +52,16 @@ android {
 
     buildTypes {
         release {
+            isDebuggable = false
             isMinifyEnabled = false
+            isShrinkResources = false
+            // Uses dedicated keystore.properties when present; falls back to local ~/.android/debug.keystore
+            // (which holds E3:10:0D:61... on maintainer machine and allows CI builds to verify non-debuggable APK).
+            signingConfig = if (keystorePropsFile != null) {
+                signingConfigs.getByName("official")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
