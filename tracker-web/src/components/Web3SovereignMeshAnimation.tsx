@@ -60,8 +60,8 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'GPS + AES-256-GCM',
     color: 'sky',
     toggleable: false,
-    desktopPos: [0.11, 0.50],
-    mobilePos: [0.50, 0.12],
+    desktopPos: [0.13, 0.50],
+    mobilePos: [0.50, 0.14],
     labelPosDesktop: 'bottom',
     labelPosMobile: 'top',
   },
@@ -73,8 +73,8 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'Nostr Relay · WSS',
     color: 'sky',
     toggleable: true,
-    desktopPos: [0.40, 0.22],
-    mobilePos: [0.22, 0.36],
+    desktopPos: [0.38, 0.22],
+    mobilePos: [0.20, 0.36],
     labelPosDesktop: 'top',
     labelPosMobile: 'top',
   },
@@ -86,10 +86,10 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'Nostr Relay · WSS',
     color: 'sky',
     toggleable: true,
-    desktopPos: [0.52, 0.44],
-    mobilePos: [0.50, 0.49],
+    desktopPos: [0.49, 0.48],
+    mobilePos: [0.50, 0.50],
     labelPosDesktop: 'top',
-    labelPosMobile: 'top',
+    labelPosMobile: 'bottom',
   },
   {
     id: 'primal',
@@ -99,8 +99,8 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'Nostr Relay · WSS',
     color: 'sky',
     toggleable: true,
-    desktopPos: [0.41, 0.76],
-    mobilePos: [0.24, 0.64],
+    desktopPos: [0.39, 0.78],
+    mobilePos: [0.20, 0.65],
     labelPosDesktop: 'bottom',
     labelPosMobile: 'bottom',
   },
@@ -112,8 +112,8 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'Nostr Relay · WSS',
     color: 'sky',
     toggleable: true,
-    desktopPos: [0.62, 0.68],
-    mobilePos: [0.76, 0.64],
+    desktopPos: [0.63, 0.74],
+    mobilePos: [0.80, 0.65],
     labelPosDesktop: 'bottom',
     labelPosMobile: 'bottom',
   },
@@ -125,8 +125,8 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'IPFS Web Mirror · CID',
     color: 'indigo',
     toggleable: true,
-    desktopPos: [0.60, 0.20],
-    mobilePos: [0.78, 0.36],
+    desktopPos: [0.62, 0.21],
+    mobilePos: [0.80, 0.36],
     labelPosDesktop: 'top',
     labelPosMobile: 'top',
   },
@@ -138,8 +138,8 @@ const NODE_SPECS: NodeSpec[] = [
     sublabel: 'BIP-340 + Dekripsi Lokal',
     color: 'emerald',
     toggleable: false,
-    desktopPos: [0.89, 0.50],
-    mobilePos: [0.50, 0.88],
+    desktopPos: [0.87, 0.50],
+    mobilePos: [0.50, 0.86],
     labelPosDesktop: 'bottom',
     labelPosMobile: 'bottom',
   },
@@ -208,8 +208,13 @@ function getQuadraticControlPoint(
   const my = (ay + by) * 0.5;
   const dx = bx - ax;
   const dy = by - ay;
-  const len = Math.hypot(dx, dy) || 1;
-  return [mx + (-dy / len) * offset, my + (dx / len) * offset];
+  const chordLen = Math.hypot(dx, dy) || 1;
+  const scaledOffset =
+    Math.min(Math.abs(offset), chordLen * 0.14) * Math.sign(offset);
+  return [
+    mx + (-dy / chordLen) * scaledOffset,
+    my + (dx / chordLen) * scaledOffset,
+  ];
 }
 
 function evalQuadraticBezier(
@@ -225,6 +230,72 @@ function evalQuadraticBezier(
   const x = mt * mt * ax + 2 * mt * t * cx + t * t * bx;
   const y = mt * mt * ay + 2 * mt * t * cy + t * t * by;
   return [x, y];
+}
+
+function fillRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+): void {
+  const r = Math.min(radius, width * 0.5, height * 0.5);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawCanvasLabel(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  font: string,
+  fillStyle: string,
+  drawPill: boolean
+): { safeX: number; safeY: number } {
+  ctx.font = font;
+  const textWidth = ctx.measureText(text).width;
+  const safeX = Math.max(
+    textWidth * 0.5 + 10,
+    Math.min(w - textWidth * 0.5 - 10, x)
+  );
+  const safeY = Math.max(12, Math.min(h - 12, y));
+
+  if (drawPill) {
+    const padX = 5;
+    const padY = 2;
+    const pillH = 14 + padY * 2;
+    const pillW = textWidth + padX * 2;
+    ctx.fillStyle = 'rgba(6, 9, 17, 0.78)';
+    fillRoundedRect(
+      ctx,
+      safeX - pillW * 0.5,
+      safeY - pillH * 0.5,
+      pillW,
+      pillH,
+      4
+    );
+  }
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = fillStyle;
+  ctx.fillText(text, safeX, safeY);
+
+  return { safeX, safeY };
 }
 
 export const Web3SovereignMeshAnimation: React.FC = () => {
@@ -248,12 +319,15 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       return {
         nx: Math.max(0.05, Math.min(0.95, 0.5 + rx)),
         ny: Math.max(0.07, Math.min(0.93, 0.5 + ry)),
-        vx: ((idx % 2 === 0 ? 1 : -1) * (0.00018 + (idx % 3) * 0.00008)),
-        vy: ((idx % 3 === 0 ? -1 : 1) * (0.00015 + (idx % 4) * 0.00006)),
+        vx: (idx % 2 === 0 ? 1 : -1) * (0.00018 + (idx % 3) * 0.00008),
+        vy: (idx % 3 === 0 ? -1 : 1) * (0.00015 + (idx % 4) * 0.00006),
       };
     })
   );
-  const sizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const sizeRef = useRef<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
   const renderNowRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -277,6 +351,7 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
     let lastBroadcastTs = 0;
     let lastIpfsTs = 0;
     let orbitAngle = 0;
+    let bgGrad: CanvasGradient | null = null;
 
     const getCoords = (w: number, h: number): Record<string, [number, number]> => {
       const isMobile = w < 560;
@@ -374,19 +449,11 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
 
       ctx.clearRect(0, 0, w, h);
 
-      // Subtle radial ambient backdrop
-      const bgGrad = ctx.createRadialGradient(
-        w * 0.5,
-        h * 0.5,
-        10,
-        w * 0.5,
-        h * 0.5,
-        Math.max(w, h) * 0.65
-      );
-      bgGrad.addColorStop(0, 'rgba(14, 24, 44, 0.36)');
-      bgGrad.addColorStop(1, 'rgba(6, 9, 17, 0)');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, w, h);
+      // Cached radial ambient backdrop
+      if (bgGrad) {
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+      }
 
       // Micro dot-matrix grid (24px spacing)
       ctx.fillStyle = 'rgba(148, 163, 184, 0.08)';
@@ -471,7 +538,12 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
                 radius: 8,
                 maxRadius: p.toId === 'client' ? 30 : 24,
                 alpha: 0.65,
-                color: p.toId === 'client' ? (p.kind === 'ipfs' ? 'indigo' : 'emerald') : p.color,
+                color:
+                  p.toId === 'client'
+                    ? p.kind === 'ipfs'
+                      ? 'indigo'
+                      : 'emerald'
+                    : p.color,
               });
             }
 
@@ -511,6 +583,7 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       }
 
       // Draw curved Bezier edges
+      const offsetScale = isMobile ? 0.65 : 1;
       for (const e of EDGE_SPECS) {
         const a = coords[e.from];
         const b = coords[e.to];
@@ -521,7 +594,6 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
         const isHoveredEdge =
           hoveredId !== null && (e.from === hoveredId || e.to === hoveredId);
         const energy = edgeEnergyRef.current[e.id] || 0;
-        const offsetScale = isMobile ? 0.65 : 1;
         const [cx, cy] = getQuadraticControlPoint(
           a[0],
           a[1],
@@ -570,7 +642,6 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
         if (!edge || !a || !b) continue;
 
         const reverseSign = edge.from === p.fromId ? 1 : -1;
-        const offsetScale = isMobile ? 0.65 : 1;
         const [cx, cy] = getQuadraticControlPoint(
           a[0],
           a[1],
@@ -638,7 +709,7 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
         ctx.stroke();
       }
 
-      // Draw geometric nodes & monospace labels
+      // Draw geometric nodes & dynamic clamped monospace labels
       for (const n of NODE_SPECS) {
         const pos = coords[n.id];
         if (!pos) continue;
@@ -706,32 +777,55 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
           ctx.fill();
         }
 
-        // Monospace label anchored safely inside viewport edges
+        // Dynamic clamped monospace label with subtle legibility backdrop
         const label = isMobile ? n.mobileLabel : n.label;
         const posDir = isMobile ? n.labelPosMobile : n.labelPosDesktop;
-        const offsetY = posDir === 'top' ? -(baseR + 16) : baseR + 17;
-        const clampedX = Math.max(58, Math.min(w - 58, x));
-
-        ctx.font = `${isPrimary ? 600 : 500} ${isMobile ? 10 : 11}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = isOffline
-          ? 'rgba(251, 113, 133, 0.88)'
+        const labelOffsetY = posDir === 'top' ? -(baseR + 18) : baseR + 19;
+        const primaryFont = `${isPrimary ? 600 : 500} ${isMobile ? 10 : 11}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
+        const primaryFill = isOffline
+          ? 'rgba(251, 113, 133, 0.92)'
           : isHovered || isPrimary
-            ? 'rgba(241, 245, 249, 0.96)'
-            : 'rgba(203, 213, 225, 0.86)';
-        ctx.fillText(label, clampedX, y + offsetY);
+            ? 'rgba(241, 245, 249, 0.98)'
+            : 'rgba(203, 213, 225, 0.88)';
+
+        const { safeY } = drawCanvasLabel(
+          ctx,
+          label,
+          x,
+          y + labelOffsetY,
+          w,
+          h,
+          primaryFont,
+          primaryFill,
+          true
+        );
 
         if (isOffline) {
-          ctx.font = '500 9px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
-          ctx.fillStyle = 'rgba(244, 63, 94, 0.85)';
-          const tagY = posDir === 'top' ? y + offsetY - 12 : y + offsetY + 12;
-          ctx.fillText('[OFFLINE]', clampedX, tagY);
+          const tagY = posDir === 'top' ? safeY - 14 : safeY + 14;
+          drawCanvasLabel(
+            ctx,
+            '[OFFLINE]',
+            x,
+            tagY,
+            w,
+            h,
+            '500 9px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            'rgba(244, 63, 94, 0.88)',
+            false
+          );
         } else if (isPrimary && !isMobile) {
-          ctx.font = '400 9.5px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
-          ctx.fillStyle = 'rgba(148, 163, 184, 0.72)';
-          const subY = posDir === 'top' ? y + offsetY - 13 : y + offsetY + 13;
-          ctx.fillText(n.sublabel, clampedX, subY);
+          const subY = posDir === 'top' ? safeY - 14 : safeY + 14;
+          drawCanvasLabel(
+            ctx,
+            n.sublabel,
+            x,
+            subY,
+            w,
+            h,
+            '400 9.5px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            'rgba(148, 163, 184, 0.78)',
+            false
+          );
         }
       }
 
@@ -756,6 +850,18 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      bgGrad = ctx.createRadialGradient(
+        width * 0.5,
+        height * 0.5,
+        10,
+        width * 0.5,
+        height * 0.5,
+        Math.max(width, height) * 0.65
+      );
+      bgGrad.addColorStop(0, 'rgba(14, 24, 44, 0.36)');
+      bgGrad.addColorStop(1, 'rgba(6, 9, 17, 0)');
+
       drawFrame(performance.now());
     };
 
@@ -772,7 +878,7 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       const coords = getCoords(rect.width, rect.height);
 
       let closest: NodeSpec | null = null;
-      let minDist = 28;
+      let minDist = rect.width < 560 ? 36 : 28;
       for (const n of NODE_SPECS) {
         const pos = coords[n.id];
         if (!pos) continue;
@@ -808,8 +914,16 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
 
     const onClick = (e: MouseEvent) => {
       const hit = findHitNode(e.clientX, e.clientY);
-      if (!hit) return;
+      if (!hit) {
+        if (hoveredRef.current !== null) {
+          hoveredRef.current = null;
+          setFocusedNodeId(null);
+          renderNowRef.current?.();
+        }
+        return;
+      }
 
+      hoveredRef.current = hit.id;
       setFocusedNodeId(hit.id);
       if (hit.id === 'edge') {
         dispatchGpsBurst();
@@ -876,7 +990,7 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       ? 'Semua relay offline — paket terenkripsi antre lokal di HP hingga minimal 1 relay aktif'
       : offlineIds.length > 0
         ? `${offlineIds.length} node dinonaktifkan — paket otomatis reroute melewati ${activeRelayCount} relay aktif`
-        : 'Klik node relay untuk simulasi gangguan (auto-reroute) · Klik HP Target untuk kirim ping';
+        : 'Klik node relay untuk simulasi gangguan · Klik HP Target untuk ping';
 
   const relayStatusClass =
     activeRelayCount >= 2
@@ -888,15 +1002,18 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
   return (
     <section className="rounded-2xl bg-slate-950/85 border border-slate-800/90 overflow-hidden relative backdrop-blur-sm">
       {/* Minimal Top Header Strip */}
-      <div className="px-4 sm:px-5 py-3 border-b border-slate-800/70 flex flex-wrap items-center justify-between gap-2 font-mono text-[0.6875rem]">
-        <div className="flex items-center gap-2">
+      <div className="px-4 sm:px-5 py-3 border-b border-slate-800/70 flex items-center justify-between gap-2 font-mono text-[0.6875rem]">
+        <div className="flex items-center gap-2 min-w-0">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-slate-200 font-semibold tracking-wider">
+          <span className="sm:hidden text-slate-200 font-semibold tracking-wider truncate">
+            TOPOLOGI NODE P2P
+          </span>
+          <span className="hidden sm:inline text-slate-200 font-semibold tracking-wider truncate">
             TOPOLOGI JARINGAN P2P · ZERO-SERVER MESH
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 shrink-0">
           <span className={`font-semibold ${relayStatusClass}`}>
             {activeRelayCount}/4 RELAY AKTIF
           </span>
@@ -915,7 +1032,7 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       {/* Interactive Seamless Canvas */}
       <div
         ref={containerRef}
-        className="relative w-full h-[380px] sm:h-[350px] select-none bg-[#060911]"
+        className="relative w-full h-[360px] sm:h-[340px] md:h-[360px] select-none bg-[#060911]"
       >
         <canvas
           ref={canvasRef}
@@ -925,8 +1042,8 @@ export const Web3SovereignMeshAnimation: React.FC = () => {
       </div>
 
       {/* Minimal Bottom Telemetry Strip */}
-      <div className="px-4 sm:px-5 py-2.5 border-t border-slate-800/70 bg-slate-950/90 flex flex-wrap items-center justify-between gap-2 font-mono text-[0.6875rem] text-slate-400">
-        <span className="text-slate-300 truncate max-w-full">{statusText}</span>
+      <div className="px-4 sm:px-5 py-2.5 border-t border-slate-800/70 bg-slate-950/90 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 font-mono text-[0.6875rem] text-slate-400">
+        <span className="text-slate-300 leading-relaxed">{statusText}</span>
 
         <div className="flex items-center gap-3 shrink-0">
           <span className="inline-flex items-center gap-1.5">
