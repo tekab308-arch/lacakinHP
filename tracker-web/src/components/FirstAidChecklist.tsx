@@ -302,6 +302,127 @@ export const FirstAidChecklist: React.FC = () => {
         })}
       </div>
 
+      {/* Golden Hour & Signal Accuracy Accordion Card */}
+      <SpotlightCard
+        tone="emerald"
+        radius={540}
+        restingBgClassName="bg-slate-950/85"
+        restingBorderClassName="border-emerald-500/30"
+        hoverBgClassName="bg-slate-900/95"
+        contentClassName="p-0"
+      >
+        <details className="group">
+          <summary className="p-4 sm:p-6 cursor-pointer flex items-center justify-between gap-3 select-none">
+            <div className="flex items-start sm:items-center gap-3 min-w-0">
+              <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0 mt-0.5 sm:mt-0">
+                <Info className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-sm sm:text-base font-bold text-slate-100 leading-snug">
+                  Waktu Emas Pelacakan (Golden Hour) &amp; Panduan Akurasi Sinyal GPS / BTS
+                </h2>
+                <p className="text-xs sm:text-[0.8125rem] text-slate-300 mt-0.5">
+                  Ketuk untuk memahami peluang pelacakan terbaik serta arti radius akurasi berdasarkan hardware &amp; izin HP
+                </p>
+              </div>
+            </div>
+            <ChevronDown className="details-chevron w-5 h-5 text-emerald-300 shrink-0 transition-transform duration-200" />
+          </summary>
+
+          <div className="px-4 sm:px-6 pb-5 sm:pb-6 pt-2 border-t border-slate-800/80 space-y-4 text-xs sm:text-sm text-slate-200 leading-relaxed">
+            {/* 1. Golden Hour */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="font-bold text-amber-300 text-sm">
+                1. Mengapa 1–6 Jam Pertama (&ldquo;Golden Hour&rdquo;) Sangat Menentukan?
+              </div>
+              <p>
+                Peluang tertinggi menemukan perangkat ada pada <b>1 hingga 6 jam pertama</b> sejak HP disadari hilang atau berpindah tangan — selagi baterai masih terisi dan perangkat masih merespons sinyal:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-slate-200">
+                <li>
+                  <b>Saat HP Tercecer / Tertinggal:</b> Peta langsung menampilkan titik koordinat terakhir beserta persentase sisa baterai (termasuk sinyal darurat otomatis <i>Last-Gasp</i> saat baterai menyentuh &le; 8%).
+                </li>
+                <li>
+                  <b>Saat Layar Dicoba Dibuka / Kartu SIM Diganti:</b> Kesalahan PIN layar &ge; 3x atau pergantian kartu SIM otomatis mengaktifkan <b>Mode Kejar Darurat (pembaruan tiap 2 menit)</b> dan mengirim peringatan SMS.
+                </li>
+                <li>
+                  <b>Jika Baterai Habis / Perangkat Tidak Lagi Aktif:</b> Riwayat jejak terakhir yang sudah terenkripsi di relay Nostr tetap aman untuk dicetak menjadi <b>Lembar Bukti Polisi A4</b> beserta <b>Nomor IMEI Kartu Darurat</b> guna pelaporan LP/STPL dan pemblokiran CEIR.
+                </li>
+              </ul>
+            </div>
+
+            {/* 2. Hardware & Environment Accuracy */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+              <div className="font-bold text-sky-300 text-sm">
+                2. Tingkat Keakuratan Sinyal Berdasarkan Hardware HP &amp; Lingkungan
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="p-3 rounded-lg bg-slate-950/90 border border-slate-800/90 space-y-1">
+                  <div className="font-bold text-emerald-300">
+                    Satelit GNSS / GPS (&plusmn;3 s/d 20 Meter)
+                  </div>
+                  <p className="text-xs text-slate-300">
+                    Akurasi tertinggi saat HP berada di luar ruangan, di jalan, atau dekat jendela. Chip GPS menerima sinyal satelit secara langsung sehingga tetap bekerja walau tanpa kuota internet.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-950/90 border border-slate-800/90 space-y-1">
+                  <div className="font-bold text-sky-300">
+                    Pemindaian Wi-Fi Sekitar (&plusmn;15 s/d 60 Meter)
+                  </div>
+                  <p className="text-xs text-slate-300">
+                    Saat HP berada di dalam gedung/rumah (atap beton menghalangi satelit). Dilengkapi sensor gerak hardware untuk mencegah loncatan lokasi palsu dari hotspot seluler yang bergerak.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-950/90 border border-slate-800/90 space-y-1">
+                  <div className="font-bold text-amber-300">
+                    Menara Operator / BTS (&plusmn;300 s/d 1.500 Meter)
+                  </div>
+                  <p className="text-xs text-slate-300">
+                    Muncul jika HP berada di ruang tertutup rapat tanpa Wi-Fi. LacakHP otomatis menyaring titik BTS yang kasar apabila sudah ada titik GPS satelit yang presisi agar rute peta tidak zig-zag.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-950/90 border border-slate-800/90 space-y-1">
+                  <div className="font-bold text-slate-200">
+                    Perangkat Tanpa Chip GPS Fisik (Tablet Wi-Fi)
+                  </div>
+                  <p className="text-xs text-slate-300">
+                    Perangkat khusus Wi-Fi tanpa modul GNSS mengandalkan pemindaian jaringan sekitar (&plusmn;30–150m) dan membutuhkan koneksi Wi-Fi aktif untuk memperbarui posisi.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Permissions Impact */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="font-bold text-emerald-300 text-sm">
+                3. Pengaruh Izin yang Diberikan di HP terhadap Hasil Pelacakan
+              </div>
+              <ul className="space-y-1.5 text-xs sm:text-[0.8125rem]">
+                <li>
+                  <b className="text-emerald-300">&bull; Lokasi Akurat + &ldquo;Sepanjang Waktu&rdquo; + Bebas Baterai + Gembok Recent Apps:</b>{' '}
+                  Sinyal GPS presisi (&plusmn;3–20m) tetap berjalan stabil di latar belakang meskipun layar HP terkunci rapat.
+                </li>
+                <li>
+                  <b className="text-amber-300">&bull; Hanya &ldquo;Saat Aplikasi Dipakai&rdquo; (Lupa pilih Sepanjang Waktu):</b>{' '}
+                  Android menghentikan pembacaan GPS baru begitu layar terkunci; hanya titik lokasi terakhir (<i>cache</i>) yang dapat dilaporkan.
+                </li>
+                <li>
+                  <b className="text-amber-300">&bull; Lokasi Akurat Dimatikan (Hanya Lokasi Perkiraan / Coarse):</b>{' '}
+                  Sistem operasi membatasi ketelitian koordinat menjadi radius area kasar (&plusmn;1–3 km).
+                </li>
+                <li>
+                  <b className="text-sky-300">&bull; Izin SMS &amp; Telepon Aktif (Versi Lengkap):</b>{' '}
+                  Tetap dapat meminta titik GPS satelit terbaru via SMS (<code>LACAK</code>) meskipun koneksi data internet di HP sedang mati.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </details>
+      </SpotlightCard>
+
       {/* Police 110 Emergency Contact */}
       <SpotlightCard
         tone="amber"

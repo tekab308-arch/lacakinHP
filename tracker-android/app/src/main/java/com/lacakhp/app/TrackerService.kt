@@ -60,6 +60,7 @@ class TrackerService : Service() {
         private const val TRACKING_MIN_DISTANCE_M = 100f
         private const val LOW_BATTERY_THRESHOLD_PCT = 8
         private const val HEARTBEAT_REQ_CODE = 2002
+        private const val REVIVE_REQ_CODE = 2003
 
         const val ACTION_BROADCAST_STATE = "com.lacakhp.app.TRACKER_UPDATE"
         const val ACTION_HEARTBEAT_ALARM = "com.lacakhp.app.HEARTBEAT_ALARM"
@@ -79,9 +80,34 @@ class TrackerService : Service() {
         const val EXTRA_FAILED_ATTEMPTS = "failed_attempts"
 
         @Volatile
+        var isRunning: Boolean = false
+        @Volatile
         var isStationaryMode: Boolean = false
         @Volatile
         var isChaseMode: Boolean = false
+
+        fun scheduleReviveAlarm(context: Context, delayMs: Long = 2_000L) {
+            val appCtx = context.applicationContext
+            val am = appCtx.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val intent = Intent(appCtx, BootReceiver::class.java).apply {
+                action = BootReceiver.ACTION_REVIVE_TRACKER
+            }
+            val pi = PendingIntent.getBroadcast(
+                appCtx,
+                REVIVE_REQ_CODE,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            try {
+                am.setAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() + delayMs,
+                    pi
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed scheduling revive alarm: ${e.message}")
+            }
+        }
     }
 
     private lateinit var dbHelper: LocationDbHelper
@@ -250,6 +276,8 @@ class TrackerService : Service() {
             return
         }
         isInitialized = true
+        isRunning = true
+        TrackerWatchdogJob.schedule(applicationContext)
 
         startGpsListener()
         registerSignificantMotionWatcher()
@@ -340,9 +368,27 @@ class TrackerService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        if (gpsLocator.hasLocationPermission()) {
+            Log.w(TAG, "Task removed (Recents swipe / Clear Memory); scheduling tracker revive")
+            scheduleReviveAlarm(applicationContext, delayMs = 1_500L)
+            scheduleNextHeartbeatAlarm()
+            TrackerWatchdogJob.schedule(applicationContext)
+        }
+    }
+
     override fun onDestroy() {
         isDestroyed = true
-        cancelHeartbeatAlarm()
+        isRunning = false
+        if (!gpsLocator.hasLocationPermission()) {
+            cancelHeartbeatAlarm()
+            TrackerWatchdogJob.cancel(applicationContext)
+        } else if (isInitialized) {
+            scheduleNextHeartbeatAlarm()
+            scheduleReviveAlarm(applicationContext, delayMs = 3_000L)
+            TrackerWatchdogJob.schedule(applicationContext)
+        }
         mainHandler.removeCallbacksAndMessages(null)
         gpsLocator.stopPeriodicUpdates()
         activeListenerIntervalMs = -1L

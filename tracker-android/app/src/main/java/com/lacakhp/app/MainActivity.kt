@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
     private var hasPromptedAdminThisSession = false
     private var isAwaitingCredential = false
     private var isManualSmsPermRequest = false
+    private var pendingXiaomiKeepAliveAfterBattery = false
     private var pendingSecureAction: (() -> Unit)? = null
 
     private val confirmDeviceCredential = registerForActivityResult(
@@ -194,6 +195,14 @@ class MainActivity : AppCompatActivity() {
 
         if (TrackerPrefs.isSetupCompleted(this) && !isAwaitingCredential) {
             promptDeviceAdminIfNeeded()
+        }
+
+        if (pendingXiaomiKeepAliveAfterBattery) {
+            pendingXiaomiKeepAliveAfterBattery = false
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (pm.isIgnoringBatteryOptimizations(packageName) && OemPowerHelper.isXiaomiDevice()) {
+                showXiaomiKeepAliveDialog()
+            }
         }
     }
 
@@ -604,10 +613,15 @@ class MainActivity : AppCompatActivity() {
         btnPermBattery.setOnClickListener {
             val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                pendingXiaomiKeepAliveAfterBattery = OemPowerHelper.isXiaomiDevice()
                 val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                     data = Uri.parse("package:$packageName")
                 }
                 startActivity(intent)
+            } else if (OemPowerHelper.isXiaomiDevice()) {
+                showXiaomiKeepAliveDialog()
+            } else if (OemPowerHelper.isSamsungDevice() || OemPowerHelper.isColorOsOrFuntouchDevice()) {
+                showOemBatteryKeepAliveDialog()
             } else {
                 Toast.makeText(this, "Hemat baterai sudah dinonaktifkan", Toast.LENGTH_SHORT).show()
             }
@@ -886,6 +900,10 @@ class MainActivity : AppCompatActivity() {
         val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         val batteryOk = pm.isIgnoringBatteryOptimizations(packageName)
         applyBadge(tvPermBattery, btnPermBattery, batteryOk, "Diizinkan", "Perlu diizinkan")
+        if (batteryOk && OemPowerHelper.isXiaomiDevice()) {
+            tvPermBattery.text = "Diizinkan • Ketuk untuk Gembok & Autostart Xiaomi"
+            btnPermBattery.text = "Atur Xiaomi"
+        }
 
         DeviceOwnerHelper.syncUsbDebuggingLock(this)
         val isOwner = DeviceOwnerHelper.isDeviceOwner(this)
@@ -1041,6 +1059,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startTrackerService() {
         if (!hasForegroundLocation()) return
+        TrackerWatchdogJob.schedule(applicationContext)
         try {
             val intent = Intent(this, TrackerService::class.java)
             ContextCompat.startForegroundService(this, intent)
@@ -1263,21 +1282,42 @@ class MainActivity : AppCompatActivity() {
                 append("Kunci Kartu SIM: ${if (simOk) "Terkunci" else "Belum dikunci"}\n")
             }
 
-            append("\n--- TIPS KHUSUS SAMSUNG ONE UI ---\n")
-            append("Pastikan masuk ke Info Aplikasi -> Baterai -> pilih 'Tidak dibatasi' (Unrestricted) dan masukkan LacakHP ke 'Aplikasi tidak pernah tidur' di Pengaturan Perawatan Perangkat.")
+            when {
+                OemPowerHelper.isXiaomiDevice() -> {
+                    append("\n--- TIPS KHUSUS XIAOMI (MIUI / HYPEROS) ---\n")
+                    append("Agar LacakHP TIDAK ikut terhapus saat tombol 'X' (Clear Memory) ditekan:\n")
+                    append("1. Gembok 🔒 di Recent Apps: Tekan tombol Recent → tahan kartu LacakHP → ketuk ikon Gembok.\n")
+                    append("2. Mulai Otomatis (Autostart): Wajib AKTIF.\n")
+                    append("3. Penghemat Baterai MIUI: Pilih 'Tidak ada pembatasan'.")
+                }
+                OemPowerHelper.isSamsungDevice() -> {
+                    append("\n--- TIPS KHUSUS SAMSUNG ONE UI ---\n")
+                    append("Pastikan masuk ke Info Aplikasi -> Baterai -> pilih 'Tidak dibatasi' (Unrestricted) dan masukkan LacakHP ke 'Aplikasi tidak pernah tidur' di Pengaturan Perawatan Perangkat.")
+                }
+                OemPowerHelper.isColorOsOrFuntouchDevice() -> {
+                    append("\n--- TIPS KHUSUS OPPO / REALME / VIVO ---\n")
+                    append("Aktifkan 'Izinkan aktivitas latar belakang' & 'Mulai otomatis' di Info Aplikasi, serta gembok (🔒) LacakHP di Recent Apps agar tidak terhenti saat Clear Memory.")
+                }
+                else -> {
+                    append("\n--- TIPS ANTI-KILL LATAR BELAKANG ---\n")
+                    append("Pastikan baterai aplikasi disetel ke 'Tidak dibatasi' dan kunci aplikasi di Recent Apps jika HP Anda memiliki pembersih memori otomatis.")
+                }
+            }
         }
 
-        AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this)
             .setTitle("Diagnosa Kesiapan Perangkat")
             .setMessage(msg)
             .setPositiveButton("Buka Info Aplikasi") { _, _ ->
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:$packageName")
-                }
-                startActivity(intent)
+                OemPowerHelper.openAppDetailsSettings(this)
             }
             .setNegativeButton("Tutup", null)
-            .show()
+        if (OemPowerHelper.isXiaomiDevice()) {
+            builder.setNeutralButton("Atur Anti-Kill Xiaomi") { _, _ ->
+                showXiaomiKeepAliveDialog()
+            }
+        }
+        builder.show()
     }
 
     private fun launchShareEmergencyCard() {
@@ -1640,8 +1680,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSmsRestrictedSettingsGuideDialog() {
-        val brand = "${Build.MANUFACTURER} ${Build.BRAND}".lowercase(Locale.ROOT)
-        val isXiaomi = brand.contains("xiaomi") || brand.contains("redmi") || brand.contains("poco")
+        val isXiaomi = OemPowerHelper.isXiaomiDevice()
 
         val message = if (isXiaomi) {
             "Pada Xiaomi HyperOS / MIUI (Android 13–15), sistem mengunci izin SMS untuk aplikasi dari luar Play Store ('Setelan Terbatas').\n\n" +
@@ -1673,15 +1712,47 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun openAppDetailsSettings() {
-        try {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.parse("package:$packageName")
+    private fun showXiaomiKeepAliveDialog() {
+        val msg = "Di Xiaomi (MIUI / HyperOS), menekan tombol 'X' (Clear Memory) di Recent Apps akan memaksa berhenti (force-stop) aplikasi KECUALI 3 hal ini aktif:\n\n" +
+            "1️⃣ Gembok di Recent Apps (🔒) — WAJIB:\n" +
+            "Buka daftar Recent Apps → tekan & tahan kartu LacakHP → ketuk ikon Gembok (🔒).\n" +
+            "(Atau buka app Keamanan/Security → Setelan ⚙️ → Tingkatkan kecepatan → Kunci aplikasi → aktifkan LacakHP).\n\n" +
+            "2️⃣ Mulai Otomatis (Autostart):\n" +
+            "Izinkan LacakHP memulai otomatis agar langsung hidup kembali jika memori penuh.\n\n" +
+            "3️⃣ Penghemat Baterai MIUI:\n" +
+            "Pilih 'Tidak ada pembatasan' (No restrictions)."
+
+        AlertDialog.Builder(this)
+            .setTitle("Anti-Kill Clear Memory Xiaomi")
+            .setMessage(msg)
+            .setPositiveButton("1. Buka Autostart") { _, _ ->
+                OemPowerHelper.openXiaomiAutostartSettings(this)
             }
-            startActivity(intent)
-        } catch (e: Exception) {
-            Log.w("MainActivity", "Failed opening app details: ${e.message}")
+            .setNeutralButton("2. Baterai MIUI") { _, _ ->
+                OemPowerHelper.openXiaomiBatterySaverSettings(this)
+            }
+            .setNegativeButton("Tutup", null)
+            .show()
+    }
+
+    private fun showOemBatteryKeepAliveDialog() {
+        val msg = if (OemPowerHelper.isSamsungDevice()) {
+            "Izin baterai standar sudah aktif.\n\nUntuk Samsung One UI, pastikan juga masuk ke Info Aplikasi → Baterai → pilih 'Tidak dibatasi' (Unrestricted), dan tambahkan LacakHP ke 'Aplikasi tidak pernah tidur' di Perawatan Perangkat."
+        } else {
+            "Izin baterai standar sudah aktif.\n\nUntuk HP Oppo / Realme / Vivo, buka Info Aplikasi → Penggunaan baterai → aktifkan 'Izinkan aktivitas latar belakang' & 'Mulai otomatis', serta gembok (🔒) aplikasi di Recent Apps."
         }
+        AlertDialog.Builder(this)
+            .setTitle("Pengaturan Anti-Sleep Perangkat")
+            .setMessage(msg)
+            .setPositiveButton("Buka Info Aplikasi") { _, _ ->
+                OemPowerHelper.openAppDetailsSettings(this)
+            }
+            .setNegativeButton("Tutup", null)
+            .show()
+    }
+
+    private fun openAppDetailsSettings() {
+        OemPowerHelper.openAppDetailsSettings(this)
     }
 
     private fun openXiaomiPermissionEditor() {

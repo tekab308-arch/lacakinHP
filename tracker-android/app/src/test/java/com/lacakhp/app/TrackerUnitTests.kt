@@ -141,4 +141,18 @@ class TrackerUnitTests {
         assertTrue(TrackerPrefs.isWindowActive(untilMs = 1_000_000L, nowMs = 999_999L))
         assertFalse(TrackerPrefs.isWindowActive(untilMs = 1_000_000L, nowMs = 1_000_000L))
     }
+
+    @Test
+    fun detectsOemBrandsAndWatchdogConstants() {
+        assertTrue(OemPowerHelper.isXiaomiDevice("Xiaomi", "Redmi"))
+        assertTrue(OemPowerHelper.isXiaomiDevice("Xiaomi", "POCO"))
+        assertFalse(OemPowerHelper.isXiaomiDevice("Samsung", "samsung"))
+
+        assertTrue(OemPowerHelper.isSamsungDevice("samsung", "SM-A217F"))
+        assertTrue(OemPowerHelper.isColorOsOrFuntouchDevice("OPPO", "realme"))
+        assertTrue(OemPowerHelper.isColorOsOrFuntouchDevice("vivo", "iQOO"))
+
+        assertEquals("com.lacakhp.app.ACTION_REVIVE_TRACKER", BootReceiver.ACTION_REVIVE_TRACKER)
+        assertEquals(2041, TrackerWatchdogJob.JOB_ID)
+    }
 }
