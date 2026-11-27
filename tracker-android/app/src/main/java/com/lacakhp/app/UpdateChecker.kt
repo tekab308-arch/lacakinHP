@@ -37,6 +37,9 @@ object UpdateChecker {
         TrackerPrefs.MIRROR_VERCEL_URL
     )
 
+    const val OFFICIAL_GITHUB_RELEASES_PREFIX =
+        "https://github.com/tekab308-arch/lacakinHP/releases/"
+
     private val SHA256_HEX_RE = Regex("^[0-9a-f]{64}$")
 
     private val client = OkHttpClient.Builder()
@@ -49,9 +52,14 @@ object UpdateChecker {
 
     fun isTrustedUpdateUrl(url: String): Boolean {
         val clean = url.trim()
-        return OFFICIAL_UPDATE_ORIGINS.any { origin ->
-            clean.startsWith("$origin/")
+        if (clean.isEmpty() || clean.contains("..") || clean.any { it.isWhitespace() }) {
+            return false
         }
+        if (OFFICIAL_UPDATE_ORIGINS.any { origin -> clean.startsWith("$origin/") }) {
+            return true
+        }
+        return clean.startsWith(OFFICIAL_GITHUB_RELEASES_PREFIX) &&
+            clean.lowercase(Locale.ROOT).endsWith(".apk")
     }
 
     fun isOfficialCertSha256(certSha256: String): Boolean {
@@ -65,11 +73,14 @@ object UpdateChecker {
     }
 
     fun resolveMirrorApkUrl(rawApkUrl: String, activeOrigin: String): String {
+        val clean = rawApkUrl.trim()
+        if (clean.startsWith(OFFICIAL_GITHUB_RELEASES_PREFIX) && isTrustedUpdateUrl(clean)) {
+            return clean
+        }
         val fallbackForOrigin = "$activeOrigin/lacakhp-resmi.apk"
         if (activeOrigin != TrackerPrefs.DEFAULT_WEB_URL) {
             return fallbackForOrigin
         }
-        val clean = rawApkUrl.trim()
         return if (isTrustedUpdateUrl(clean)) clean else fallbackForOrigin
     }
 

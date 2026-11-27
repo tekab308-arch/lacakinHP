@@ -8,6 +8,12 @@ import { TrackerWorkspace } from './components/TrackerWorkspace';
 import { ArchitectureGuide } from './components/ArchitectureGuide';
 import { FirstAidChecklist } from './components/FirstAidChecklist';
 import { AboutProject } from './components/AboutProject';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
+import {
+  GITHUB_REPO_URL,
+  GITHUB_RELEASES_URL,
+  GITHUB_SECURITY_URL,
+} from './lib/releaseInfo';
 import {
   CryptoVersion,
   DecryptedLocationPoint,
@@ -55,6 +61,7 @@ export const App: React.FC = () => {
       ? isOfficialWebHost(window.location.hostname)
       : true;
   const [activeTab, setActiveTab] = useState<ActiveTab>('tracker');
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [largeText, setLargeText] = useState<boolean>(() => {
     try {
       return localStorage.getItem('lacakhp_ui_large_text') === '1';
@@ -612,7 +619,7 @@ export const App: React.FC = () => {
             </motion.div>
           </main>
 
-          <footer className="no-print border-t border-slate-900/90 bg-slate-950/70 backdrop-blur-sm py-6 px-4 text-center text-xs sm:text-sm text-slate-300 space-y-2">
+          <footer className="no-print border-t border-slate-900/90 bg-slate-950/70 backdrop-blur-sm py-6 px-4 text-center text-xs sm:text-sm text-slate-300 space-y-2.5">
             <div>
               LacakHP Open-Source Charity • Zero-Knowledge E2EE • Tanpa Server
               Pelacakan Terpusat •{' '}
@@ -627,12 +634,53 @@ export const App: React.FC = () => {
                 Tentang Projek (Inisiator: Sena)
               </button>
             </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-slate-300">
+              <a
+                href={GITHUB_REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-300 hover:underline font-medium"
+              >
+                Source Code (GitHub)
+              </a>
+              <span className="text-slate-700">•</span>
+              <a
+                href={GITHUB_RELEASES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-300 hover:underline font-medium"
+              >
+                Rilis APK (GitHub Releases)
+              </a>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => setIsPrivacyOpen(true)}
+                className="text-slate-200 hover:text-white hover:underline font-medium"
+              >
+                Kebijakan Privasi &amp; Lisensi
+              </button>
+              <span className="text-slate-700">•</span>
+              <a
+                href={GITHUB_SECURITY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-300 hover:underline font-medium"
+              >
+                Keamanan (SECURITY.md)
+              </a>
+            </div>
             <div className="text-xs text-amber-300/90 max-w-2xl mx-auto leading-relaxed">
               Projek Amal Open-Source Demi Mendukung Tugas Kepolisian — Kami
               tidak pernah meminta biaya, transfer uang, PIN, atau kode OTP
               untuk membuka lokasi.
             </div>
           </footer>
+
+          <PrivacyPolicyModal
+            isOpen={isPrivacyOpen}
+            onClose={() => setIsPrivacyOpen(false)}
+          />
         </div>
 
         {/* Floating Toast */}

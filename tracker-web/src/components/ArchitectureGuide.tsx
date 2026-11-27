@@ -27,6 +27,7 @@ import {
   Terminal,
   ShieldCheck,
   ChevronDown,
+  ExternalLink,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 import { LegalConsentModal } from './LegalConsentModal';
@@ -34,6 +35,10 @@ import {
   useReleaseInfo,
   computeBufferSha256Hex,
   verifyApkHash,
+  getProvisioningApkUrl,
+  triggerApkDownload,
+  GITHUB_REPO_URL,
+  GITHUB_RELEASES_URL,
 } from '../lib/releaseInfo';
 import {
   encodeQrMatrix,
@@ -87,7 +92,7 @@ export const ArchitectureGuide: React.FC = () => {
     'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME':
       'com.lacakhp.app/.TrackerAdminReceiver',
     'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION':
-      'https://lacakinhp110.my.id/lacakhp-resmi.apk',
+      getProvisioningApkUrl(releaseInfo.apkUrl),
     'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM':
       signatureChecksumB64Url,
   };
@@ -169,12 +174,7 @@ export const ArchitectureGuide: React.FC = () => {
   };
 
   const handleConfirmDownload = () => {
-    const link = document.createElement('a');
-    link.href = '/lacakhp-resmi.apk';
-    link.download = 'lacakhp-resmi.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    triggerApkDownload(releaseInfo.apkUrl);
   };
 
   useEffect(() => {
@@ -1348,9 +1348,27 @@ export const ArchitectureGuide: React.FC = () => {
           >
             <span>Unduh APK Resmi v{releaseInfo.versionName} (lacakhp-resmi.apk)</span>
           </button>
-          <span className="text-xs text-slate-300">
-            Versi Lengkap (Internet Nostr + SMS Darurat + Anti-Uninstall)
-          </span>
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            <a
+              href={GITHUB_RELEASES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sky-300 hover:underline font-semibold"
+            >
+              <span>GitHub Releases</span>
+              <ExternalLink className="w-3 h-3 shrink-0" />
+            </a>
+            <span className="text-slate-600">•</span>
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-slate-200 hover:text-white hover:underline font-medium"
+            >
+              <span>Source Code</span>
+              <ExternalLink className="w-3 h-3 shrink-0" />
+            </a>
+          </div>
         </div>
 
         {/* Client-Side SHA-256 APK Authenticity Verifier */}

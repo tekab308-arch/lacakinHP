@@ -162,13 +162,35 @@ try {
     'decryptNostrPayload must reject oversized ciphertexts'
   );
 
-  // 6. Client-side APK SHA-256 verifier
+  // 6. Client-side APK SHA-256 verifier & trusted APK URL allowlist
   const sampleBuf = new TextEncoder().encode('lacakhp-official-apk-test').buffer;
   const computedHex = await releaseMod.computeBufferSha256Hex(sampleBuf);
   assert.equal(computedHex.length, 64, 'SHA-256 hex must be 64 chars');
   assert.equal(releaseMod.verifyApkHash(computedHex, computedHex.toUpperCase()), true);
   assert.equal(releaseMod.verifyApkHash(computedHex, '0'.repeat(64)), false);
   assert.equal(releaseMod.verifyApkHash('not-a-hash', 'not-a-hash'), false);
+
+  assert.equal(releaseMod.isTrustedApkUrl('/lacakhp-resmi.apk'), true);
+  assert.equal(
+    releaseMod.isTrustedApkUrl('https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk'),
+    true
+  );
+  assert.equal(
+    releaseMod.isTrustedApkUrl('https://github.com/evil/repo/releases/download/v2.6/lacakhp-resmi.apk'),
+    false
+  );
+  assert.equal(
+    releaseMod.isTrustedApkUrl('https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/../evil.apk'),
+    false
+  );
+  assert.equal(
+    releaseMod.getProvisioningApkUrl('/lacakhp-resmi.apk'),
+    'https://lacakinhp110.my.id/lacakhp-resmi.apk'
+  );
+  assert.equal(
+    releaseMod.getProvisioningApkUrl('https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk'),
+    'https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk'
+  );
 
   // 7. Official BIP-340 Schnorr Test Vectors + NIP-01 Event Anti-Tamper Verification
   const bip340Vec0Ok = await cryptoMod.verifySchnorrBip340(

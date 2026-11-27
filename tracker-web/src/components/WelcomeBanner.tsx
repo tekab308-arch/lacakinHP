@@ -17,10 +17,18 @@ import {
   Lock,
   Share2,
   Scale,
+  Code2,
+  ExternalLink,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 import { LegalConsentModal } from './LegalConsentModal';
-import { useReleaseInfo, shortCertFingerprint } from '../lib/releaseInfo';
+import {
+  useReleaseInfo,
+  shortCertFingerprint,
+  triggerApkDownload,
+  GITHUB_REPO_URL,
+  GITHUB_RELEASES_URL,
+} from '../lib/releaseInfo';
 
 interface WelcomeBannerProps {
   hasMagicHash: boolean;
@@ -91,12 +99,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
   }, [hasMagicHash]);
 
   const handleConfirmDownload = () => {
-    const link = document.createElement('a');
-    link.href = '/lacakhp-resmi.apk';
-    link.download = 'lacakhp-resmi.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    triggerApkDownload(releaseInfo.apkUrl);
     setActiveDrawer('install');
   };
 
@@ -151,9 +154,21 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
             >
               <div className="p-4 sm:p-6 pt-4 border-t border-slate-800/80">
                 <div className="space-y-3 max-w-[64ch] min-w-0">
-                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/90 border border-slate-800 text-xs font-mono text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>open-source • nirlaba • zero-knowledge</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/90 border border-slate-800 text-xs font-mono text-slate-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>open-source • nirlaba • zero-knowledge</span>
+                    </div>
+                    <a
+                      href={GITHUB_REPO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/90 hover:bg-slate-800 border border-slate-800 hover:border-sky-500/40 text-xs font-mono text-sky-300 transition"
+                    >
+                      <Code2 className="w-3.5 h-3.5 shrink-0" />
+                      <span>Audit Kode di GitHub</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 opacity-80" />
+                    </a>
                   </div>
 
                   <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-50 leading-snug">
@@ -256,7 +271,15 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                             </span>
                           </div>
                           <span className="font-mono text-xs text-slate-300 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 break-all tabular-nums">
-                            Versi Lengkap v{releaseInfo.versionName} (~12 MB) • Signature SHA-256: {shortCertFingerprint(releaseInfo.certSha256)}
+                            Versi Lengkap v{releaseInfo.versionName} (~12 MB) • Signature SHA-256: {shortCertFingerprint(releaseInfo.certSha256)} •{' '}
+                            <a
+                              href={GITHUB_RELEASES_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sky-300 hover:underline"
+                            >
+                              GitHub Releases
+                            </a>
                           </span>
                         </div>
 

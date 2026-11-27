@@ -27,6 +27,7 @@ if [[ $# -ge 2 ]]; then
 fi
 
 NOTES="${3:-Pembaruan keamanan Anti-Sabotase, Benteng Device Owner, & rilis non-debuggable resmi lacakinhp110.my.id.}"
+HOST_APK_ON_GITHUB="${HOST_APK_ON_GITHUB:-0}"
 
 VER_CODE=$(grep -E "versionCode = " "$GRADLE_FILE" | sed -E 's/.*versionCode = ([0-9]+).*/\1/')
 VER_NAME=$(grep -E "versionName = " "$GRADLE_FILE" | sed -E 's/.*versionName = "([^"]+)".*/\1/')
@@ -44,16 +45,34 @@ if command -v apksigner >/dev/null 2>&1; then
   fi
 fi
 
-echo "==> [2/4] Menyalin APK & menghitung checksum SHA-256..."
+echo "==> [2/4] Menghitung checksum SHA-256 & menyiapkan distribusi APK..."
 mkdir -p "$WEB_DIR/public"
 cp "$APK_SOURCE" "$APK_DEST"
 APK_SHA256=$(shasum -a 256 "$APK_DEST" | awk '{print $1}')
+
+APK_PUBLIC_URL="https://lacakinhp110.my.id/lacakhp-resmi.apk"
+if [[ "$HOST_APK_ON_GITHUB" == "1" ]]; then
+  RELEASE_TAG="v$VER_NAME"
+  APK_PUBLIC_URL="https://github.com/tekab308-arch/lacakinHP/releases/download/${RELEASE_TAG}/lacakhp-resmi.apk"
+  if command -v gh >/dev/null 2>&1; then
+    echo "==> Mengunggah APK ke GitHub Releases ($RELEASE_TAG)..."
+    if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+      gh release upload "$RELEASE_TAG" "$APK_DEST" --clobber
+    else
+      gh release create "$RELEASE_TAG" "$APK_DEST" \
+        --title "LacakHP $RELEASE_TAG (Build $VER_CODE)" \
+        --notes "$NOTES (APK SHA-256: $APK_SHA256)"
+    fi
+  else
+    echo "⚠️  gh CLI belum terpasang. Unggah manual $APK_DEST ke GitHub Release tag $RELEASE_TAG sebelum deploy!"
+  fi
+fi
 
 cat > "$VERSION_JSON" <<EOF
 {
   "versionCode": $VER_CODE,
   "versionName": "$VER_NAME",
-  "apkUrl": "https://lacakinhp110.my.id/lacakhp-resmi.apk",
+  "apkUrl": "$APK_PUBLIC_URL",
   "certSha256": "E3:10:0D:61:55:7B:49:1F:65:E4:B2:42:CC:43:29:25:27:3B:7C:96:F5:55:27:CA:27:A9:EB:48:C3:A8:07:48",
   "apkSha256": "$APK_SHA256",
   "notes": "$NOTES"

@@ -9,6 +9,63 @@ export interface ReleaseInfo {
   notes: string;
 }
 
+export const GITHUB_REPO_URL = 'https://github.com/tekab308-arch/lacakinHP';
+export const GITHUB_RELEASES_URL =
+  'https://github.com/tekab308-arch/lacakinHP/releases';
+export const GITHUB_LICENSE_URL =
+  'https://github.com/tekab308-arch/lacakinHP/blob/main/LICENSE';
+export const GITHUB_SECURITY_URL =
+  'https://github.com/tekab308-arch/lacakinHP/blob/main/SECURITY.md';
+
+const TRUSTED_DIRECT_APK_URLS = new Set([
+  '/lacakhp-resmi.apk',
+  'https://lacakinhp110.my.id/lacakhp-resmi.apk',
+  'https://lacakinhp.pages.dev/lacakhp-resmi.apk',
+  'https://tracker-web-xi.vercel.app/lacakhp-resmi.apk',
+]);
+
+const GITHUB_RELEASE_APK_PREFIX =
+  'https://github.com/tekab308-arch/lacakinHP/releases/';
+
+export function isTrustedApkUrl(url: string): boolean {
+  const clean = (url || '').trim();
+  if (!clean || clean.includes('..') || /\s/.test(clean)) return false;
+  if (TRUSTED_DIRECT_APK_URLS.has(clean)) return true;
+  return (
+    clean.startsWith(GITHUB_RELEASE_APK_PREFIX) &&
+    clean.toLowerCase().endsWith('.apk')
+  );
+}
+
+export function isExternalApkUrl(apkUrl: string): boolean {
+  return /^https?:\/\//i.test((apkUrl || '').trim());
+}
+
+export function getProvisioningApkUrl(apkUrl: string): string {
+  const clean = (apkUrl || '').trim();
+  if (isTrustedApkUrl(clean) && clean.startsWith('https://')) {
+    return clean;
+  }
+  return 'https://lacakinhp110.my.id/lacakhp-resmi.apk';
+}
+
+export function triggerApkDownload(apkUrl: string): void {
+  const target = isTrustedApkUrl(apkUrl)
+    ? apkUrl.trim()
+    : '/lacakhp-resmi.apk';
+  const link = document.createElement('a');
+  link.href = target;
+  if (isExternalApkUrl(target)) {
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  } else {
+    link.download = 'lacakhp-resmi.apk';
+  }
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export const DEFAULT_RELEASE_INFO: ReleaseInfo = {
   versionCode: 8,
   versionName: '2.6',
@@ -46,6 +103,14 @@ async function fetchReleaseInfo(): Promise<ReleaseInfo> {
               ? data.certSha256.trim().toUpperCase()
               : DEFAULT_RELEASE_INFO.certSha256;
 
+          const rawApkUrl =
+            typeof data.apkUrl === 'string' ? data.apkUrl.trim() : '';
+          const resolvedApkUrl =
+            rawApkUrl.startsWith(GITHUB_RELEASE_APK_PREFIX) &&
+            isTrustedApkUrl(rawApkUrl)
+              ? rawApkUrl
+              : DEFAULT_RELEASE_INFO.apkUrl;
+
           cachedReleaseInfo = {
             versionCode:
               typeof data.versionCode === 'number' &&
@@ -54,7 +119,7 @@ async function fetchReleaseInfo(): Promise<ReleaseInfo> {
                 ? data.versionCode
                 : DEFAULT_RELEASE_INFO.versionCode,
             versionName: data.versionName.trim(),
-            apkUrl: '/lacakhp-resmi.apk',
+            apkUrl: resolvedApkUrl,
             certSha256: validCert,
             apkSha256: data.apkSha256.trim().toLowerCase(),
             notes: typeof data.notes === 'string' ? data.notes.slice(0, 500) : '',

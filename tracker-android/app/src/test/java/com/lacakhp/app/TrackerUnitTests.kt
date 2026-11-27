@@ -99,16 +99,39 @@ class TrackerUnitTests {
         assertTrue(UpdateChecker.isTrustedUpdateUrl("https://lacakinhp110.my.id/lacakhp-resmi.apk"))
         assertTrue(UpdateChecker.isTrustedUpdateUrl("https://lacakinhp.pages.dev/lacakhp-resmi.apk"))
         assertTrue(UpdateChecker.isTrustedUpdateUrl("https://tracker-web-xi.vercel.app/lacakhp-resmi.apk"))
+        assertTrue(
+            UpdateChecker.isTrustedUpdateUrl(
+                "https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk"
+            )
+        )
 
-        // Reject subdomain/prefix spoofing & plain HTTP
+        // Reject subdomain/prefix spoofing, untrusted GitHub repos, path traversal, & plain HTTP
         assertFalse(UpdateChecker.isTrustedUpdateUrl("https://lacakinhp110.my.id.evil.com/lacakhp-resmi.apk"))
         assertFalse(UpdateChecker.isTrustedUpdateUrl("http://lacakinhp110.my.id/lacakhp-resmi.apk"))
+        assertFalse(
+            UpdateChecker.isTrustedUpdateUrl(
+                "https://github.com/evil-attacker/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk"
+            )
+        )
+        assertFalse(
+            UpdateChecker.isTrustedUpdateUrl(
+                "https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/../evil.apk"
+            )
+        )
 
-        // When failing over to Cloudflare mirror, APK URL rewrites to active mirror
+        // When failing over to Cloudflare mirror, mirror-hosted APK URL rewrites to active mirror,
+        // while official GitHub Releases APK URL is preserved across mirrors
         assertEquals(
             "https://lacakinhp.pages.dev/lacakhp-resmi.apk",
             UpdateChecker.resolveMirrorApkUrl(
                 "https://lacakinhp110.my.id/lacakhp-resmi.apk",
+                "https://lacakinhp.pages.dev"
+            )
+        )
+        assertEquals(
+            "https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk",
+            UpdateChecker.resolveMirrorApkUrl(
+                "https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk",
                 "https://lacakinhp.pages.dev"
             )
         )

@@ -9,6 +9,7 @@ import {
   Cpu,
   AlertTriangle,
   CheckCircle2,
+  ExternalLink,
 } from 'lucide-react';
 import { SpotlightCard } from './SpotlightCard';
 import { Web3SovereignMeshAnimation } from './Web3SovereignMeshAnimation';
@@ -16,6 +17,10 @@ import {
   useReleaseInfo,
   shortHexHash,
   shortCertFingerprint,
+  GITHUB_REPO_URL,
+  GITHUB_RELEASES_URL,
+  GITHUB_SECURITY_URL,
+  GITHUB_LICENSE_URL,
 } from '../lib/releaseInfo';
 
 interface AboutProjectProps {
@@ -211,6 +216,45 @@ export const AboutProject: React.FC<AboutProjectProps> = ({
             keamanan, maupun relawan dapat saling menguji, menyanggah bug, dan
             menyempurnakannya bersama-sama.
           </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sky-300 hover:underline font-semibold"
+            >
+              <span>GitHub Repo</span>
+              <ExternalLink className="w-3 h-3 shrink-0" />
+            </a>
+            <span className="text-slate-600">•</span>
+            <a
+              href={GITHUB_RELEASES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-emerald-300 hover:underline font-semibold"
+            >
+              <span>Releases</span>
+              <ExternalLink className="w-3 h-3 shrink-0" />
+            </a>
+            <span className="text-slate-600">•</span>
+            <a
+              href={GITHUB_SECURITY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-amber-300 hover:underline"
+            >
+              <span>Security</span>
+            </a>
+            <span className="text-slate-600">•</span>
+            <a
+              href={GITHUB_LICENSE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-slate-300 hover:underline"
+            >
+              <span>License</span>
+            </a>
+          </div>
         </SpotlightCard>
       </section>
 
