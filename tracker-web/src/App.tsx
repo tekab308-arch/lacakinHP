@@ -1,19 +1,43 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MotionConfig, motion } from 'framer-motion';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { NetworkPulseCanvas } from './components/NetworkPulseCanvas';
 import { WelcomeBanner } from './components/WelcomeBanner';
 import { TrackerWorkspace } from './components/TrackerWorkspace';
-import { ArchitectureGuide } from './components/ArchitectureGuide';
-import { FirstAidChecklist } from './components/FirstAidChecklist';
-import { AboutProject } from './components/AboutProject';
-import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import {
   GITHUB_REPO_URL,
   GITHUB_RELEASES_URL,
   GITHUB_SECURITY_URL,
 } from './lib/releaseInfo';
+
+const FirstAidChecklist = lazy(() =>
+  import('./components/FirstAidChecklist').then((m) => ({
+    default: m.FirstAidChecklist,
+  }))
+);
+const ArchitectureGuide = lazy(() =>
+  import('./components/ArchitectureGuide').then((m) => ({
+    default: m.ArchitectureGuide,
+  }))
+);
+const AboutProject = lazy(() =>
+  import('./components/AboutProject').then((m) => ({
+    default: m.AboutProject,
+  }))
+);
+const PrivacyPolicyModal = lazy(() =>
+  import('./components/PrivacyPolicyModal').then((m) => ({
+    default: m.PrivacyPolicyModal,
+  }))
+);
+
+const TabLoadingFallback: React.FC = () => (
+  <div className="max-w-4xl mx-auto py-16 flex items-center justify-center gap-2.5 text-sm text-slate-300">
+    <Loader2 className="w-4 h-4 animate-spin text-sky-400 shrink-0" />
+    <span>Memuat halaman...</span>
+  </div>
+);
 import {
   CryptoVersion,
   DecryptedLocationPoint,
@@ -600,21 +624,31 @@ export const App: React.FC = () => {
                 </>
               )}
 
-              {activeTab === 'firstaid' && <FirstAidChecklist />}
+              {activeTab === 'firstaid' && (
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <FirstAidChecklist />
+                </Suspense>
+              )}
 
-              {activeTab === 'architecture' && <ArchitectureGuide />}
+              {activeTab === 'architecture' && (
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <ArchitectureGuide />
+                </Suspense>
+              )}
 
               {activeTab === 'about' && (
-                <AboutProject
-                  onOpenArchitecture={() => {
-                    setActiveTab('architecture');
-                    window.scrollTo(0, 0);
-                  }}
-                  onOpenTracker={() => {
-                    setActiveTab('tracker');
-                    window.scrollTo(0, 0);
-                  }}
-                />
+                <Suspense fallback={<TabLoadingFallback />}>
+                  <AboutProject
+                    onOpenArchitecture={() => {
+                      setActiveTab('architecture');
+                      window.scrollTo(0, 0);
+                    }}
+                    onOpenTracker={() => {
+                      setActiveTab('tracker');
+                      window.scrollTo(0, 0);
+                    }}
+                  />
+                </Suspense>
               )}
             </motion.div>
           </main>
@@ -677,10 +711,14 @@ export const App: React.FC = () => {
             </div>
           </footer>
 
-          <PrivacyPolicyModal
-            isOpen={isPrivacyOpen}
-            onClose={() => setIsPrivacyOpen(false)}
-          />
+          {isPrivacyOpen && (
+            <Suspense fallback={null}>
+              <PrivacyPolicyModal
+                isOpen={isPrivacyOpen}
+                onClose={() => setIsPrivacyOpen(false)}
+              />
+            </Suspense>
+          )}
         </div>
 
         {/* Floating Toast */}

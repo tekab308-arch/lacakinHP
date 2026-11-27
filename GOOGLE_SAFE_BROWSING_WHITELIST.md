@@ -8,14 +8,29 @@ Dokumen ini berisi langkah praktis untuk menghilangkan status mencurigakan Googl
 
 ## Langkah 1 — Upload APK v2.6 Saat Ini ke GitHub Releases
 
-1. Buka [GitHub Releases lacakinHP](https://github.com/tekab308-arch/lacakinHP/releases/new) (atau pakai `gh release create` setelah `brew install gh && gh auth login`).
+### Opsi A — Langsung dari Termius / Terminal SSH
+Jika ingin mengunggah langsung lewat terminal tanpa buka browser:
+```zsh
+brew install gh
+gh auth login
+gh release create v2.6 tracker-web/public/lacakhp-resmi.apk \
+  --title "LacakHP v2.6 (Build 8) — Rilis Resmi" \
+  --notes "Rilis resmi LacakHP v2.6 (APK SHA-256: de81c0fe3bc3d6cbe50a467bb4143fe4a0a41d9207ba56f12281f105cea1d970)"
+```
+
+### Opsi B — Lewat Browser
+1. Buka `https://github.com/tekab308-arch/lacakinHP/releases/new`
 2. Isi:
    - **Tag version:** `v2.6`
    - **Release title:** `LacakHP v2.6 (Build 8) — Rilis Resmi`
    - **Attach binaries:** unggah file `tracker-web/public/lacakhp-resmi.apk` yang sudah ada (jangan build ulang agar SHA-256 tetap `de81c0fe3bc3d6cbe50a467bb4143fe4a0a41d9207ba56f12281f105cea1d970`).
 3. Klik **Publish release**.
-4. Pastikan tautan berikut dapat diunduh langsung (HTTP 200):
-   `https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk`
+
+### Cek Link Rilis Sudah Aktif (Dari Termius)
+```zsh
+curl -I -L https://github.com/tekab308-arch/lacakinHP/releases/download/v2.6/lacakhp-resmi.apk
+```
+Pastikan status akhir `HTTP/2 200`.
 
 ---
 

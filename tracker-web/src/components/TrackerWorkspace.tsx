@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -39,7 +39,12 @@ import {
 import { RadarMap } from './RadarMap';
 import { SpotlightCard } from './SpotlightCard';
 import { DemoSimulatorBar } from './DemoSimulatorBar';
-import { PoliceEvidenceModal } from './PoliceEvidenceModal';
+
+const PoliceEvidenceModal = lazy(() =>
+  import('./PoliceEvidenceModal').then((m) => ({
+    default: m.PoliceEvidenceModal,
+  }))
+);
 
 interface TrackerWorkspaceProps {
   deviceId: string;
@@ -904,14 +909,18 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
         </div>
       </div>
 
-      <PoliceEvidenceModal
-        isOpen={isPoliceModalOpen}
-        onClose={() => setIsPoliceModalOpen(false)}
-        deviceId={deviceId}
-        derivedPubHex={derivedPubHex}
-        points={points}
-        rawSampleEvent={rawSampleEvent}
-      />
+      {isPoliceModalOpen && (
+        <Suspense fallback={null}>
+          <PoliceEvidenceModal
+            isOpen={isPoliceModalOpen}
+            onClose={() => setIsPoliceModalOpen(false)}
+            deviceId={deviceId}
+            derivedPubHex={derivedPubHex}
+            points={points}
+            rawSampleEvent={rawSampleEvent}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
