@@ -137,6 +137,6 @@ Untuk memastikan server relawan aman dan stabil sebelum masuk ke registri nasion
 
 * [x] **Fase 1 (Selesai):** Multi-Relay failover client-side (Damus, Nos.lol, Primal) + fallback relays.
 * [x] **Fase 2 (Selesai):** Security Headers (CSP, HSTS, X-Frame-Options: DENY, Anti-Sniff) di hosting produksi.
-* [ ] **Fase 3:** Pembuatan berkas `tracker-web/public/community-relays.json` dan skrip validator `scripts/verify-relay.mjs`.
-* [ ] **Fase 4:** Komponen UI pemilih relay relawan lokal Indonesia di halaman pemantau web.
-* [ ] **Fase 5:** Skrip GitHub Action Uptime Sentinel berkala (Cron 6 jam).
+* [x] **Fase 3 (Selesai):** Pembuatan berkas `tracker-web/public/community-relays.json` dan skrip validator `tracker-web/scripts/verify-relay.mjs` + template Docker `relay-node/`.
+* [x] **Fase 4 (Selesai):** Komponen UI pemilih node relay komunitas & indikator quorum di halaman pemantau web (`TrackerWorkspace.tsx`).
+* [x] **Fase 5 (Selesai):** Skrip GitHub Action Uptime Sentinel berkala (`.github/workflows/relay-sentinel.yml`, Cron 6 jam).

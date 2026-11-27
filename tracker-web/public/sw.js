@@ -40,12 +40,14 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // Bypass Service Worker entirely for APK download and live version metadata
+  // Bypass Service Worker entirely for APK download and live registry/version metadata
   if (
     url.pathname === '/lacakhp-resmi.apk' ||
     url.pathname.endsWith('/lacakhp-resmi.apk') ||
     url.pathname === '/version.json' ||
-    url.pathname.endsWith('/version.json')
+    url.pathname.endsWith('/version.json') ||
+    url.pathname === '/community-relays.json' ||
+    url.pathname.endsWith('/community-relays.json')
   ) {
     return;
   }

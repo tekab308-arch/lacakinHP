@@ -22,6 +22,7 @@ function bundle(entryRel, outName) {
 try {
   const cryptoMod = await import(bundle('src/lib/crypto.ts', 'crypto.mjs'));
   const nostrMod = await import(bundle('src/lib/nostr.ts', 'nostr.mjs'));
+  const communityMod = await import(bundle('src/lib/communityRelays.ts', 'communityRelays.mjs'));
   const releaseMod = await import(bundle('src/lib/releaseInfo.ts', 'releaseInfo.mjs'));
   const qrMod = await import(bundle('src/lib/qrSvg.ts', 'qrSvg.mjs'));
 
@@ -131,15 +132,32 @@ try {
   assert.ok(!hostileGpx.includes('<script>'), 'GPX must escape XML tags');
   assert.ok(hostileGpx.includes('&lt;script&gt;'), 'GPX must contain escaped XML entities');
 
-  // 4. Relay URL validation: enforce wss:// (block plaintext ws:// external, credentials, >8 relays)
+  // 4. Relay URL validation: enforce wss:// (block plaintext ws:// external, credentials, private/SSRF IPs, >8 relays)
   const parsedRelays = nostrMod.parseRelaysCsv(
-    'wss://relay.damus.io,ws://evil.example.com,wss://user:pass@relay.bad.example,javascript:alert(1),ws://localhost:8080,wss://relay.damus.io/'
+    'wss://relay.damus.io,ws://evil.example.com,wss://192.168.1.10,wss://169.254.169.254,wss://user:pass@relay.bad.example,javascript:alert(1),ws://localhost:8080,wss://relay.damus.io/'
   );
   assert.deepEqual(
     parsedRelays,
     ['wss://relay.damus.io', 'ws://localhost:8080'],
-    'parseRelaysCsv must block insecure external ws://, URL credentials, non-WS schemes, and duplicates'
+    'parseRelaysCsv must block insecure external ws://, RFC1918/metadata IPs, URL credentials, non-WS schemes, and duplicates'
   );
+  assert.equal(nostrMod.isValidPublicRelayUrl('wss://relay.damus.io'), true);
+  assert.equal(nostrMod.isValidPublicRelayUrl('wss://10.0.0.5'), false);
+  assert.equal(nostrMod.isValidPublicRelayUrl('ws://localhost:8080'), false);
+
+  const parsedRegistry = communityMod.parseCommunityRelaysRegistry({
+    version: 1,
+    minQuorum: 2,
+    relays: [
+      { id: 'a', url: 'wss://relay.damus.io', name: 'Damus', location: 'Global', operator: 'Damus', isCore: true, status: 'active' },
+      { id: 'bad-ssrf', url: 'wss://192.168.1.1', name: 'Bad', location: 'LAN', operator: 'Evil', isCore: false, status: 'active' },
+      { id: 'b', url: 'wss://nos.lol', name: 'Nos', location: 'Global', operator: 'Nos', isCore: true, status: 'active' },
+    ],
+  });
+  assert.equal(parsedRegistry.relays.length, 2, 'parseCommunityRelaysRegistry must drop private/SSRF relay entries');
+
+  execFileSync('node', [path.join(rootDir, 'scripts/verify-relay.mjs')], { stdio: 'pipe' });
+
   const floodRelays = nostrMod.parseRelaysCsv(
     Array.from({ length: 20 }, (_, i) => `wss://relay${i}.example.com`).join(',')
   );

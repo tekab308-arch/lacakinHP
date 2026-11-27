@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-27T16:15:00Z",
+  "minQuorum": 2,
+  "relays": [
+    {
+      "id": "damus-core",
+      "url": "wss://relay.damus.io",
+      "name": "Damus Global Core",
+      "location": "Global / US-EU",
+      "operator": "Damus Foundation",
+      "isCore": true,
+      "status": "active"
+    },
+    {
+      "id": "noslol-core",
+      "url": "wss://nos.lol",
+      "name": "Nos.lol Core",
+      "location": "Global / EU",
+      "operator": "Nos.lol Collective",
+      "isCore": true,
+      "status": "active"
+    },
+    {
+      "id": "primal-core",
+      "url": "wss://relay.primal.net",
+      "name": "Primal Global Core",
+      "location": "Global / US",
+      "operator": "Primal Inc.",
+      "isCore": true,
+      "status": "active"
+    },
+    {
+      "id": "offchain-backup",
+      "url": "wss://offchain.pub",
+      "name": "Offchain Pub",
+      "location": "Global",
+      "operator": "Offchain Community",
+      "isCore": false,
+      "status": "active"
+    },
+    {
+      "id": "nostrmom-backup",
+      "url": "wss://nostr.mom",
+      "name": "Nostr.mom Node",
+      "location": "Global / EU",
+      "operator": "Nostr.mom Community",
+      "isCore": false,
+      "status": "active"
+    },
+    {
+      "id": "bitcoiner-backup",
+      "url": "wss://nostr.bitcoiner.social",
+      "name": "Bitcoiner Social Node",
+      "location": "Global",
+      "operator": "Bitcoiner Community",
+      "isCore": false,
+      "status": "active"
+    }
+  ]
+}

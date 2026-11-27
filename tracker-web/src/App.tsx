@@ -52,6 +52,7 @@ import {
   parseRelaysCsv,
   subscribeToRelays,
 } from './lib/nostr';
+import { useCommunityRelays } from './lib/communityRelays';
 import {
   DEMO_DEVICE_ID,
   DEMO_SECRET,
@@ -86,6 +87,7 @@ export const App: React.FC = () => {
       : true;
   const [activeTab, setActiveTab] = useState<ActiveTab>('tracker');
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const communityRegistry = useCommunityRelays();
   const [largeText, setLargeText] = useState<boolean>(() => {
     try {
       return localStorage.getItem('lacakhp_ui_large_text') === '1';
@@ -211,12 +213,17 @@ export const App: React.FC = () => {
         const dualKeys = await deriveAllKeyVersions(cleanId, cleanSecret);
         setDerivedPubHex(dualKeys.v2.pubHex);
 
+        const dynamicFallbacks = communityRegistry.relays
+          .filter((r) => !r.isCore && r.status === 'active')
+          .map((r) => r.url);
+
         const result = await fetchAndDecryptFromRelays(
           relays,
           dualKeys,
           (url, status) => {
             setRelayStatuses((prev) => ({ ...prev, [url]: status }));
-          }
+          },
+          dynamicFallbacks
         );
 
         setRawSampleEvent(result.rawSampleEvent);
@@ -610,6 +617,8 @@ export const App: React.FC = () => {
                     showRawPoints={showRawPoints}
                     onToggleShowRaw={() => setShowRawPoints((v) => !v)}
                     relayStatuses={relayStatuses}
+                    communityRelays={communityRegistry.relays}
+                    minQuorum={communityRegistry.minQuorum}
                     onTrack={handleManualTrack}
                     onCopyMagicLink={handleCopyMagicLink}
                     onStartDemo={handleStartDemo}

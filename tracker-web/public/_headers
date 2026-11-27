@@ -12,6 +12,9 @@
 /version.json
   Cache-Control: no-store, max-age=0
 
+/community-relays.json
+  Cache-Control: no-store, max-age=0
+
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
 

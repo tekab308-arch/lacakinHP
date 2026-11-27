@@ -1,0 +1,17 @@
+name: Relay Uptime Sentinel
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify-community-relays:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify community-relays.json schema, anti-SSRF, and live WSS handshake
+        run: node tracker-web/scripts/verify-relay.mjs --live

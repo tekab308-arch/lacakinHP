@@ -1,0 +1,12 @@
+{$RELAY_DOMAIN} {
+	encode gzip
+
+	@nip11 {
+		header Accept *application/nostr+json*
+	}
+
+	reverse_proxy strfry:7777 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+	}
+}

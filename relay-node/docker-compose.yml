@@ -1,0 +1,31 @@
+services:
+  strfry:
+    image: ghcr.io/hoytech/strfry:latest
+    container_name: lacakhp-strfry
+    restart: unless-stopped
+    volumes:
+      - ./strfry.conf:/etc/strfry.conf:ro
+      - strfry-data:/app/strfry-db
+    expose:
+      - "7777"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: lacakhp-caddy
+    restart: unless-stopped
+    depends_on:
+      - strfry
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - RELAY_DOMAIN=${RELAY_DOMAIN:-relay.contoh-domain.id}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  strfry-data:
+  caddy-data:
+  caddy-config:

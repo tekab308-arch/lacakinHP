@@ -140,6 +140,46 @@ const MAX_EVENTS_PER_RELAY = 200;
 const MAX_WS_FRAME_BYTES = 16_384;
 const MAX_SEEN_EVENT_IDS = 2000;
 
+export function isPrivateOrLocalHost(hostname: string): boolean {
+  const h = (hostname || '').trim().toLowerCase().replace(/^\[|\]$/g, '');
+  if (!h) return true;
+  if (
+    h === 'localhost' ||
+    h.endsWith('.local') ||
+    h.endsWith('.internal') ||
+    h === '::1' ||
+    h === '::' ||
+    h.startsWith('fe80:') ||
+    h.startsWith('fc') ||
+    h.startsWith('fd')
+  ) {
+    return true;
+  }
+  const ipv4 = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const [a, b] = [Number(ipv4[1]), Number(ipv4[2])];
+    if (a === 10 || a === 127 || a === 0) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+  }
+  return false;
+}
+
+export function isValidPublicRelayUrl(raw: string): boolean {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed || trimmed.length > 200) return false;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'wss:') return false;
+    if (parsed.username || parsed.password) return false;
+    if (isPrivateOrLocalHost(parsed.hostname)) return false;
+    return parsed.hostname.includes('.');
+  } catch {
+    return false;
+  }
+}
+
 export function parseRelaysCsv(raw: string): string[] {
   const seen = new Set<string>();
   const valid: string[] = [];
@@ -149,11 +189,12 @@ export function parseRelaysCsv(raw: string): string[] {
     try {
       const parsed = new URL(trimmed);
       if (parsed.username || parsed.password) continue;
-      const isSecure = parsed.protocol === 'wss:';
       const isLocalDev =
         parsed.protocol === 'ws:' &&
         (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1');
-      if (!isSecure && !isLocalDev) continue;
+      const isPublicWss =
+        parsed.protocol === 'wss:' && !isPrivateOrLocalHost(parsed.hostname);
+      if (!isPublicWss && !isLocalDev) continue;
       const normalized = parsed.toString().replace(/\/$/, '');
       if (!seen.has(normalized)) {
         seen.add(normalized);
@@ -256,7 +297,8 @@ function querySingleRelay(
 export async function fetchAndDecryptFromRelays(
   relays: string[],
   keys: DualDerivedKeys,
-  onRelayProgress: (url: string, status: RelayQueryStatus) => void
+  onRelayProgress: (url: string, status: RelayQueryStatus) => void,
+  extraFallbackRelays: string[] = []
 ): Promise<NostrQueryResult> {
   const authors = [keys.v2.pubHex, keys.v1.pubHex];
   let healthyPrimaryRelays = 0;
@@ -292,10 +334,12 @@ export async function fetchAndDecryptFromRelays(
   // Smart Auto-Failover: if fewer than 2 primary relays succeeded OR zero verified events were found,
   // automatically sweep backup relays so blocked/slow relays never prevent finding a lost device.
   if (healthyPrimaryRelays < 2 || uniqueById.size === 0) {
-    const backupRelays = FALLBACK_RELAYS.filter((r) => !relays.includes(r));
-    if (backupRelays.length > 0) {
+    const backupPool = Array.from(
+      new Set([...FALLBACK_RELAYS, ...extraFallbackRelays])
+    ).filter((r) => isValidPublicRelayUrl(r) && !relays.includes(r));
+    if (backupPool.length > 0) {
       const backupLists = await Promise.all(
-        backupRelays.map((url) =>
+        backupPool.map((url) =>
           querySingleRelay(url, authors, (status) =>
             onRelayProgress(url, { ...status, isFallback: true })
           )

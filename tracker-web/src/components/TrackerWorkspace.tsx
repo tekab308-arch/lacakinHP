@@ -30,12 +30,14 @@ import {
 } from '../lib/crypto';
 import { DemoStoryStage } from '../lib/demoData';
 import {
+  DEFAULT_RELAYS,
   RawNostrEvent,
   RelayQueryStatus,
   parseRelaysCsv,
   pointsToCsv,
   pointsToGpx,
 } from '../lib/nostr';
+import { CommunityRelayNode } from '../lib/communityRelays';
 import { RadarMap } from './RadarMap';
 import { SpotlightCard } from './SpotlightCard';
 import { DemoSimulatorBar } from './DemoSimulatorBar';
@@ -69,6 +71,8 @@ interface TrackerWorkspaceProps {
   showRawPoints?: boolean;
   onToggleShowRaw?: () => void;
   relayStatuses: Record<string, RelayQueryStatus>;
+  communityRelays?: CommunityRelayNode[];
+  minQuorum?: number;
   onTrack: () => void;
   onCopyMagicLink: () => void;
   onStartDemo: () => void;
@@ -120,6 +124,8 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
   showRawPoints = false,
   onToggleShowRaw,
   relayStatuses,
+  communityRelays = [],
+  minQuorum = 2,
   onTrack,
   onCopyMagicLink,
   onStartDemo,
@@ -144,7 +150,38 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
     (url) => !parsedRelays.includes(url)
   );
   const displayedRelays = [...parsedRelays, ...activeFallbackRelays];
+  const healthyRelayCount = displayedRelays.filter(
+    (url) => relayStatuses[url]?.state === 'done'
+  ).length;
   const detectedMode = detectSecretMode(secretKey);
+  const trimmedSecret = secretKey.trim();
+  const isWeakManualSecret =
+    !isDemoMode &&
+    !hasMagicHash &&
+    trimmedSecret.length > 0 &&
+    !detectedMode.startsWith('Seedphrase') &&
+    trimmedSecret.length < 10;
+  const isStrongSeedphrase =
+    !isDemoMode &&
+    trimmedSecret.length > 0 &&
+    detectedMode.startsWith('Seedphrase');
+
+  const handleToggleCommunityRelay = (relayUrl: string) => {
+    const exists = parsedRelays.includes(relayUrl);
+    if (exists) {
+      if (parsedRelays.length <= 1) {
+        onShowToast('Minimal harus ada 1 node relay aktif.', false);
+        return;
+      }
+      setRelaysCsv(parsedRelays.filter((u) => u !== relayUrl).join(','));
+      return;
+    }
+    if (parsedRelays.length >= 8) {
+      onShowToast('Maksimal 8 node relay aktif agar browser tetap ringan.', false);
+      return;
+    }
+    setRelaysCsv([...parsedRelays, relayUrl].join(','));
+  };
 
   const handleCopyCoords = () => {
     if (!latest) return;
@@ -300,6 +337,19 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                     )}
                   </button>
                 </div>
+                {isWeakManualSecret && (
+                  <p className="mt-1.5 text-[0.72rem] text-amber-300/95 leading-snug">
+                    Sandi pendek (&lt;10 karakter) rentan brute-force offline di
+                    relay publik. Untuk perangkat baru, disarankan memakai 12
+                    kata Seedphrase atau sandi &ge;12 karakter.
+                  </p>
+                )}
+                {isStrongSeedphrase && (
+                  <p className="mt-1.5 text-[0.72rem] text-emerald-300/90 leading-snug">
+                    Entropi Seedphrase tinggi — tahan terhadap tebakan offline
+                    di node relay publik.
+                  </p>
+                )}
               </div>
 
               <button
@@ -390,8 +440,10 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                 <span className="text-[0.8125rem] sm:text-sm font-bold text-slate-100 truncate">
                   Status Jaringan Nostr Relay
                 </span>
-                <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded text-[0.625rem] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
-                  Auto-Failover
+                <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded text-[0.625rem] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0 tabular-nums">
+                  {healthyRelayCount > 0
+                    ? `Quorum ${healthyRelayCount}/${displayedRelays.length}`
+                    : `${parsedRelays.length} Node • Failover`}
                 </span>
               </div>
               <button
@@ -460,19 +512,75 @@ export const TrackerWorkspace: React.FC<TrackerWorkspaceProps> = ({
                   transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-2.5 border-t border-slate-800 space-y-1.5">
-                    <label className="block text-xs font-medium text-slate-300">
-                      Daftar URL Relay (pisahkan koma):
-                    </label>
-                    <input
-                      type="text"
-                      value={relaysCsv}
-                      onChange={(e) => setRelaysCsv(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-base sm:text-xs font-mono text-slate-200 outline-none"
-                    />
+                  <div className="pt-2.5 border-t border-slate-800 space-y-2.5">
+                    {communityRelays.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium text-slate-300">
+                            Pilih Node Relay (Min. Quorum {minQuorum} Node):
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setRelaysCsv(DEFAULT_RELAYS.join(','))}
+                            className="text-[0.6875rem] text-sky-300 hover:underline font-medium shrink-0"
+                          >
+                            Reset Default
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {communityRelays.map((node) => {
+                            const active = parsedRelays.includes(node.url);
+                            return (
+                              <button
+                                key={node.id}
+                                type="button"
+                                onClick={() => handleToggleCommunityRelay(node.url)}
+                                title={`${node.name} (${node.location}) — ${node.operator}`}
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[0.6875rem] font-mono transition ${
+                                  active
+                                    ? 'bg-emerald-500/15 border-emerald-500/45 text-emerald-200'
+                                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    active ? 'bg-emerald-400' : 'bg-slate-600'
+                                  }`}
+                                />
+                                <span>{node.url.replace(/^wss:\/\//, '')}</span>
+                                <span className="text-[0.6rem] opacity-75">
+                                  {node.isCore ? 'Inti' : 'Komunitas'}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-slate-300">
+                        Daftar URL Relay Kustom (pisahkan koma):
+                      </label>
+                      <input
+                        type="text"
+                        value={relaysCsv}
+                        onChange={(e) => setRelaysCsv(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 rounded-xl px-3 py-2 text-base sm:text-xs font-mono text-slate-200 outline-none"
+                      />
+                    </div>
                     <p className="text-xs text-slate-300 leading-relaxed">
-                      Sudah terisi otomatis untuk masyarakat umum. Ubah hanya
-                      jika Anda memiliki server relay Nostr pribadi.
+                      Minimal 2–3 node aktif disarankan agar data lokasi tetap
+                      tersedia jika salah satu relay padam. Relawan bisa menambah
+                      node mandiri via{' '}
+                      <a
+                        href="https://github.com/tekab308-arch/lacakinHP/tree/main/relay-node"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sky-300 hover:underline font-medium"
+                      >
+                        panduan Docker Node Relawan
+                      </a>
+                      .
                     </p>
                   </div>
                 </motion.div>
