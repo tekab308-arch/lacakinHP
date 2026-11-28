@@ -901,7 +901,11 @@ class MainActivity : AppCompatActivity() {
         val batteryOk = pm.isIgnoringBatteryOptimizations(packageName)
         applyBadge(tvPermBattery, btnPermBattery, batteryOk, "Diizinkan", "Perlu diizinkan")
         if (batteryOk && OemPowerHelper.isXiaomiDevice()) {
-            tvPermBattery.text = "Diizinkan • Ketuk untuk Gembok & Autostart Xiaomi"
+            tvPermBattery.text = if (DeviceOwnerHelper.isDeviceOwner(this)) {
+                "Diizinkan • Ketuk untuk Gembok & Baterai MIUI"
+            } else {
+                "Diizinkan • Ketuk untuk Gembok & Autostart Xiaomi"
+            }
             btnPermBattery.text = "Atur Xiaomi"
         }
 
@@ -1287,7 +1291,11 @@ class MainActivity : AppCompatActivity() {
                     append("\n--- TIPS KHUSUS XIAOMI (MIUI / HYPEROS) ---\n")
                     append("Agar LacakHP TIDAK ikut terhapus saat tombol 'X' (Clear Memory) ditekan:\n")
                     append("1. Gembok 🔒 di Recent Apps: Tekan tombol Recent → tahan kartu LacakHP → ketuk ikon Gembok.\n")
-                    append("2. Mulai Otomatis (Autostart): Wajib AKTIF.\n")
+                    if (isOwner) {
+                        append("2. Mulai Otomatis (Autostart): Wajar jika tidak muncul di daftar karena Device Owner otomatis dikecualikan sistem.\n")
+                    } else {
+                        append("2. Mulai Otomatis (Autostart): Wajib AKTIF.\n")
+                    }
                     append("3. Penghemat Baterai MIUI: Pilih 'Tidak ada pembatasan'.")
                 }
                 OemPowerHelper.isSamsungDevice() -> {
@@ -1499,15 +1507,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (emergencyLocked) {
-                options.add("✈️ Pulihkan Status Darurat (Buka Blokir Mode Pesawat)" to {
+                options.add("✈️ Pulihkan Status Darurat (Buka Blokir Mode Pesawat & Lokasi)" to {
                     requireDualOwnerAuth(
                         "Pulihkan Status Darurat",
-                        "Verifikasi PIN/Sidik Jari + Kunci Rahasia untuk membuka kembali akses Mode Pesawat."
+                        "Verifikasi PIN/Sidik Jari + Kunci Rahasia untuk membuka kembali akses Mode Pesawat, Lokasi, dan Jam."
                     ) {
                         DeviceOwnerHelper.clearEmergencyLockdown(this)
                         updatePermissionsUI()
                         refreshDashboard()
-                        Toast.makeText(this, "Status darurat dipulihkan. Mode Pesawat kembali normal.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Status darurat dipulihkan. Mode Pesawat & setelan sistem kembali normal.", Toast.LENGTH_SHORT).show()
                     }
                 })
             }
@@ -1596,12 +1604,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun showLevel2ActivationGuideDialog() {
         val cmd = DeviceOwnerHelper.adbActivationCommand(this)
-        val msg = "Benteng Level 2 (Device Owner resmi Android) menonaktifkan tombol Hapus Instalan, memblokir Factory Reset & Safe Mode, mengunci izin GPS/SMS permanen, serta menutup port USB Debugging otomatis.\n\n" +
+        val oemChecklist = buildString {
+            if (OemPowerHelper.isXiaomiDevice()) {
+                append("• Khusus Xiaomi (MIUI / HyperOS): Nyalakan 'Proses debug USB (Setelan keamanan)' di Opsi Pengembang, dan wajib hapus user 'Aplikasi Ganda' (Setelan > Aplikasi > Aplikasi ganda > ⚙️ > Hapus akun Aplikasi ganda; cadangkan dulu data aplikasi kloningan).\n")
+            } else if (OemPowerHelper.isColorOsOrFuntouchDevice()) {
+                append("• Khusus Oppo / Realme / Vivo: Aktifkan 'Matikan pemantauan izin (Disable permission monitoring)' di Opsi Pengembang sebelum menjalankan perintah.\n")
+            }
+        }
+        val msg = "Benteng Level 2 (Device Owner resmi Android) menonaktifkan tombol Hapus Instalan, memblokir Factory Reset, Reset Jaringan, & Safe Mode, mengunci izin GPS/SMS permanen, serta menutup port USB Debugging otomatis.\n\n" +
             "Cara praktis tanpa laptop (cukup 1 menit via Shizuku + aShell):\n" +
-            "1️⃣ Lepas sementara akun Google/Samsung/Xiaomi di Pengaturan > Akun.\n" +
+            "1️⃣ Hapus sementara SEMUA akun sinkronisasi di Pengaturan > Akun (bukan Google saja, termasuk WhatsApp, Meet, Samsung/Xiaomi Account), lalu tunggu ±15–20 detik.\n" +
+            oemChecklist +
             "2️⃣ Buka aShell (tersambung Shizuku) atau ADB di laptop, tempel perintah berikut:\n\n" +
             "$cmd\n\n" +
-            "3️⃣ Setelah muncul 'Success: Device owner set', silakan login kembali ke akun Google Anda seperti biasa."
+            "3️⃣ Setelah muncul 'Success: Device owner set', segera login kembali Akun Google (untuk proteksi FRP), pastikan PIN/Sidik Jari aktif, dan matikan akses Pusat Kontrol di layar terkunci."
 
         AlertDialog.Builder(this)
             .setTitle("Upgrade ke Benteng Device Owner")
@@ -1713,26 +1729,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showXiaomiKeepAliveDialog() {
-        val msg = "Di Xiaomi (MIUI / HyperOS), menekan tombol 'X' (Clear Memory) di Recent Apps akan memaksa berhenti (force-stop) aplikasi KECUALI 3 hal ini aktif:\n\n" +
+        val isOwner = DeviceOwnerHelper.isDeviceOwner(this)
+        val autostartLine = if (isOwner) {
+            "2️⃣ Mulai Otomatis (Autostart):\n" +
+                "Karena Benteng Device Owner sudah aktif, wajar jika LacakHP tidak muncul di daftar Autostart (sudah dikecualikan otomatis oleh sistem).\n\n"
+        } else {
+            "2️⃣ Mulai Otomatis (Autostart):\n" +
+                "Izinkan LacakHP memulai otomatis agar langsung hidup kembali jika memori penuh.\n\n"
+        }
+        val msg = "Di Xiaomi (MIUI / HyperOS), menekan tombol 'X' (Clear Memory) di Recent Apps dapat menghentikan aplikasi KECUALI langkah berikut aktif:\n\n" +
             "1️⃣ Gembok di Recent Apps (🔒) — WAJIB:\n" +
             "Buka daftar Recent Apps → tekan & tahan kartu LacakHP → ketuk ikon Gembok (🔒).\n" +
             "(Atau buka app Keamanan/Security → Setelan ⚙️ → Tingkatkan kecepatan → Kunci aplikasi → aktifkan LacakHP).\n\n" +
-            "2️⃣ Mulai Otomatis (Autostart):\n" +
-            "Izinkan LacakHP memulai otomatis agar langsung hidup kembali jika memori penuh.\n\n" +
+            autostartLine +
             "3️⃣ Penghemat Baterai MIUI:\n" +
             "Pilih 'Tidak ada pembatasan' (No restrictions)."
 
-        AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this)
             .setTitle("Anti-Kill Clear Memory Xiaomi")
             .setMessage(msg)
-            .setPositiveButton("1. Buka Autostart") { _, _ ->
-                OemPowerHelper.openXiaomiAutostartSettings(this)
-            }
-            .setNeutralButton("2. Baterai MIUI") { _, _ ->
+            .setPositiveButton("Baterai MIUI") { _, _ ->
                 OemPowerHelper.openXiaomiBatterySaverSettings(this)
             }
             .setNegativeButton("Tutup", null)
-            .show()
+
+        if (!isOwner) {
+            builder.setNeutralButton("Buka Autostart") { _, _ ->
+                OemPowerHelper.openXiaomiAutostartSettings(this)
+            }
+        }
+
+        builder.show()
     }
 
     private fun showOemBatteryKeepAliveDialog() {

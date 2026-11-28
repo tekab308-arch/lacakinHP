@@ -23,6 +23,24 @@ object DeviceOwnerHelper {
 
     private const val TAG = "DeviceOwnerHelper"
 
+    internal val PERMANENT_RESTRICTIONS = listOf(
+        UserManager.DISALLOW_FACTORY_RESET,
+        UserManager.DISALLOW_SAFE_BOOT,
+        UserManager.DISALLOW_ADD_USER,
+        UserManager.DISALLOW_NETWORK_RESET
+    )
+
+    internal fun emergencyRestrictions(sdkInt: Int = Build.VERSION.SDK_INT): List<String> =
+        if (sdkInt >= Build.VERSION_CODES.P) {
+            listOf(
+                UserManager.DISALLOW_AIRPLANE_MODE,
+                UserManager.DISALLOW_CONFIG_LOCATION,
+                UserManager.DISALLOW_CONFIG_DATE_TIME
+            )
+        } else {
+            emptyList()
+        }
+
     fun adminComponent(context: Context): ComponentName =
         ComponentName(context, TrackerAdminReceiver::class.java)
 
@@ -50,7 +68,7 @@ object DeviceOwnerHelper {
 
     /**
      * Applies Smart Mode permanent protections when Device Owner is active:
-     * - Blocks app uninstallation, factory reset, safe boot, and secondary user creation.
+     * - Blocks app uninstallation, factory reset, safe boot, secondary user creation, and network reset.
      * - Locks essential runtime permissions (Location, Notifications, SMS/Phone in full flavor).
      * - Enforces USB Debugging lock unless within an owner-authorized 30-minute window.
      * - Reads hardware IMEI 1/2 locally for the family Emergency Card (never sent to Nostr).
@@ -68,12 +86,7 @@ object DeviceOwnerHelper {
             Log.w(TAG, "setUninstallBlocked failed: ${e.message}")
         }
 
-        val permanentRestrictions = listOf(
-            UserManager.DISALLOW_FACTORY_RESET,
-            UserManager.DISALLOW_SAFE_BOOT,
-            UserManager.DISALLOW_ADD_USER
-        )
-        for (restriction in permanentRestrictions) {
+        for (restriction in PERMANENT_RESTRICTIONS) {
             try {
                 manager.addUserRestriction(admin, restriction)
             } catch (e: Exception) {
@@ -87,11 +100,17 @@ object DeviceOwnerHelper {
         syncUsbDebuggingLock(appCtx)
 
         if (TrackerPrefs.isEmergencyLockdownActive(appCtx) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            for (restriction in emergencyRestrictions()) {
+                try {
+                    manager.addUserRestriction(admin, restriction)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Re-applying emergency restriction($restriction) failed: ${e.message}")
+                }
+            }
             try {
-                manager.addUserRestriction(admin, UserManager.DISALLOW_AIRPLANE_MODE)
                 manager.setLocationEnabled(admin, true)
             } catch (e: Exception) {
-                Log.w(TAG, "Re-applying emergency lockdown failed: ${e.message}")
+                Log.w(TAG, "Re-applying setLocationEnabled failed: ${e.message}")
             }
         }
 
@@ -174,7 +193,7 @@ object DeviceOwnerHelper {
     /**
      * Zero-latency emergency escalation callable directly inside BroadcastReceivers (even in Doze Mode):
      * 1. Activates 2-minute Chase Mode for 45 minutes.
-     * 2. Immediately relocks USB Debugging, blocks Airplane Mode, and forces Location ON when Device Owner.
+     * 2. Immediately relocks USB Debugging, blocks Airplane Mode / Location / Clock changes, and forces Location ON when Device Owner.
      */
     fun enforceEmergencyLockdown(context: Context) {
         val appCtx = context.applicationContext
@@ -186,10 +205,12 @@ object DeviceOwnerHelper {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val manager = dpm(appCtx)
                 val admin = adminComponent(appCtx)
-                try {
-                    manager?.addUserRestriction(admin, UserManager.DISALLOW_AIRPLANE_MODE)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed locking Airplane Mode: ${e.message}")
+                for (restriction in emergencyRestrictions()) {
+                    try {
+                        manager?.addUserRestriction(admin, restriction)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed locking $restriction: ${e.message}")
+                    }
                 }
                 try {
                     manager?.setLocationEnabled(admin, true)
@@ -201,20 +222,21 @@ object DeviceOwnerHelper {
     }
 
     /**
-     * Restores normal non-emergency Airplane Mode access after Dual Owner Verification.
+     * Restores normal non-emergency Airplane Mode, Location config, and Date/Time access after Dual Owner Verification.
      */
     fun clearEmergencyLockdown(context: Context) {
         val appCtx = context.applicationContext
         TrackerPrefs.setEmergencyLockdownActive(appCtx, false)
         TrackerPrefs.clearChaseMode(appCtx)
-        if (isDeviceOwner(appCtx) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                dpm(appCtx)?.clearUserRestriction(
-                    adminComponent(appCtx),
-                    UserManager.DISALLOW_AIRPLANE_MODE
-                )
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed clearing Airplane Mode restriction: ${e.message}")
+        if (isDeviceOwner(appCtx)) {
+            val manager = dpm(appCtx)
+            val admin = adminComponent(appCtx)
+            for (restriction in emergencyRestrictions()) {
+                try {
+                    manager?.clearUserRestriction(admin, restriction)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed clearing $restriction: ${e.message}")
+                }
             }
         }
     }
@@ -243,15 +265,9 @@ object DeviceOwnerHelper {
             return true
         }
 
-        val allRestrictions = buildList {
-            add(UserManager.DISALLOW_FACTORY_RESET)
-            add(UserManager.DISALLOW_SAFE_BOOT)
-            add(UserManager.DISALLOW_ADD_USER)
-            add(UserManager.DISALLOW_DEBUGGING_FEATURES)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                add(UserManager.DISALLOW_AIRPLANE_MODE)
-            }
-        }
+        val allRestrictions = PERMANENT_RESTRICTIONS +
+            UserManager.DISALLOW_DEBUGGING_FEATURES +
+            emergencyRestrictions()
         for (r in allRestrictions) {
             try {
                 manager.clearUserRestriction(admin, r)

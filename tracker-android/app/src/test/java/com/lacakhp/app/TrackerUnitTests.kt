@@ -1,5 +1,7 @@
 package com.lacakhp.app
 
+import android.os.Build
+import android.os.UserManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -177,5 +179,28 @@ class TrackerUnitTests {
 
         assertEquals("com.lacakhp.app.ACTION_REVIVE_TRACKER", BootReceiver.ACTION_REVIVE_TRACKER)
         assertEquals(2041, TrackerWatchdogJob.JOB_ID)
+    }
+
+    @Test
+    fun definesPermanentAndEmergencyDeviceOwnerRestrictions() {
+        assertTrue(DeviceOwnerHelper.PERMANENT_RESTRICTIONS.containsAll(
+            listOf(
+                UserManager.DISALLOW_FACTORY_RESET,
+                UserManager.DISALLOW_SAFE_BOOT,
+                UserManager.DISALLOW_ADD_USER,
+                UserManager.DISALLOW_NETWORK_RESET
+            )
+        ))
+
+        assertTrue(DeviceOwnerHelper.emergencyRestrictions(Build.VERSION_CODES.O).isEmpty())
+        assertTrue(
+            DeviceOwnerHelper.emergencyRestrictions(Build.VERSION_CODES.P).containsAll(
+                listOf(
+                    UserManager.DISALLOW_AIRPLANE_MODE,
+                    UserManager.DISALLOW_CONFIG_LOCATION,
+                    UserManager.DISALLOW_CONFIG_DATE_TIME
+                )
+            )
+        )
     }
 }
