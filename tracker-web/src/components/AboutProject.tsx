@@ -299,7 +299,18 @@ export const AboutProject: React.FC<AboutProjectProps> = ({
             </div>
             <ul className="text-slate-200 text-[0.8125rem] leading-relaxed space-y-1.5 list-disc list-inside">
               <li>Domain resmi utama: <strong className="text-slate-50">lacakinhp110.my.id</strong> (mirror: <code>lacakinhp.pages.dev</code>)</li>
-              <li>100% Gratis selamanya, tanpa iklan, dan tanpa pungutan apa pun.</li>
+              <li>Memakai domain hemat <code>.my.id</code> + infrastruktur statis agar proyek amal tetap 100% gratis selamanya tanpa iklan.</li>
+              <li>Identitas &amp; mirror resmi tercatat publik di{' '}
+                <a
+                  href="/.well-known/security.txt"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sky-300 hover:underline font-mono"
+                >
+                  /.well-known/security.txt
+                </a>{' '}
+                dan repositori GitHub.
+              </li>
               <li>Data koordinat terenkripsi lokal (Zero-Knowledge, aman dari sadapan).</li>
             </ul>
           </div>

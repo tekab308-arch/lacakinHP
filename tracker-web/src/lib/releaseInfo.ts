@@ -16,6 +16,14 @@ export const GITHUB_LICENSE_URL =
   'https://github.com/tekab308-arch/lacakinHP/blob/main/LICENSE';
 export const GITHUB_SECURITY_URL =
   'https://github.com/tekab308-arch/lacakinHP/blob/main/SECURITY.md';
+export const GITHUB_CONTRIBUTING_URL =
+  'https://github.com/tekab308-arch/lacakinHP/blob/main/CONTRIBUTING.md';
+export const GITHUB_ISSUES_URL =
+  'https://github.com/tekab308-arch/lacakinHP/issues';
+export const GITHUB_RELAY_NODE_URL =
+  'https://github.com/tekab308-arch/lacakinHP/tree/main/relay-node';
+export const GITHUB_ACTIONS_URL =
+  'https://github.com/tekab308-arch/lacakinHP/actions';
 
 const TRUSTED_DIRECT_APK_URLS = new Set([
   '/lacakhp-resmi.apk',

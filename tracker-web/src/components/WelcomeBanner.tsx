@@ -24,10 +24,15 @@ import { SpotlightCard } from './SpotlightCard';
 import { LegalConsentModal } from './LegalConsentModal';
 import {
   useReleaseInfo,
+  shortHexHash,
   shortCertFingerprint,
   triggerApkDownload,
   GITHUB_REPO_URL,
   GITHUB_RELEASES_URL,
+  GITHUB_CONTRIBUTING_URL,
+  GITHUB_ISSUES_URL,
+  GITHUB_RELAY_NODE_URL,
+  GITHUB_ACTIONS_URL,
 } from '../lib/releaseInfo';
 
 interface WelcomeBannerProps {
@@ -249,6 +254,26 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                       <ArrowUpRight className="w-4 h-4 shrink-0" />
                     </button>
                   </div>
+
+                  {/* Compact Open-Source & Integrity Trust Bar */}
+                  <div className="pt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.72rem] text-slate-300 font-mono tabular-nums">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-300">
+                      <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                      <span>v{releaseInfo.versionName} • SHA-256: {shortHexHash(releaseInfo.apkSha256)}</span>
+                    </span>
+                    <span className="text-slate-600 hidden sm:inline">•</span>
+                    <button
+                      type="button"
+                      onClick={onOpenArchitecture}
+                      className="text-sky-300 hover:underline font-sans font-medium"
+                    >
+                      Verifikasi Keaslian APK
+                    </button>
+                    <span className="text-slate-600 hidden sm:inline">•</span>
+                    <span className="text-slate-400 font-sans">
+                      Domain hemat <code>.my.id</code> dipakai murni agar proyek amal tetap 100% gratis tanpa sponsor
+                    </span>
+                  </div>
                 </div>
 
                 {/* Expandable 4-Step Layperson APK Installation Guide */}
@@ -395,28 +420,77 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
                       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="pt-4 mt-4 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {CONTRIBUTE_ROLES.map((role, i) => (
-                          <motion.div
-                            key={role.title}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                              delay: i * 0.04,
-                              duration: 0.22,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                            className="bg-slate-950/85 border border-slate-800/90 rounded-xl p-3.5 space-y-2"
+                      <div className="pt-4 mt-4 border-t border-slate-800/80 space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                          {CONTRIBUTE_ROLES.map((role, i) => (
+                            <motion.div
+                              key={role.title}
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                delay: i * 0.04,
+                                duration: 0.22,
+                                ease: [0.22, 1, 0.36, 1],
+                              }}
+                              className="bg-slate-950/85 border border-slate-800/90 rounded-xl p-3.5 space-y-2"
+                            >
+                              <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
+                                {role.icon}
+                                <span>{role.title}</span>
+                              </div>
+                              <p className="text-[0.8125rem] text-slate-300 leading-relaxed">
+                                {role.desc}
+                              </p>
+                            </motion.div>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <a
+                            href={GITHUB_REPO_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-sky-300 font-semibold transition"
                           >
-                            <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
-                              {role.icon}
-                              <span>{role.title}</span>
-                            </div>
-                            <p className="text-[0.8125rem] text-slate-300 leading-relaxed">
-                              {role.desc}
-                            </p>
-                          </motion.div>
-                        ))}
+                            <span>Buka GitHub Repo</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                          <a
+                            href={GITHUB_CONTRIBUTING_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-medium transition"
+                          >
+                            <span>Panduan Kontribusi (PR)</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                          <a
+                            href={GITHUB_RELAY_NODE_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-emerald-300 font-medium transition"
+                          >
+                            <span>Docker Node Relawan</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                          <a
+                            href={GITHUB_ISSUES_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-amber-300 font-medium transition"
+                          >
+                            <span>Laporkan Bug / Sanggahan</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                          <a
+                            href={GITHUB_ACTIONS_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium transition"
+                          >
+                            <span>Log Uji Otomatis (CI)</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        </div>
                       </div>
                     </motion.div>
                   )}

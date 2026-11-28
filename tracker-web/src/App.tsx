@@ -9,6 +9,8 @@ import {
   GITHUB_REPO_URL,
   GITHUB_RELEASES_URL,
   GITHUB_SECURITY_URL,
+  GITHUB_CONTRIBUTING_URL,
+  GITHUB_ACTIONS_URL,
 } from './lib/releaseInfo';
 
 const FirstAidChecklist = lazy(() =>
@@ -703,6 +705,33 @@ export const App: React.FC = () => {
               >
                 Kebijakan Privasi &amp; Lisensi
               </button>
+              <span className="text-slate-700">•</span>
+              <a
+                href={GITHUB_CONTRIBUTING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-300 hover:underline font-medium"
+              >
+                Kontribusi
+              </a>
+              <span className="text-slate-700">•</span>
+              <a
+                href={GITHUB_ACTIONS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-300 hover:underline font-medium"
+              >
+                Uji Otomatis (CI)
+              </a>
+              <span className="text-slate-700">•</span>
+              <a
+                href="/.well-known/security.txt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-300 hover:underline font-mono"
+              >
+                security.txt
+              </a>
               <span className="text-slate-700">•</span>
               <a
                 href={GITHUB_SECURITY_URL}
