@@ -10,3 +10,12 @@ local.properties
 *.keystore
 keystore.properties
 google-services.json
+
+# Local-only internal notes, checklists, & assistant rules
+.agents/
+list.md
+KONTEN_STRUKTUR_PROJEK.md
+OPTIMASI_FULL_ROOT_MDM.md
+kemajuan projek.md
+GOOGLE_PLAY_PROTECT_APPEAL.md
+GOOGLE_SAFE_BROWSING_WHITELIST.md
