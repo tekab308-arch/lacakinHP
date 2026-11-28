@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Smartphone,
   Server,
@@ -185,8 +185,6 @@ export const ArchitectureGuide: React.FC = () => {
     return () => window.clearInterval(timer);
   }, [isPlaying]);
 
-  const current = STORY_STEPS[activeStep];
-
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Interactive Animated Walkthrough Hero */}
@@ -276,278 +274,305 @@ export const ArchitectureGuide: React.FC = () => {
           })}
         </div>
 
-        {/* Animated Stage + Description */}
+        {/* Animated Stage + Description (stacked in CSS grid to lock height & prevent layout shift) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center rounded-2xl bg-slate-950/90 border border-slate-800/90 p-4 sm:p-5 overflow-hidden">
           {/* Left: Concise Explanation */}
-          <div className="lg:col-span-5 space-y-2.5">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`copy-${activeStep}`}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-2.5"
-              >
-                <div className="font-mono text-xs font-bold tracking-wider text-sky-400">
-                  {current.badge}
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-slate-50 leading-snug">
-                  {current.title}
-                </h2>
-                <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
-                  {current.desc}
-                </p>
-              </motion.div>
-            </AnimatePresence>
+          <div className="lg:col-span-5 grid">
+            {STORY_STEPS.map((step, idx) => {
+              const active = activeStep === idx;
+              return (
+                <motion.div
+                  key={`copy-${step.num}`}
+                  initial={false}
+                  animate={{
+                    opacity: active ? 1 : 0,
+                    y: active ? 0 : 6,
+                  }}
+                  transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  aria-hidden={!active}
+                  className={`col-start-1 row-start-1 space-y-2.5 self-center ${
+                    active ? 'relative z-10' : 'pointer-events-none select-none'
+                  }`}
+                >
+                  <div className="font-mono text-xs font-bold tracking-wider text-sky-400">
+                    {step.badge}
+                  </div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-50 leading-snug">
+                    {step.title}
+                  </h2>
+                  <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
+                    {step.desc}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
 
           {/* Right: Crisp Motion Diagram Stage */}
-          <div className="lg:col-span-7 min-h-[188px] flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900/90 border border-slate-800/80 p-3.5 sm:p-4 relative overflow-hidden">
-            <AnimatePresence mode="wait">
-              {activeStep === 0 && (
+          <div className="lg:col-span-7 min-h-[188px] grid items-center rounded-xl bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900/90 border border-slate-800/80 p-3.5 sm:p-4 relative overflow-hidden">
+            <motion.div
+              initial={false}
+              animate={{
+                opacity: activeStep === 0 ? 1 : 0,
+                scale: activeStep === 0 ? 1 : 0.98,
+              }}
+              transition={{ duration: 0.28 }}
+              aria-hidden={activeStep !== 0}
+              className={`col-start-1 row-start-1 w-full flex flex-col sm:flex-row items-center justify-between gap-3 ${
+                activeStep === 0 ? 'relative z-10' : 'pointer-events-none select-none'
+              }`}
+            >
+              {/* Phone creating ID + Seedphrase */}
+              <div className="w-full sm:w-[46%] rounded-xl bg-slate-950 border border-indigo-500/35 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-[11px] font-bold text-indigo-300">
+                  <Smartphone className="w-4 h-4 shrink-0" />
+                  <span>HP Pemilik</span>
+                </div>
+                <div className="space-y-1.5 font-mono text-[10px]">
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      opacity: activeStep === 0 ? 1 : 0,
+                      x: activeStep === 0 ? 0 : -6,
+                    }}
+                    transition={{ delay: activeStep === 0 ? 0.1 : 0 }}
+                    className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-200 truncate"
+                  >
+                    ID: <span className="text-sky-300">samsung-a21s-7f3a</span>
+                  </motion.div>
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      opacity: activeStep === 0 ? 1 : 0,
+                      x: activeStep === 0 ? 0 : -6,
+                    }}
+                    transition={{ delay: activeStep === 0 ? 0.28 : 0 }}
+                    className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-200 flex items-center gap-1.5 truncate"
+                  >
+                    <KeyRound className="w-3 h-3 text-amber-400 shrink-0" />
+                    <span className="text-amber-300 truncate">awan batik fajar ...</span>
+                  </motion.div>
+                  <motion.div
+                    initial={false}
+                    animate={{ opacity: activeStep === 0 ? 1 : 0 }}
+                    transition={{ delay: activeStep === 0 ? 0.45 : 0 }}
+                    className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[9px]"
+                  >
+                    PBKDF2 100k + AES-256-GCM
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Animated Encrypted Packet Track */}
+              <div className="flex sm:flex-col items-center justify-center gap-1.5 shrink-0 py-1">
+                <div className="relative w-20 sm:w-24 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                  <motion.div
+                    animate={{ x: ['-100%', '220%'] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1.7,
+                      ease: 'easeInOut',
+                    }}
+                    className="w-10 h-full rounded-full bg-gradient-to-r from-transparent via-sky-400 to-indigo-400"
+                  />
+                </div>
+                <span className="font-mono text-[9px] text-sky-400 whitespace-nowrap">
+                  v1:r7KpQ9...
+                </span>
+              </div>
+
+              {/* Blind Relay Node */}
+              <div className="w-full sm:w-[34%] rounded-xl bg-slate-950 border border-amber-500/30 p-3 space-y-1.5 text-center">
                 <motion.div
-                  key="stage-0"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full flex flex-col sm:flex-row items-center justify-between gap-3"
+                  animate={{ scale: [1, 1.07, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
+                  className="mx-auto w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400"
                 >
-                  {/* Phone creating ID + Seedphrase */}
-                  <div className="w-full sm:w-[46%] rounded-xl bg-slate-950 border border-indigo-500/35 p-3 space-y-2">
-                    <div className="flex items-center gap-2 text-[11px] font-bold text-indigo-300">
-                      <Smartphone className="w-4 h-4 shrink-0" />
-                      <span>HP Pemilik</span>
-                    </div>
-                    <div className="space-y-1.5 font-mono text-[10px]">
-                      <motion.div
-                        initial={{ opacity: 0, x: -6 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.12 }}
-                        className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-200 truncate"
-                      >
-                        ID: <span className="text-sky-300">samsung-a21s-7f3a</span>
-                      </motion.div>
-                      <motion.div
-                        initial={{ opacity: 0, x: -6 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.35 }}
-                        className="px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-200 flex items-center gap-1.5 truncate"
-                      >
-                        <KeyRound className="w-3 h-3 text-amber-400 shrink-0" />
-                        <span className="text-amber-300 truncate">awan batik fajar ...</span>
-                      </motion.div>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[9px]"
-                      >
-                        PBKDF2 100k + AES-256-GCM
-                      </motion.div>
-                    </div>
-                  </div>
-
-                  {/* Animated Encrypted Packet Track */}
-                  <div className="flex sm:flex-col items-center justify-center gap-1.5 shrink-0 py-1">
-                    <div className="relative w-20 sm:w-24 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                      <motion.div
-                        animate={{ x: ['-100%', '220%'] }}
-                        transition={{
-                          repeat: Infinity,
-                          duration: 1.7,
-                          ease: 'easeInOut',
-                        }}
-                        className="w-10 h-full rounded-full bg-gradient-to-r from-transparent via-sky-400 to-indigo-400"
-                      />
-                    </div>
-                    <span className="font-mono text-[9px] text-sky-400 whitespace-nowrap">
-                      v1:r7KpQ9...
-                    </span>
-                  </div>
-
-                  {/* Blind Relay Node */}
-                  <div className="w-full sm:w-[34%] rounded-xl bg-slate-950 border border-amber-500/30 p-3 space-y-1.5 text-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.07, 1] }}
-                      transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-                      className="mx-auto w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400"
-                    >
-                      <Server className="w-4 h-4" />
-                    </motion.div>
-                    <div className="text-[11px] font-bold text-white">Nostr Relay</div>
-                    <div className="text-[10px] text-amber-300/85 leading-snug">
-                      Hanya melihat teks acak, tak bisa membaca lokasi
-                    </div>
-                  </div>
+                  <Server className="w-4 h-4" />
                 </motion.div>
-              )}
+                <div className="text-[11px] font-bold text-white">Nostr Relay</div>
+                <div className="text-[10px] text-amber-300/85 leading-snug">
+                  Hanya melihat teks acak, tak bisa membaca lokasi
+                </div>
+              </div>
+            </motion.div>
 
-              {activeStep === 1 && (
-                <motion.div
-                  key="stage-1"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full space-y-3"
-                >
-                  {/* Top Bar: Magic Link Hash Privacy */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 font-mono text-[10px]">
-                    <span className="text-slate-400 truncate">
-                      lacakinhp110.my.id/
-                      <span className="text-emerald-400 font-semibold">#id=...&amp;key=...</span>
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 text-[9px] shrink-0">
-                      #hash hanya di RAM browser
-                    </span>
+            <motion.div
+              initial={false}
+              animate={{
+                opacity: activeStep === 1 ? 1 : 0,
+                scale: activeStep === 1 ? 1 : 0.98,
+              }}
+              transition={{ duration: 0.28 }}
+              aria-hidden={activeStep !== 1}
+              className={`col-start-1 row-start-1 w-full space-y-3 ${
+                activeStep === 1 ? 'relative z-10' : 'pointer-events-none select-none'
+              }`}
+            >
+              {/* Top Bar: Magic Link Hash Privacy */}
+              <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 font-mono text-[10px]">
+                <span className="text-slate-400 truncate">
+                  lacakinhp110.my.id/
+                  <span className="text-emerald-400 font-semibold">#id=...&amp;key=...</span>
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 text-[9px] shrink-0">
+                  #hash hanya di RAM browser
+                </span>
+              </div>
+
+              {/* Cipher -> Local Unlock -> Plaintext */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <div className="w-full sm:w-[35%] rounded-xl bg-slate-950 border border-amber-500/30 p-2.5 font-mono text-[10px] space-y-1">
+                  <div className="text-slate-500 text-[9px]">PAKET DARI RELAY</div>
+                  <div className="text-amber-300 break-all leading-tight">
+                    v1:9fA3kL...:mZ4tYpQ1x8...
                   </div>
+                </div>
 
-                  {/* Cipher -> Local Unlock -> Plaintext */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
-                    <div className="w-full sm:w-[35%] rounded-xl bg-slate-950 border border-amber-500/30 p-2.5 font-mono text-[10px] space-y-1">
-                      <div className="text-slate-500 text-[9px]">PAKET DARI RELAY</div>
-                      <div className="text-amber-300 break-all leading-tight">
-                        v1:9fA3kL...:mZ4tYpQ1x8...
-                      </div>
-                    </div>
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      '0 0 0px rgba(16,185,129,0.0)',
+                      '0 0 18px rgba(16,185,129,0.45)',
+                      '0 0 0px rgba(16,185,129,0.0)',
+                    ],
+                  }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-1.5 text-emerald-300 text-[11px] font-bold shrink-0"
+                >
+                  <Unlock className="w-4 h-4" />
+                  <span>Dekripsi Lokal</span>
+                </motion.div>
 
+                <motion.div
+                  initial={false}
+                  animate={{
+                    opacity: activeStep === 1 ? 1 : 0,
+                    x: activeStep === 1 ? 0 : 8,
+                  }}
+                  transition={{ delay: activeStep === 1 ? 0.2 : 0 }}
+                  className="w-full sm:w-[37%] rounded-xl bg-slate-950 border border-emerald-500/40 p-2.5 font-mono text-[10px] space-y-1"
+                >
+                  <div className="text-emerald-400 text-[9px] font-bold">TERBUKA DI BROWSER</div>
+                  <div className="text-white">-5.154884, 105.299902</div>
+                  <div className="text-slate-400">±15m (gps) • Bat 82%</div>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={false}
+              animate={{
+                opacity: activeStep === 2 ? 1 : 0,
+                scale: activeStep === 2 ? 1 : 0.98,
+              }}
+              transition={{ duration: 0.28 }}
+              aria-hidden={activeStep !== 2}
+              className={`col-start-1 row-start-1 w-full grid grid-cols-1 sm:grid-cols-12 gap-3 items-center ${
+                activeStep === 2 ? 'relative z-10' : 'pointer-events-none select-none'
+              }`}
+            >
+              {/* Stylized Animated Mini Radar Map */}
+              <div className="sm:col-span-7 relative h-36 rounded-xl bg-slate-950 border border-sky-500/30 overflow-hidden p-3">
+                {/* Subtle Grid */}
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)',
+                    backgroundSize: '24px 24px',
+                  }}
+                />
+                <svg
+                  viewBox="0 0 240 120"
+                  className="relative z-10 w-full h-full"
+                  aria-hidden="true"
+                >
+                  <motion.path
+                    d="M 28 92 Q 86 78, 118 56 T 192 36"
+                    fill="none"
+                    stroke="#38bdf8"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeDasharray="220"
+                    initial={false}
+                    animate={{
+                      strokeDashoffset: activeStep === 2 ? 0 : 220,
+                      opacity: activeStep === 2 ? 0.95 : 0.4,
+                    }}
+                    transition={{ duration: activeStep === 2 ? 1.35 : 0.2, ease: 'easeOut' }}
+                  />
+                  <circle cx="28" cy="92" r="4" fill="#6366f1" stroke="#e2e8f0" strokeWidth="1.5" />
+                  <circle cx="118" cy="56" r="4" fill="#6366f1" stroke="#e2e8f0" strokeWidth="1.5" />
+                  <motion.circle
+                    cx="192"
+                    cy="36"
+                    r="8"
+                    fill="none"
+                    stroke="#38bdf8"
+                    strokeWidth="1.5"
+                    animate={{ r: [8, 24], opacity: [0.85, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.8, ease: 'easeOut' }}
+                  />
+                  <circle cx="192" cy="36" r="5.5" fill="#38bdf8" stroke="#ffffff" strokeWidth="2" />
+                </svg>
+                <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-sky-300 inline-flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    Radar Live
+                  </span>
+                  <span className="text-emerald-400">Loncatan BTS disaring</span>
+                </div>
+              </div>
+
+              {/* Action Output Pills */}
+              <div className="sm:col-span-5 space-y-2 text-[11px]">
+                {[
+                  {
+                    icon: MapPin,
+                    color: 'text-sky-400',
+                    title: 'Navigasi Google Maps',
+                    sub: '1-klik menuju titik akurat',
+                  },
+                  {
+                    icon: FileText,
+                    color: 'text-emerald-400',
+                    title: 'Bukti Laporan Polisi',
+                    sub: 'Cetak PDF & ekspor CSV/GPX',
+                  },
+                  {
+                    icon: MessageSquare,
+                    color: 'text-amber-400',
+                    title: 'Cadangan SMS Offline',
+                    sub: 'Perintah LACAK / KUNCI / BUNYI',
+                  },
+                ].map((item, i) => {
+                  const Icon = item.icon;
+                  return (
                     <motion.div
+                      key={item.title}
+                      initial={false}
                       animate={{
-                        boxShadow: [
-                          '0 0 0px rgba(16,185,129,0.0)',
-                          '0 0 18px rgba(16,185,129,0.45)',
-                          '0 0 0px rgba(16,185,129,0.0)',
-                        ],
+                        opacity: activeStep === 2 ? 1 : 0,
+                        x: activeStep === 2 ? 0 : 10,
                       }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                      className="px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-1.5 text-emerald-300 text-[11px] font-bold shrink-0"
+                      transition={{ delay: activeStep === 2 ? 0.1 * i : 0 }}
+                      className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800"
                     >
-                      <Unlock className="w-4 h-4" />
-                      <span>Dekripsi Lokal</span>
+                      <Icon className={`w-4 h-4 shrink-0 ${item.color}`} />
+                      <div className="min-w-0">
+                        <div className="font-bold text-white leading-tight truncate">
+                          {item.title}
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate">
+                          {item.sub}
+                        </div>
+                      </div>
                     </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.25 }}
-                      className="w-full sm:w-[37%] rounded-xl bg-slate-950 border border-emerald-500/40 p-2.5 font-mono text-[10px] space-y-1"
-                    >
-                      <div className="text-emerald-400 text-[9px] font-bold">TERBUKA DI BROWSER</div>
-                      <div className="text-white">-5.154884, 105.299902</div>
-                      <div className="text-slate-400">±15m (gps) • Bat 82%</div>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeStep === 2 && (
-                <motion.div
-                  key="stage-2"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full grid grid-cols-1 sm:grid-cols-12 gap-3 items-center"
-                >
-                  {/* Stylized Animated Mini Radar Map */}
-                  <div className="sm:col-span-7 relative h-36 rounded-xl bg-slate-950 border border-sky-500/30 overflow-hidden p-3">
-                    {/* Subtle Grid */}
-                    <div
-                      className="absolute inset-0 opacity-20"
-                      style={{
-                        backgroundImage:
-                          'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)',
-                        backgroundSize: '24px 24px',
-                      }}
-                    />
-                    <svg
-                      viewBox="0 0 240 120"
-                      className="relative z-10 w-full h-full"
-                      aria-hidden="true"
-                    >
-                      <motion.path
-                        d="M 28 92 Q 86 78, 118 56 T 192 36"
-                        fill="none"
-                        stroke="#38bdf8"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeDasharray="220"
-                        initial={{ strokeDashoffset: 220, opacity: 0.4 }}
-                        animate={{ strokeDashoffset: 0, opacity: 0.95 }}
-                        transition={{ duration: 1.35, ease: 'easeOut' }}
-                      />
-                      <circle cx="28" cy="92" r="4" fill="#6366f1" stroke="#e2e8f0" strokeWidth="1.5" />
-                      <circle cx="118" cy="56" r="4" fill="#6366f1" stroke="#e2e8f0" strokeWidth="1.5" />
-                      <motion.circle
-                        cx="192"
-                        cy="36"
-                        r="8"
-                        fill="none"
-                        stroke="#38bdf8"
-                        strokeWidth="1.5"
-                        animate={{ r: [8, 24], opacity: [0.85, 0] }}
-                        transition={{ repeat: Infinity, duration: 1.8, ease: 'easeOut' }}
-                      />
-                      <circle cx="192" cy="36" r="5.5" fill="#38bdf8" stroke="#ffffff" strokeWidth="2" />
-                    </svg>
-                    <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-sky-300 inline-flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        Radar Live
-                      </span>
-                      <span className="text-emerald-400">Loncatan BTS disaring</span>
-                    </div>
-                  </div>
-
-                  {/* Action Output Pills */}
-                  <div className="sm:col-span-5 space-y-2 text-[11px]">
-                    {[
-                      {
-                        icon: MapPin,
-                        color: 'text-sky-400',
-                        title: 'Navigasi Google Maps',
-                        sub: '1-klik menuju titik akurat',
-                      },
-                      {
-                        icon: FileText,
-                        color: 'text-emerald-400',
-                        title: 'Bukti Laporan Polisi',
-                        sub: 'Cetak PDF & ekspor CSV/GPX',
-                      },
-                      {
-                        icon: MessageSquare,
-                        color: 'text-amber-400',
-                        title: 'Cadangan SMS Offline',
-                        sub: 'Perintah LACAK / KUNCI / BUNYI',
-                      },
-                    ].map((item, i) => {
-                      const Icon = item.icon;
-                      return (
-                        <motion.div
-                          key={item.title}
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.12 * i }}
-                          className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-800"
-                        >
-                          <Icon className={`w-4 h-4 shrink-0 ${item.color}`} />
-                          <div className="min-w-0">
-                            <div className="font-bold text-white leading-tight truncate">
-                              {item.title}
-                            </div>
-                            <div className="text-[10px] text-slate-400 truncate">
-                              {item.sub}
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  );
+                })}
+              </div>
+            </motion.div>
           </div>
         </div>
       </SpotlightCard>
@@ -993,7 +1018,7 @@ export const ArchitectureGuide: React.FC = () => {
               <span>Benteng Anti-Hapus Android Enterprise (Murni Device Owner)</span>
             </div>
             <h2 className="text-base sm:text-lg font-bold text-slate-50 tracking-tight leading-snug">
-              Aktivasi Proteksi 2 Tingkat: Dari Pemilik Awam hingga Benteng Maksimal
+              Aktivasi Proteksi 2 Tingkat: Dari Mode Standar hingga Benteng Maksimal
             </h2>
             <p className="text-[0.8125rem] sm:text-sm text-slate-200 leading-relaxed">
               100% Mematuhi Kebijakan Google Play Protect (Murni izin resmi <code>BIND_DEVICE_ADMIN</code> tanpa modifikasi berbahaya).
@@ -1009,7 +1034,7 @@ export const ArchitectureGuide: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <div className="p-4 sm:p-5 rounded-xl bg-slate-950/85 border border-slate-800 space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-bold text-sky-300 text-sm">Level 1: Device Administrator (Awam)</span>
+              <span className="font-bold text-sky-300 text-sm">Level 1: Device Administrator (Mode Standar)</span>
               <span className="text-[0.6875rem] font-semibold px-2.5 py-0.5 rounded bg-sky-500/15 text-sky-200 border border-sky-500/25 shrink-0">
                 1-Klik di Aplikasi
               </span>
