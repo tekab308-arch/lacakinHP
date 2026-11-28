@@ -1177,6 +1177,42 @@ export const ArchitectureGuide: React.FC = () => {
             </div>
           )}
 
+          {(activeOwnerTab === 'shizuku' || activeOwnerTab === 'adb') && (
+            <details className="rounded-xl bg-amber-500/10 border border-amber-500/30 overflow-hidden">
+              <summary className="px-4 py-3 cursor-pointer flex items-center justify-between gap-2 text-[0.8125rem] sm:text-sm font-bold text-amber-300 hover:bg-amber-500/15 transition select-none">
+                <span className="flex items-center gap-2 min-w-0">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>
+                    Catatan Penting Per Merk HP agar Tidak Ditolak Android (Samsung / Xiaomi / Oppo &amp; Vivo)
+                  </span>
+                </span>
+                <ChevronDown className="details-chevron w-4 h-4 text-amber-300 shrink-0 transition-transform duration-200" />
+              </summary>
+              <div className="px-4 pb-4 pt-2 border-t border-amber-500/20 space-y-2.5 text-[0.8125rem] sm:text-sm text-slate-100 leading-relaxed max-w-[68ch]">
+                <p>
+                  <b>1. Semua akun sinkronisasi harus kosong (bukan Google saja):</b>{' '}
+                  Di menu <i>Pengaturan &gt; Akun &amp; Sinkronisasi</i>, hapus sementara juga akun <b>WhatsApp</b>, <b>Meet</b>, <b>Samsung/Xiaomi Account</b>, serta akun aplikasi pihak ketiga (misal keyboard sinkronisasi). Setelah menghapus akun terakhir, <b>tunggu ±15–20 detik</b> sebelum menjalankan perintah <code>dpm</code> agar sistem selesai membersihkan sesi.
+                </p>
+                <p>
+                  <b>2. Khusus Xiaomi (MIUI / HyperOS):</b>{' '}
+                  Nyalakan <b>Proses debug USB (Setelan keamanan)</b> di Opsi Pengembang (jika meminta login Mi Account untuk menggeser saklar, login sebentar lalu <i>sign out</i> lagi setelah saklar aktif). Anda juga wajib menghapus user <b>Aplikasi Ganda (Dual Apps)</b> lewat <i>Setelan &gt; Aplikasi &gt; Aplikasi ganda &gt; ikon ⚙️ &gt; Hapus akun Aplikasi ganda</i>{' '}
+                  <span className="text-amber-200">
+                    (peringatan: seluruh data aplikasi kloningan ke-2 akan terhapus, cadangkan terlebih dahulu)
+                  </span>
+                  . Setelah Device Owner aktif, wajar jika LacakHP tidak muncul di daftar <i>Mulai otomatis</i> karena sudah dikecualikan sistem — cukup izinkan <b>Baterai: Tidak ada pembatasan / Mencegah ponsel tidur</b>.
+                </p>
+                <p>
+                  <b>3. Khusus Oppo / Realme / Vivo:</b>{' '}
+                  Aktifkan saklar <b>Matikan pemantauan izin (Disable permission monitoring)</b> di Opsi Pengembang sebelum menjalankan perintah aktivasi.
+                </p>
+                <p>
+                  <b>4. Wajib setelah sukses (FRP &amp; Kunci Panel):</b>{' '}
+                  Segera <b>login kembali Akun Google</b> dan pastikan <b>PIN/Sidik Jari layar aktif</b> agar <i>Factory Reset Protection (FRP)</i> mengunci HP jika di-reset lewat tombol fisik, serta nonaktifkan akses <b>Pusat Kontrol / Jaringan di layar terkunci</b>.
+                </p>
+              </div>
+            </details>
+          )}
+
           {/* Tab Content 3: QR Provisioning */}
           {activeOwnerTab === 'qr' && (
             <div className="p-4 sm:p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3.5 text-[0.8125rem] sm:text-sm leading-relaxed">
